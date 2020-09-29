@@ -1,6 +1,6 @@
 {
   "name": "circle-regions",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Circle Intersection Regions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,6 +8,12 @@
     "name": "Bogdan Stăncescu",
     "url": "https://bogdan.stancescu.ro/"
   },
+  "contributors": [
+    {
+      "name": "Harrison Hogg",
+      "url": "http://hogg.io/"
+    }
+  ],
   "license": "MIT",
   "scripts": {
     "pretest": "npm run build",

@@ -4,7 +4,7 @@ A blazingly fast solution for computing all regions in a 2D plane resulted from 
 
 ## Installation
 
-The library works both in NodeJS, and as a stand-alone, browser library.
+The library works both in NodeJS, and as a stand-alone, browser library (use the browser approach below to [test it on Runkit](https://npm.runkit.com/circle-regions)).
 
 ### NodeJS
 
@@ -30,7 +30,7 @@ console.log(getIntersectionAreas([
     y:0.5,
     radius: 1
   }
-]);
+]));
 ```
 
 ### Browser
@@ -55,5 +55,5 @@ console.log(circleRegions.getIntersectionAreas([
     y:0.5,
     radius: 1
   }
-]);
+]));
 ```
