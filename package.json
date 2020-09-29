@@ -1,6 +1,6 @@
 {
   "name": "circle-regions",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Circle Intersection Regions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -40,5 +40,6 @@
     "lodash.mean": "^4.1.0",
     "two.js": "^0.7.0-stable.1",
     "uuid": "^8.3.0"
-  }
+  },
+  "keywords": ["circle", "geometry", "plane", "intersection", "region", "2d", "shape", "relation", "algorithms"]
 }
