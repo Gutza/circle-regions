@@ -43,17 +43,17 @@ export default class Arc {
   }
 
   get area() {
-    if (this._area === undefined) {
-      const ø = Math.abs(this.a2 - this.a1);
-      const R = this.circle.radius;
-      const s = R * ø;
-      const r = R * Math.cos(0.5 * ø);
-      const a = 2 * Math.sqrt((R ** 2) - (r ** 2));
-
-      this._area = 0.5 * ((R * s) - (a * r));
+    if (this._area !== undefined) {
+      return this._area;
     }
 
-    return this._area;
+    const ø = Math.abs(this.a2 - this.a1);
+    const R = this.circle.radius;
+    const s = R * ø;
+    const r = R * Math.cos(0.5 * ø);
+    const a = 2 * Math.sqrt((R ** 2) - (r ** 2));
+
+    return this._area = 0.5 * ((R * s) - (a * r));
   }
 
   isConvex(arcs: Arc[]) {

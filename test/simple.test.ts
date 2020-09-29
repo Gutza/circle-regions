@@ -39,4 +39,7 @@ describe('Simple tests (just counting, no geometry)', () => {
     it('should contain three areas', () => {
         assert.equal(circInt2.areas.filter(s => (s instanceof Area)).length, 3);
     });
+    it('should contain no circle regions', () => {
+        assert.equal(circInt2.areas.filter(s => (s instanceof Circle)).some(c => c.isRegion), false);
+    })
 });

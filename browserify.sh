@@ -1,1 +1,1 @@
-npx browserify circleRegions.js -t babelify -o circleRegionsBundle.js -s circleRegions
+npx browserify dist/index.js -t babelify -o circle-regions.Bundle.js -s circle-regions

@@ -12,7 +12,6 @@ const precise = (n: number) => floor(n, 5);
 export default class Circle {
   arcs: Arc[];
   area: number;
-  filled: boolean;
   id: string;
   isCircle: boolean;
   n: number;
@@ -22,9 +21,11 @@ export default class Circle {
   x: number;
   y: number;
 
+  public get isRegion(): boolean {
+    return this.arcs.length > 0;
+  }
 
   constructor(circle: IntersectionCircle, n: number) {
-    this.filled = false;
     this.isCircle = true;
 
     this.arcs = [];
@@ -40,13 +41,14 @@ export default class Circle {
   }
 
   addVector(vector: Vector) {
-    if (!this.vectors.some((v) => vector === v)) {
-      this.vectors.push(vector);
-      this.vectors.sort((a, b) => a.getAngle(this) - b.getAngle(this));
-      this.segments = this.vectors.map((vector, i) =>
-        new CircleSegment(vector, this.vectors[i + 1] || this.vectors[0], this)
-      );
+    if (this.vectors.some(v => v === vector)) {
+      return;
     }
+    this.vectors.push(vector);
+    this.vectors.sort((a, b) => a.getAngle(this) - b.getAngle(this));
+    this.segments = this.vectors.map((vector, i) =>
+      new CircleSegment(vector, this.vectors[i + 1] || this.vectors[0], this)
+    );
   }
 
   getConnections(vector: Vector) {
@@ -65,9 +67,9 @@ export default class Circle {
   toObject(): Intersection {
     return {
       arcs: [],
-      filled: this.filled,
       id: this.id,
       isCircle: true,
+      isRegion: this.isRegion,
       radius: this.radius,
       underlay: this.segments.length > 0,
       x: this.x,

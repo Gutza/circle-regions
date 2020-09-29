@@ -1,28 +1,34 @@
 {
   "name": "circle-regions",
-  "version": "0.0.0",
-  "description": "CircleRegions",
-  "main": "circle-regions.js",
+  "version": "0.1.0",
+  "description": "Circle Intersection Regions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "author": {
-    "name": ""
+    "name": "Bogdan Stăncescu",
+    "url": "https://bogdan.stancescu.ro/"
   },
+  "license": "MIT",
   "scripts": {
     "pretest": "npm run build",
-    "test": "mocha",
+    "test": "mocha dist/test/**/*.js",
     "build": "tsc --build",
     "clean": "tsc --build --clean"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
+    "@types/lodash.floor": "^4.0.6",
+    "@types/lodash.mean": "^4.1.6",
+    "@types/mocha": "^8.0.3",
     "@types/node": "^8.0.14",
     "@types/two.js": "^0.7.2",
+    "@types/uuid": "^8.3.0",
     "babelify": "^10.0.0",
     "browserify": "^16.5.2",
     "mocha": "^8.1.3",
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "@types/mocha": "^8.0.3",
     "bitset": "^5.1.1",
     "lodash.floor": "^4.0.4",
     "lodash.mean": "^4.1.0",

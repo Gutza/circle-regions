@@ -17,9 +17,9 @@ export interface IntersectionCircle {
 
 export interface Intersection {
   arcs: IntersectionArc[];
-  filled?: boolean;
   id?: string;
   isCircle: boolean;
+  isRegion: boolean;
   radius: number;
   underlay?: boolean;
   x: number;

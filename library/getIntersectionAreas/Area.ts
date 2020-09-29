@@ -5,17 +5,17 @@ import Arc from './Arc';
 
 export default class Area {
   arcs: Arc[];
-  filled: boolean;
   id: string;
   isCircle: boolean;
+  isRegion: boolean;
   x: number;
   y: number;
 
   constructor(arcs: Arc[]) {
     this.arcs = arcs;
-    this.filled = false;
     this.id = v4();
     this.isCircle = false;
+    this.isRegion = true; // All areas are regions
     this.x = mean(arcs.map(({ mx }) => mx));
     this.y = mean(arcs.map(({ my }) => my));
   }
@@ -38,9 +38,9 @@ export default class Area {
   toObject(): Intersection {
     return {
       arcs: this.arcs.map((arc) => arc.toObject()),
-      filled: this.filled,
       id: this.id,
       isCircle: false,
+      isRegion: true,
       radius: -1,
       x: this.x,
       y: this.y,
