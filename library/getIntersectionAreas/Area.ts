@@ -10,6 +10,7 @@ export default class Area {
   isRegion: boolean;
   x: number;
   y: number;
+  _perimeter?: number;
 
   constructor(arcs: Arc[]) {
     this.arcs = arcs;
@@ -33,6 +34,19 @@ export default class Area {
     }
 
     return Math.abs(areaPolygon / 2) + areaSegment;
+  }
+
+  get perimeter(): number {
+    if (this._perimeter !== undefined) {
+      return this._perimeter;
+    }
+
+    let perimeter = 0;
+    this.arcs.forEach(a => {
+      perimeter += a.arcLength;
+    });
+    
+    return this._perimeter = perimeter;
   }
 
   toObject(): Intersection {

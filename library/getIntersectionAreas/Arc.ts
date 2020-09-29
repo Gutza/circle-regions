@@ -19,6 +19,7 @@ export default class Arc {
   end: Vector;
   x: number;
   y: number;
+  _arcLength?: number;
 
   constructor(segment: CircleSegment, direction: -1 | 1) {
     this.direction = direction;
@@ -42,14 +43,23 @@ export default class Arc {
     if (this.direction === -1 && this.a2 > this.a1) this.a2 -= TWO_PI;
   }
 
-  get area() {
+  get arcLength(): number {
+    if (this._arcLength !== undefined) {
+      return this._arcLength;
+    }
+
+    const ø = Math.abs(this.a2 - this.a1);
+    return this._arcLength = this.circle.radius * ø;
+  }
+
+  get area(): number {
     if (this._area !== undefined) {
       return this._area;
     }
 
     const ø = Math.abs(this.a2 - this.a1);
     const R = this.circle.radius;
-    const s = R * ø;
+    const s = this._arcLength = R * ø;
     const r = R * Math.cos(0.5 * ø);
     const a = 2 * Math.sqrt((R ** 2) - (r ** 2));
 
