@@ -17,9 +17,10 @@ npm install circle-regions
 And use it
 
 ```javascript
-import { getIntersectionAreas } from 'circle-regions';
+"use strict";
+const circleRegions = require('circle-regions');
 
-console.log(getIntersectionAreas([
+console.log(circleRegions.getIntersectionAreas([
   {
     x: 0,
     y: 0,
