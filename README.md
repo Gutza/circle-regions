@@ -39,10 +39,10 @@ console.log(circleRegions.getIntersectionAreas([
 Generate the JavaScript bundle
 
 ```shell
-./browserify.js
+npm run browserify
 ```
 
-And use it
+This will produce a plain JavaScript file called `circle-regions.Bundle.js`, which you can load in your HTML file. You can then use it
 
 ```javascript
 console.log(circleRegions.getIntersectionAreas([
