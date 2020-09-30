@@ -1,13 +1,12 @@
 # Circle Intersection Regions
-
-A blazingly fast solution for computing all regions in a 2D plane resulted from intersecting any number of circles, in any configuration. This is essentially the engine inside [Harrison Hogg's](http://hogg.io/) wonderful "[circles](https://github.com/HHogg/circles)" art project – check it out live [here](https://circles.hogg.io/); the algorithm is described on [HHogg's website](https://hogg.io/writings/circle-intersections).
+A blazingly fast solution for computing all regions in a 2D plane resulted from intersecting any number of circles, in any configuration.
+This is essentially the engine inside [Harrison Hogg's](http://hogg.io/) wonderful "[circles](https://github.com/HHogg/circles)" art project – check it out live [here](https://circles.hogg.io/); the algorithm is described on [HHogg's website](https://hogg.io/writings/circle-intersections).
+I also saved the algorithm description on the [Wayback Machine](https://web.archive.org/web/20200930112821/https://hogg.io/writings/circle-intersections), in case he decides to drop it off the website for some reason.
 
 ## Installation
-
 The library works both in NodeJS, and as a stand-alone, browser library (use the browser approach below to [test it on Runkit](https://npm.runkit.com/circle-regions)).
 
 ### NodeJS
-
 Install it with
 
 ```shell
@@ -34,8 +33,9 @@ console.log(circleRegions.getIntersectionAreas([
 ]));
 ```
 
-### Browser
+Typescript is also supported (the definitions are bundled with the npm package).
 
+### Browser
 Generate the JavaScript bundle
 
 ```shell

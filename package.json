@@ -1,6 +1,6 @@
 {
   "name": "circle-regions",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Circle Intersection Regions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,6 +14,7 @@
       "url": "http://hogg.io/"
     }
   ],
+  "repository": "github.com:Gutza/circle-regions",
   "license": "MIT",
   "scripts": {
     "pretest": "npm run build",
@@ -29,7 +30,6 @@
     "@types/lodash.mean": "^4.1.6",
     "@types/mocha": "^8.0.3",
     "@types/node": "^8.0.14",
-    "@types/two.js": "^0.7.2",
     "@types/uuid": "^8.3.0",
     "babelify": "^10.0.0",
     "browserify": "^16.5.2",
@@ -40,8 +40,17 @@
     "bitset": "^5.1.1",
     "lodash.floor": "^4.0.4",
     "lodash.mean": "^4.1.0",
-    "two.js": "^0.7.0-stable.1",
     "uuid": "^8.3.0"
   },
-  "keywords": ["circle", "geometry", "plane", "intersection", "region", "2d", "shape", "relation", "algorithms"]
+  "keywords": [
+    "circle",
+    "geometry",
+    "plane",
+    "intersection",
+    "region",
+    "2d",
+    "shape",
+    "relation",
+    "algorithms"
+  ]
 }
