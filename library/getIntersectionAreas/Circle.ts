@@ -6,6 +6,7 @@ import isPointWithinCircle from '../math/isPointWithinCircle';
 import Arc from './Arc';
 import CircleSegment from './CircleSegment';
 import Vector from './Vector';
+import { isUndefined } from 'util';
 
 const precise = (n: number) => floor(n, 5);
 
@@ -32,7 +33,11 @@ export default class Circle {
     this.vectors = [];
     this.segments = [];
 
-    this.id = v4();
+    if (isUndefined(circle.id)) {
+      this.id = v4();
+    } else {
+      this.id = circle.id;
+    }
     this.n = n;
     this.x = precise(circle.x);
     this.y = precise(circle.y);
