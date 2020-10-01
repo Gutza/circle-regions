@@ -1,8 +1,10 @@
 const assert = require('assert');
 import getIntersectionAreas from '../library/getIntersectionAreas/getIntersectionAreas';
 import Circle from '../library/getIntersectionAreas/Circle';
-import Area from '../library/getIntersectionAreas/Area';
+import Region from '../library/getIntersectionAreas/Region';
 import { IntersectionCircle } from '../library/Types';
+import isPointWithinCircle from '../library/math/isPointWithinCircle';
+import Vector from '../library/getIntersectionAreas/Vector';
 
 describe('Simple tests (just counting, no geometry)', () => {
     let circInt0 = getIntersectionAreas([]);
@@ -37,9 +39,9 @@ describe('Simple tests (just counting, no geometry)', () => {
         assert.equal(circInt2.areas.filter(s => (s instanceof Circle)).length, 2);
     });
     it('should contain three areas', () => {
-        assert.equal(circInt2.areas.filter(s => (s instanceof Area)).length, 3);
+        assert.equal(circInt2.areas.filter(s => (s instanceof Region)).length, 3);
     });
     it('should contain no circle regions', () => {
-        assert.equal(circInt2.areas.filter(s => (s instanceof Circle)).some(c => c.isRegion), false);
-    })
+        assert.equal(circInt2.areas.filter(s => (s instanceof Circle && s.isRegion)).length, 0);
+    });
 });

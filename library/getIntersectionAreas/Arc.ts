@@ -1,26 +1,90 @@
 import Bitset from 'bitset';
 import { IntersectionArc } from '../Types';
+import Region from './Region';
 import Circle from './Circle';
 import CircleSegment from './CircleSegment';
 import Vector from './Vector';
 const TWO_PI = 2 * Math.PI;
 
+/**
+ * In circle-regions, an arc is one of the sides of a region.
+ */
 export default class Arc {
+  /**
+   * The cached area.
+   */
   _area?: number;
+
+  /**
+   * The reference segment's starting angular position on the reference circle.
+   */
   a1: number;
+
+  /**
+   * The reference segment's ending angular position on the reference circle.
+   */
   a2: number;
+
+  /**
+   * The internal bitset, used to traverse the network in order to extract the regions.
+   */
   bitset?: Bitset;
+
+  /**
+   * The reference circle.
+   */
   circle: Circle;
+
+  /**
+   * The arc's direction; indicates which direction to connect @see Arc.a1 to @see Arc.a2
+   */
   direction: -1 | 1;
+
+  /**
+   * This arc's midpoint's x coordinate.
+   */
   mx: number;
+
+  /**
+   * This arc's midpoint's y coordinate.
+   */
   my: number;
+
+  /**
+   * The reference circle's radius.
+   */
   radius: number;
+
+  /**
+   * The vector at the start of this arc.
+   */
   start: Vector;
+
+  /**
+   * The vector at the end of this arc.
+   */
   end: Vector;
+
+  /**
+   * The reference circle's center's x coordinate.
+   */
   x: number;
+
+  /**
+   * The reference circle's center's y coordinate.
+   */
   y: number;
+
+  /**
+   * Cached value for the arc length.
+   */
   _arcLength?: number;
 
+  /**
+   * Construct an arc based on a CircleSegment
+   * @param segment The reference circle segment
+   * @param direction The direction of the segment
+   */
   constructor(segment: CircleSegment, direction: -1 | 1) {
     this.direction = direction;
 
@@ -29,20 +93,32 @@ export default class Arc {
     this.my = segment.my;
 
     this.circle = segment.circle;
-    this.radius = segment.circle.radius;
-    this.x = segment.circle.x;
-    this.y = segment.circle.y;
+    this.radius = this.circle.radius;
+    this.x = this.circle.x;
+    this.y = this.circle.y;
 
-    this.start = direction === 1 ? segment.start : segment.end;
-    this.end = direction === 1 ? segment.end : segment.start;
+    if (direction == 1) {
+      this.start = segment.start;
+      this.end = segment.end;
+    } else {
+      this.start = segment.end;
+      this.end = segment.start;
+    }
 
-    this.a1 = this.start.getAngle(this.circle);
-    this.a2 = this.end.getAngle(this.circle);
+    this.a1 = this.start.getAngle(this.circle) as number;
+    this.a2 = this.end.getAngle(this.circle) as number;
 
-    if (this.direction === 1 && this.a1 > this.a2) this.a1 -= TWO_PI;
-    if (this.direction === -1 && this.a2 > this.a1) this.a2 -= TWO_PI;
+    if (this.direction === 1 && this.a1 > this.a2) {
+      this.a1 -= TWO_PI;
+    }
+    else if (this.direction === -1 && this.a2 > this.a1) {
+      this.a2 -= TWO_PI;
+    }
   }
 
+  /**
+   * Retrieve the length of this arc. Once computed, the value is cached.
+   */
   get arcLength(): number {
     if (this._arcLength !== undefined) {
       return this._arcLength;
@@ -52,6 +128,9 @@ export default class Arc {
     return this._arcLength = this.circle.radius * ø;
   }
 
+  /**
+   * Retrieve the geometric area of this arc. Once computed, the value is cached.
+   */
   get area(): number {
     if (this._area !== undefined) {
       return this._area;
@@ -66,9 +145,15 @@ export default class Arc {
     return this._area = 0.5 * ((R * s) - (a * r));
   }
 
-  isConvex(arcs: Arc[]) {
-    return arcs.every((arc) => arc.circle === this.circle ||
-      this.circle.isPointWithinCircle(arc.mx, arc.my));
+  /**
+   * Checks if this arc is convex, when rendered as part of a given area
+   * @param area 
+   */
+  isConvex(area: Region): boolean {
+    return area.arcs.every(arc =>
+      arc.circle === this.circle ||
+      this.circle.isPointWithinCircle(arc.mx, arc.my)
+    );
   }
 
   toObject(): IntersectionArc {

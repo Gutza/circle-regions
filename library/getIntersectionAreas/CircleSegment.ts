@@ -4,6 +4,9 @@ import Vector from './Vector';
 
 const TWO_PI = 2 * Math.PI;
 
+/**
+ * A circle segment 
+ */
 export default class CircleSegment {
   _n?: number;
   bitset?: Bitset;
@@ -21,8 +24,8 @@ export default class CircleSegment {
     this.end = vector2;
     this.circle = circle;
 
-    this.a1 = this.start.getAngle(this.circle);
-    this.a2 = this.end.getAngle(this.circle);
+    this.a1 = this.start.getAngle(this.circle) as number;
+    this.a2 = this.end.getAngle(this.circle) as number;
 
     if (this.a1 > this.a2) this.a1 -= TWO_PI;
 

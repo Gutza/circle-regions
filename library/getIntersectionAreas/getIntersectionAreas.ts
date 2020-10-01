@@ -1,7 +1,7 @@
 import Bitset from 'bitset';
 import Arc from './Arc';
 import { IntersectionCircle } from '../Types';
-import Area from './Area';
+import Region from './Region';
 import Circle from './Circle';
 import Vector from './Vector';
 import getIntersectionCirclePoints from './getIntersectionCirclePoints';
@@ -37,38 +37,42 @@ const getVectors = (circles: Circle[]) => {
 
 const mergeBitsets = (a: Arc, b: Arc) => (a.bitset as Bitset).or(b.bitset as Bitset).toString();
 
-const getAreas = (A: Vector, circles: Circle[], history: History, areas: Area[] = [], arcs: Arc[] = [], intersections: Intersections = {}) => {
+const getRegions = (A: Vector, circles: Circle[], history: History, areas: Region[] = [], arcs: Arc[] = [], intersections: Intersections = {}) => {
   const BC = arcs[arcs.length - 1];
   const C = BC ? BC.end : A;
 
-  C.getConnections().forEach((CD) => {
+  C.getConnections().forEach(CD => {
     if (BC) {
-      if (BC.circle === CD.circle) return;
-      if (history[mergeBitsets(BC, CD)]) return;
+      if (BC.circle === CD.circle) return; // don't continue along the same circle
+      if (history[mergeBitsets(BC, CD)]) return; // don't return to a previously traversed arc
 
+      // For a valid region, all arcs' centers must be consistently inside some of the circles, and consistently OUTSIDE the other circles.
       for (const [n, isInside] of Object.entries(intersections)) {
-        if (CD.circle.n !== +n && isInside !== circles[+n].isPointWithinCircle(CD.mx, CD.my)) {
+        if (CD.circle.n === +n) {
+          continue;
+        }
+        if (isInside !== circles[+n].isPointWithinCircle(CD.mx, CD.my)) {
           return;
         }
       }
     }
 
-    const cCircle = C.getOtherCircle(CD.circle);
-    const dCircle = CD.end.getOtherCircle(CD.circle);
     const nextArcs = [...arcs, CD];
-    const nextIntersections: Intersections = {
-      ...intersections,
-      [cCircle.n]: cCircle.isPointWithinCircle(CD.mx, CD.my),
-      [dCircle.n]: dCircle.isPointWithinCircle(CD.mx, CD.my),
-    };
 
     if (A === CD.end) {
-      areas.push(new Area(nextArcs));
+      areas.push(new Region(nextArcs));
       nextArcs.forEach((arc, i) => {
         history[mergeBitsets(arc, nextArcs[i + 1] || nextArcs[0])] = true;
       });
     } else {
-      getAreas(A, circles, history, areas, nextArcs, nextIntersections);
+      const cCircle = C.getOtherCircle(CD.circle) as Circle; // TODO: Check if this cast is safe
+      const dCircle = CD.end.getOtherCircle(CD.circle) as Circle; // TODO: Check if this cast is safe
+        const nextIntersections: Intersections = {
+        ...intersections,
+        [cCircle.n]: cCircle.isPointWithinCircle(CD.mx, CD.my),
+        [dCircle.n]: dCircle.isPointWithinCircle(CD.mx, CD.my),
+      };
+      getRegions(A, circles, history, areas, nextArcs, nextIntersections);
     }
   });
 
@@ -79,7 +83,7 @@ export default (shapes: IntersectionCircle[]) => {
   const history = {};
   const circles = shapes.map((shape, n) => new Circle(shape, n));
   const vectors = getVectors(circles);
-  const areas: (Area | Circle)[] = [...circles];
+  const regions: (Region | Circle)[] = [...circles];
 
   let n = vectors.length;
   circles.forEach(({ segments }) => {
@@ -88,13 +92,18 @@ export default (shapes: IntersectionCircle[]) => {
     });
   });
 
-  vectors.forEach((A) =>
-    areas.push(...getAreas(A, circles, history))
+  vectors.forEach(vector =>
+    regions.push(...getRegions(vector, circles, history))
   );
 
   return {
-    areas: areas
-      .filter((area) => !area.arcs.length || !area.arcs.every((arc) => !arc.isConvex(area.arcs)))
+    areas: regions
+      .filter(area =>
+        area instanceof Circle || // allow all circles
+        !area.arcs.length ||
+        !area.arcs.every(arc => !arc.isConvex(area)) // forbid regions which only contain concave "sides"
+        // TODO: investigate why this is enforced!
+      )
       .sort((a, b) => b.area - a.area),
     circles: circles,
     vectors: vectors,

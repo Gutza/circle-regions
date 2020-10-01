@@ -3,7 +3,7 @@ const mean = require('lodash.mean');
 import { Intersection } from '../Types';
 import Arc from './Arc';
 
-export default class Area {
+export default class Region {
   arcs: Arc[];
   id: string;
   isCircle: boolean;
@@ -29,7 +29,7 @@ export default class Area {
       const a = this.arcs[i];
       const b = this.arcs[i + 1] || this.arcs[0];
 
-      areaSegment += a.area * ((a.isConvex(this.arcs) ? 1 : -1));
+      areaSegment += a.area * ((a.isConvex(this) ? 1 : -1));
       areaPolygon += (a.start.x * b.start.y) - (a.start.y * b.start.x);
     }
 
