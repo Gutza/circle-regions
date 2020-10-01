@@ -5,6 +5,7 @@ import Region from './Region';
 import Circle from './Circle';
 import Vector from './Vector';
 import getIntersectionCirclePoints from './getIntersectionCirclePoints';
+import { isUndefined } from 'util';
 
 interface History {
   [key: string]: true;
@@ -83,7 +84,7 @@ const getRegions = (A: Vector, circles: Circle[], history: History, regions: Reg
  * Compute the regions resulted from intersecting any number of circles.
  * @param circleDefinitions The circles to intersect.
  */
-export default (circleDefinitions: IntersectionCircle[]) => {
+export const getIntersectionRegions = (circleDefinitions: IntersectionCircle[]) => {
   const history = {};
   const circles = circleDefinitions.map((shape, n) => new Circle(shape, n));
   const vectors = getVectors(circles);
@@ -111,3 +112,5 @@ export default (circleDefinitions: IntersectionCircle[]) => {
     vectors: vectors,
   };
 };
+
+module.exports.getIntersectionRegions = getIntersectionRegions;
