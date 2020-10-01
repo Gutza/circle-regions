@@ -18,8 +18,9 @@ export default class Circle {
    */
   arcs: Arc[];
 
+  // No need to cache it; it's calculated in the constructor.
   /**
-   * This circle's area. Use this to calculate the zIndex when drawing the circles.
+   * This circle's surface area. Use this to calculate the zIndex when drawing the circles.
    */
   area: number;
 
@@ -73,7 +74,7 @@ export default class Circle {
   }
 
   /**
-   * Construct a new circle. You generally don't want to call this yourself; use @see {getIntersectionAreas()} instead.
+   * Construct a new circle. You generally don't want to call this yourself; use @see {getIntersectionRegions()} instead.
    * @param circle The circle parameters
    * @param n This circle's index in the global circle array
    */

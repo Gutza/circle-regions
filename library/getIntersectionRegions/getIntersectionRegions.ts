@@ -37,7 +37,7 @@ const getVectors = (circles: Circle[]) => {
 
 const mergeBitsets = (a: Arc, b: Arc) => (a.bitset as Bitset).or(b.bitset as Bitset).toString();
 
-const getRegions = (A: Vector, circles: Circle[], history: History, areas: Region[] = [], arcs: Arc[] = [], intersections: Intersections = {}) => {
+const getRegions = (A: Vector, circles: Circle[], history: History, regions: Region[] = [], arcs: Arc[] = [], intersections: Intersections = {}) => {
   const BC = arcs[arcs.length - 1];
   const C = BC ? BC.end : A;
 
@@ -60,7 +60,7 @@ const getRegions = (A: Vector, circles: Circle[], history: History, areas: Regio
     const nextArcs = [...arcs, CD];
 
     if (A === CD.end) {
-      areas.push(new Region(nextArcs));
+      regions.push(new Region(nextArcs));
       nextArcs.forEach((arc, i) => {
         history[mergeBitsets(arc, nextArcs[i + 1] || nextArcs[0])] = true;
       });
@@ -72,11 +72,11 @@ const getRegions = (A: Vector, circles: Circle[], history: History, areas: Regio
         [cCircle.n]: cCircle.isPointWithinCircle(CD.mx, CD.my),
         [dCircle.n]: dCircle.isPointWithinCircle(CD.mx, CD.my),
       };
-      getRegions(A, circles, history, areas, nextArcs, nextIntersections);
+      getRegions(A, circles, history, regions, nextArcs, nextIntersections);
     }
   });
 
-  return areas;
+  return regions;
 };
 
 /**

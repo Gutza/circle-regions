@@ -16,7 +16,7 @@ describe('Simple tests (just counting, no geometry)', () => {
         radius: 1
     }
     let circInt1 = getIntersectionRegions([circle1]);
-    it('should contain one area', () => {
+    it('should contain one region', () => {
         assert.equal(circInt1.regions.length, 1);
     });
     it('should only contain the circle', () => {
@@ -30,7 +30,7 @@ describe('Simple tests (just counting, no geometry)', () => {
     }
 
     let circInt2 = getIntersectionRegions([circle1, circle2]);
-    it('should contain five total areas', () => {
+    it('should contain five total regions', () => {
         assert.equal(circInt2.regions.length, 5);
     });
     it('should contain two circles', () => {

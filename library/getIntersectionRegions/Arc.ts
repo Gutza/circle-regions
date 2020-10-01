@@ -12,7 +12,7 @@ const TWO_PI = 2 * Math.PI;
  */
 export default class Arc {
   /**
-   * The cached area.
+   * The cached geometric area.
    */
   _area?: number;
 
@@ -146,12 +146,13 @@ export default class Arc {
     return this._area = 0.5 * ((R * s) - (a * r));
   }
 
+  // TODO: This is messy: why do we have to specify the region at all?
   /**
-   * Checks if this arc is convex, when rendered as part of a given area
-   * @param area 
+   * Checks if this arc is convex, when rendered as part of a given region
+   * @param region The region this arc is a part of.
    */
-  isConvex(area: Region): boolean {
-    return area.arcs.every(arc =>
+  isConvex(region: Region): boolean {
+    return region.arcs.every(arc =>
       arc.circle === this.circle ||
       this.circle.isPointWithinCircle(arc.mx, arc.my)
     );
