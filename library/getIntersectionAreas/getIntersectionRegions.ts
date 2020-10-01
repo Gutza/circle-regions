@@ -97,12 +97,10 @@ export default (shapes: IntersectionCircle[]) => {
   );
 
   return {
-    areas: regions
-      .filter(area =>
-        area instanceof Circle || // allow all circles
-        !area.arcs.length ||
-        !area.arcs.every(arc => !arc.isConvex(area)) // forbid regions which only contain concave "sides"
-        // TODO: investigate why this is enforced!
+    regions: regions
+      .filter(region =>
+        (region instanceof Circle && region.isRegion) ||
+        region.area > 0
       )
       .sort((a, b) => b.area - a.area),
     circles: circles,

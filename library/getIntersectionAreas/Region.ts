@@ -11,6 +11,7 @@ export default class Region {
   x: number;
   y: number;
   _perimeter?: number;
+  _area?: number;
 
   constructor(arcs: Arc[]) {
     this.arcs = arcs;
@@ -21,7 +22,11 @@ export default class Region {
     this.y = mean(arcs.map(({ my }) => my));
   }
 
-  get area() {
+  get area(): number {
+    if (this._area !== undefined) {
+      return this._area;
+    }
+
     let areaPolygon = 0;
     let areaSegment = 0;
 
@@ -33,7 +38,7 @@ export default class Region {
       areaPolygon += (a.start.x * b.start.y) - (a.start.y * b.start.x);
     }
 
-    return Math.abs(areaPolygon / 2) + areaSegment;
+    return this._area = Math.abs(areaPolygon / 2) + areaSegment;
   }
 
   get perimeter(): number {

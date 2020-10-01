@@ -1,3 +1,3 @@
-import getIntersectionAreas from './library/getIntersectionAreas/getIntersectionAreas';
+import getIntersectionRegions from './library/getIntersectionAreas/getIntersectionRegions';
 
-module.exports.getIntersectionAreas = getIntersectionAreas;
+module.exports.getIntersectionRegions = getIntersectionRegions;

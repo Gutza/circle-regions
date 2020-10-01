@@ -160,9 +160,9 @@ export default class Arc {
     return {
       a1: this.a1,
       a2: this.a2,
-      radius: this.circle.radius,
-      x: this.circle.x,
-      y: this.circle.y,
+      radius: this.radius,
+      x: this.x,
+      y: this.y,
     };
   }
 }
