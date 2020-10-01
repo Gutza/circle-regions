@@ -79,9 +79,13 @@ const getRegions = (A: Vector, circles: Circle[], history: History, areas: Regio
   return areas;
 };
 
-export default (shapes: IntersectionCircle[]) => {
+/**
+ * Compute the regions resulted from intersecting any number of circles.
+ * @param circleDefinitions The circles to intersect.
+ */
+export default (circleDefinitions: IntersectionCircle[]) => {
   const history = {};
-  const circles = shapes.map((shape, n) => new Circle(shape, n));
+  const circles = circleDefinitions.map((shape, n) => new Circle(shape, n));
   const vectors = getVectors(circles);
   const regions: (Region | Circle)[] = [...circles];
 

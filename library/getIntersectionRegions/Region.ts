@@ -3,16 +3,54 @@ const mean = require('lodash.mean');
 import { Intersection } from '../Types';
 import Arc from './Arc';
 
+/**
+ * A region is a region of the 2D plane surrounded by connecting @see Arc entities.
+ */
 export default class Region {
+  /**
+   * The arcs which surround this region.
+   */
   arcs: Arc[];
+
+  /**
+   * This region's unique ID. Always automatically generated as a UUID.
+   */
   id: string;
+
+  /**
+   * Regions are never circles. Only @see Circle entities are circles.
+   */
   isCircle: boolean;
+
+  /**
+   * Regions are always regions (and Baba is you). @see Circle entities are sometimes regions, and other times not.
+   */
   isRegion: boolean;
+
+  /**
+   * The arithmetic average of this region's arc's middle's x coordinates.
+   */
   x: number;
+
+  /**
+   * The arithmetic average of this region's arc's middle's y coordinates.
+   */
   y: number;
+
+  /**
+   * Internal cache for this region's perimeter.
+   */
   _perimeter?: number;
+
+  /**
+   * Internal cache for this region's surface area.
+   */
   _area?: number;
 
+  /**
+   * Construct a new region.
+   * @param arcs The arcs which will surround this region. The code does NOT test in the arcs are connected.
+   */
   constructor(arcs: Arc[]) {
     this.arcs = arcs;
     this.id = v4();
@@ -22,6 +60,9 @@ export default class Region {
     this.y = mean(arcs.map(({ my }) => my));
   }
 
+  /**
+   * This region's surface area.
+   */
   get area(): number {
     if (this._area !== undefined) {
       return this._area;
@@ -41,6 +82,9 @@ export default class Region {
     return this._area = Math.abs(areaPolygon / 2) + areaSegment;
   }
 
+  /**
+   * This region's perimeter.
+   */
   get perimeter(): number {
     if (this._perimeter !== undefined) {
       return this._perimeter;
@@ -54,6 +98,9 @@ export default class Region {
     return this._perimeter = perimeter;
   }
 
+  /**
+   * Converts this region to a generic @see Intersection entity.
+   */
   toObject(): Intersection {
     return {
       arcs: this.arcs.map((arc) => arc.toObject()),

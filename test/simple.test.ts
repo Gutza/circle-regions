@@ -3,8 +3,6 @@ import getIntersectionRegions from '../library/getIntersectionRegions/getInterse
 import Circle from '../library/getIntersectionRegions/Circle';
 import Region from '../library/getIntersectionRegions/Region';
 import { IntersectionCircle } from '../library/Types';
-import isPointWithinCircle from '../library/math/isPointWithinCircle';
-import Vector from '../library/getIntersectionRegions/Vector';
 
 describe('Simple tests (just counting, no geometry)', () => {
     let circInt0 = getIntersectionRegions([]);

@@ -19,7 +19,7 @@ And use it
 "use strict";
 const circleRegions = require('circle-regions');
 
-console.log(circleRegions.getIntersectionAreas([
+console.log(circleRegions.getIntersectionRegions([
   {
     x: 0,
     y: 0,
@@ -45,7 +45,7 @@ npm run browserify
 This will produce a plain JavaScript file called `circle-regions.Bundle.js`, which you can load in your HTML file. You can then use it
 
 ```javascript
-console.log(circleRegions.getIntersectionAreas([
+console.log(circleRegions.getIntersectionRegions([
   {
     x: 0,
     y: 0,

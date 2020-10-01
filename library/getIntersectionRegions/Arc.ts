@@ -4,6 +4,7 @@ import Region from './Region';
 import Circle from './Circle';
 import CircleSegment from './CircleSegment';
 import Vector from './Vector';
+
 const TWO_PI = 2 * Math.PI;
 
 /**
@@ -156,6 +157,9 @@ export default class Arc {
     );
   }
 
+  /**
+   * Convert this arc into a generic @see IntersectionArc
+   */
   toObject(): IntersectionArc {
     return {
       a1: this.a1,

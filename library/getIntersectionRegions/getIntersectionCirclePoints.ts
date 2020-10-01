@@ -8,7 +8,7 @@ const precise = (n: number) => floor(n, 5);
  * @param circle1 The first circle
  * @param circle2 The second circle
  */
-const getIntersectionCirclePoints = (circle1: Circle, circle2: Circle):[[number, number], [number, number]] | [] => {
+export default (circle1: Circle, circle2: Circle):[[number, number], [number, number]] | [] => {
   const { x: x1, y: y1, radius: r1 } = circle1;
   const { x: x2, y: y2, radius: r2 } = circle2;
 
@@ -29,5 +29,3 @@ const getIntersectionCirclePoints = (circle1: Circle, circle2: Circle):[[number,
 
   return [p1, p2];
 };
-
-export default getIntersectionCirclePoints;
