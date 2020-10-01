@@ -33,7 +33,7 @@ console.log(circleRegions.getIntersectionRegions([
 ]));
 ```
 
-Typescript is also supported (the definitions are bundled with the npm package).
+Typescript is also supported; the definitions are bundled with the npm package.
 
 ### Browser
 Generate the JavaScript bundle

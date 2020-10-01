@@ -1,6 +1,6 @@
 {
   "name": "circle-regions",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Circle Intersection Regions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,10 @@
       "url": "http://hogg.io/"
     }
   ],
-  "repository": "github.com:Gutza/circle-regions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gutza/circle-regions"
+  },
   "license": "MIT",
   "scripts": {
     "pretest": "npm run build",
