@@ -1,10 +1,10 @@
 const assert = require('assert');
-import getIntersectionRegions from '../library/getIntersectionAreas/getIntersectionRegions';
-import Circle from '../library/getIntersectionAreas/Circle';
-import Region from '../library/getIntersectionAreas/Region';
+import getIntersectionRegions from '../library/getIntersectionRegions/getIntersectionRegions';
+import Circle from '../library/getIntersectionRegions/Circle';
+import Region from '../library/getIntersectionRegions/Region';
 import { IntersectionCircle } from '../library/Types';
 import isPointWithinCircle from '../library/math/isPointWithinCircle';
-import Vector from '../library/getIntersectionAreas/Vector';
+import Vector from '../library/getIntersectionRegions/Vector';
 
 describe('Simple tests (just counting, no geometry)', () => {
     let circInt0 = getIntersectionRegions([]);
