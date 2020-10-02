@@ -1,6 +1,6 @@
 {
   "name": "circle-regions",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Circle Intersection Regions",
   "main": "./dist/library/getIntersectionRegions/getIntersectionRegions.js",
   "types": "./dist/library/getIntersectionRegions/getIntersectionRegions.d.ts",

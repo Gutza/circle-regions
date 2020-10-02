@@ -4,9 +4,9 @@ import Circle from '../library/getIntersectionRegions/Circle';
 import Region from '../library/getIntersectionRegions/Region';
 import { IntersectionCircle } from '../library/Types';
 
-describe('Simple tests (just counting, no geometry)', () => {
+describe('Counting', () => {
     let circInt0 = getIntersectionRegions([]);
-    it('should be empty', () => {
+    it('Intersecting no circles should produce an empty result', () => {
         assert.equal(circInt0.regions.length, 0);
     })
 
@@ -16,10 +16,10 @@ describe('Simple tests (just counting, no geometry)', () => {
         radius: 1
     }
     let circInt1 = getIntersectionRegions([circle1]);
-    it('should contain one region', () => {
+    it('Intersecting one circle should produce one region', () => {
         assert.equal(circInt1.regions.length, 1);
     });
-    it('should only contain the circle', () => {
+    it('Intersecting one circle should produce one stand-alone circle', () => {
         assert.equal(circInt1.regions.filter(s => (s instanceof Circle)).length, 1);
     });
 
@@ -30,16 +30,13 @@ describe('Simple tests (just counting, no geometry)', () => {
     }
 
     let circInt2 = getIntersectionRegions([circle1, circle2]);
-    it('should contain five total regions', () => {
-        assert.equal(circInt2.regions.length, 5);
+    it('Intersecting two circles should produce three total regions', () => {
+        assert.equal(circInt2.regions.length, 3);
     });
-    it('should contain two circles', () => {
-        assert.equal(circInt2.regions.filter(s => (s instanceof Circle)).length, 2);
+    it('Intersecting two circles should contain no stand-alone circles', () => {
+        assert.equal(circInt2.regions.filter(s => (s instanceof Circle)).length, 0);
     });
-    it('should contain three areas', () => {
+    it('Intersecting two circles should contain three regions', () => {
         assert.equal(circInt2.regions.filter(s => (s instanceof Region)).length, 3);
-    });
-    it('should contain no circle regions', () => {
-        assert.equal(circInt2.regions.filter(s => (s instanceof Circle && s.isRegion)).length, 0);
     });
 });
