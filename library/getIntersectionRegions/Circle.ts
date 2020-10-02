@@ -67,11 +67,14 @@ export default class Circle {
   y: number;
 
   /**
-   * An easy way to check if this circle is a stand-alone region (i.e. if it intersects no other circles)
+   * The circles which wholly contain this circle.
    */
-  public get isRegion(): boolean {
-    return this.segments.length === 0;
-  }
+  parents: Circle[];
+
+  /**
+   * The circles wholly contained by this circle.
+   */
+  children: Circle[];
 
   /**
    * Construct a new circle. You generally don't want to call this yourself; use @see {getIntersectionRegions()} instead.
@@ -84,6 +87,8 @@ export default class Circle {
     this.arcs = [];
     this.vectors = [];
     this.segments = [];
+    this.parents = [];
+    this.children = [];
 
     if (isUndefined(circle.id)) {
       this.id = v4();
@@ -137,6 +142,13 @@ export default class Circle {
    */
   isPointWithinCircle(x: number, y: number): boolean {
     return isPointWithinCircle(x, y, this.x, this.y, this.radius);
+  }
+
+  /**
+   * An easy way to check if this circle is a stand-alone region (i.e. if it intersects no other circles)
+   */
+  public get isRegion(): boolean {
+    return this.segments.length === 0;
   }
 
   /**

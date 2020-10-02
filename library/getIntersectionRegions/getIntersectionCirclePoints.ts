@@ -13,7 +13,24 @@ export default (circle1: Circle, circle2: Circle):[[number, number], [number, nu
   const { x: x2, y: y2, radius: r2 } = circle2;
 
   const dSquared = (x2-x1)**2 + (y2-y1)**2;
-  if (!dSquared || dSquared > (r1+r2)**2 || dSquared < (r2-r1)**2) {
+  if (dSquared > (r1+r2)**2) {
+    // The circles are outside one another
+    return [];
+  }
+
+  if (dSquared < (r2-r1)**2) {
+    // One of the circles contains the other
+    let child, parent: Circle;
+    if (r1 > r2) {
+      parent = circle1;
+      child = circle2;
+    } else {
+      parent = circle2;
+      child = circle1;
+    }
+    parent.children.push(child);
+    child.parents.push(parent);
+
     return [];
   }
 
