@@ -1,5 +1,6 @@
 # Circle Intersection Regions
-[![GitHub Actions status](https://github.com/gutza/circle-regions/workflows/mocha/badge.svg?branch=master)](https://github.com/gutza/circle-regions/actions)
+[![GitHub Actions status](https://github.com/gutza/circle-regions/workflows/mocha%20test/badge.svg?branch=master)](https://github.com/gutza/circle-regions/actions)
+[![GitHub Actions status](https://github.com/gutza/circle-regions/workflows/browserify/badge.svg?branch=master)](https://github.com/gutza/circle-regions/actions)
 
 A blazingly fast solution for computing all regions in a 2D plane resulted from intersecting any number of circles, in any configuration.
 This is essentially the engine inside [Harrison Hogg's](http://hogg.io/) wonderful "[circles](https://github.com/HHogg/circles)" art project – check it out live [here](https://circles.hogg.io/); the algorithm is described on [HHogg's website](https://hogg.io/writings/circle-intersections).

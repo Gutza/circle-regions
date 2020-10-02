@@ -1,4 +1,4 @@
-name: mocha test
+name: browserify
 
 on: push
 
@@ -31,5 +31,5 @@ jobs:
         run: npm install
 
       - name: Test (it automatically builds)
-        run: npm run test
+        run: npm run browserify
         
