@@ -1,5 +1,5 @@
 import Bitset from 'bitset';
-import { IntersectionArc } from '../Types';
+import { IntersectionArc, TypeDirection } from '../Types';
 import Region from './Region';
 import Circle from './Circle';
 import CircleSegment from './CircleSegment';
@@ -39,7 +39,7 @@ export default class Arc {
   /**
    * The arc's direction; indicates which direction to connect @see Arc.a1 to @see Arc.a2
    */
-  direction: -1 | 1;
+  direction: TypeDirection;
 
   /**
    * This arc's midpoint's x coordinate.
@@ -86,7 +86,7 @@ export default class Arc {
    * @param segment The reference circle segment
    * @param direction The direction of the segment
    */
-  constructor(segment: CircleSegment, direction: -1 | 1) {
+  constructor(segment: CircleSegment, direction: TypeDirection) {
     this.direction = direction;
 
     this.bitset = segment.bitset;
