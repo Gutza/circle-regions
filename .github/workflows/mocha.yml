@@ -1,0 +1,22 @@
+name: mocha
+
+on: push
+
+jobs:
+  mocha_main:
+    name: Set up and test with Mocha
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v1
+
+      - name: Install npm packages
+        run: npm install
+
+      - name: Test (it automatically builds)
+        run: npm run test
+        
