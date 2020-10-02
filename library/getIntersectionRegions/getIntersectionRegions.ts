@@ -104,12 +104,13 @@ export const getIntersectionRegions = (circleDefinitions: IntersectionCircle[]) 
     /**
      * This is the beef. This array contains the list of regions the plane is partitioned in.
      * The array contains the stand-alone circles, and the curved n-gons resulted from
-     * intersecting the circles.
+     * intersecting the circles. The array is optimally sorted for drawing
+     * (even with filled regions).
      */
     regions: regions
       .filter(region =>
         (region instanceof Circle && region.isRegion) ||
-        region.area > 0
+        (region instanceof Region && region.area > 0)
       )
       .sort((a, b) => b.area - a.area),
     /**
