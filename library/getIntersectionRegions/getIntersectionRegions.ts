@@ -5,7 +5,6 @@ import Region from './Region';
 import Circle from './Circle';
 import Vector from './Vector';
 import getIntersectionCirclePoints from './getIntersectionCirclePoints';
-import { isUndefined } from 'util';
 
 interface History {
   [key: string]: true;
@@ -102,13 +101,25 @@ export const getIntersectionRegions = (circleDefinitions: IntersectionCircle[]) 
   );
 
   return {
+    /**
+     * This is the beef. This array contains the list of regions the plane is partitioned in.
+     * The array contains the stand-alone circles, and the curved n-gons resulted from
+     * intersecting the circles.
+     */
     regions: regions
       .filter(region =>
         (region instanceof Circle && region.isRegion) ||
         region.area > 0
       )
       .sort((a, b) => b.area - a.area),
+    /**
+     * The circles you passed to the function, now with guaranteed IDs -- and with areas.
+     */
     circles: circles,
+
+    /**
+     * The list of intersection points between the circles.
+     */
     vectors: vectors,
   };
 };
