@@ -49,6 +49,11 @@ export default class Region {
   _area?: number;
 
   /**
+   * Internal cache for this region's "interiorness"
+   */
+  _isInterior?: boolean;
+
+  /**
    * Construct a new region.
    * @param arcs The arcs which will surround this region. The code does NOT test in the arcs are connected.
    */
@@ -108,6 +113,30 @@ export default class Region {
       arc.circle === circle ||
       circle.isPointWithinCircle(arc.mx, arc.my)
     ));
+  }
+
+  /**
+   * Is this an interior region, or an exterior contour?
+   */
+  get isInterior(): boolean {
+    if (this._isInterior !== undefined) {
+      return this._isInterior;
+    }
+
+    if (!this.arcs.every(arc => !arc.isConvex(this))) {
+      return this._isInterior = true;
+    }
+    
+    let midPerim = 0;
+    let cenPerim = 0;
+    for(let a = 0; a < this.arcs.length - 1; a++) {
+      let arc1 = this.arcs[a];
+      let arc2 = this.arcs[a+1];
+      midPerim += Math.hypot(arc1.mx - arc2.mx, arc1.my - arc2.my);
+      cenPerim += Math.hypot(arc1.x - arc2.x, arc1.y - arc2.y);
+    }
+
+    return this._isInterior = midPerim < cenPerim;
   }
 
   /**
