@@ -138,12 +138,7 @@ export default class Arc {
     }
 
     const ø = Math.abs(this.a2 - this.a1);
-    const R = this.circle.radius;
-    const s = this._arcLength = R * ø;
-    const r = R * Math.cos(0.5 * ø);
-    const a = 2 * Math.sqrt((R ** 2) - (r ** 2));
-
-    return this._area = 0.5 * ((R * s) - (a * r));
+    return this._area = 0.5 * this.circle.radius ** 2 * (ø - Math.sin(ø));
   }
 
   /**
