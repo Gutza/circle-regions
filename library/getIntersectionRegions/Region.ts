@@ -86,8 +86,8 @@ export default class Region {
       const a = this.arcs[i];
       const b = this.arcs[i + 1] || this.arcs[0];
 
-      areaSegment += a.area * ((a.isConvex(this) ? 1 : -1));
-      areaPolygon += (a.start.x * b.start.y) - (a.start.y * b.start.x);
+      areaSegment += a.area * (this.isInCircle(a.circle) ? 1 : -1);
+      areaPolygon += a.start.x * b.start.y - a.start.y * b.start.x;
     }
 
     return this._area = Math.abs(areaPolygon / 2) + areaSegment;
@@ -132,7 +132,8 @@ export default class Region {
       return this._isContour;
     }
 
-    return this._isContour = this.arcs.every(arc => !arc.isConvex(this));
+    // This region is a contour if it's not contained in any of the circles which make it up
+    return this._isContour = !this.arcs.some(arc => this.isInCircle(arc.circle));
   }
 
   /**

@@ -142,17 +142,6 @@ export default class Arc {
   }
 
   /**
-   * Checks if this arc is convex, when rendered as part of a given region
-   * @param region The region this arc is a part of.
-   */
-  isConvex(region: Region): boolean {
-    return region.arcs.every(arc =>
-      arc.circle === this.circle ||
-      this.circle.isPointWithinCircle(arc.mx, arc.my)
-    );
-  }
-
-  /**
    * Convert this arc into a generic @see IntersectionArc
    */
   toObject(): IntersectionArc {
