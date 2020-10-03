@@ -49,9 +49,14 @@ export default class Region {
   _area?: number;
 
   /**
-   * Internal cache for this region's "interiorness"
+   * Internal cache which remembers if this is an interior contour
    */
-  _isInterior?: boolean;
+  _isInteriorContour?: boolean;
+
+  /**
+   * Internal cache which remembers if this is a contour
+   */
+  _isContour?: boolean;
 
   /**
    * Construct a new region.
@@ -116,17 +121,38 @@ export default class Region {
   }
 
   /**
-   * Is this an interior region, or an exterior contour?
+   * Is this a contour?
+   * Contours are regions which are not contained in any of the
+   * circles which define them. Intersecting two circles produces
+   * four regions: the main parts of the two circles, the intersection
+   * of the two circles, and the exterior contour of the two circles.
    */
-  get isInterior(): boolean {
-    if (this._isInterior !== undefined) {
-      return this._isInterior;
+  get isContour(): boolean {
+    if (this._isContour !== undefined) {
+      return this._isContour;
     }
 
-    if (!this.arcs.every(arc => !arc.isConvex(this))) {
-      return this._isInterior = true;
+    return this._isContour = this.arcs.every(arc => !arc.isConvex(this));
+  }
+
+  /**
+   * If this is a contour, is it on the interior or on the exterior?
+   * True if it's an interior contour, false if it's an exterior contour,
+   * undefined if it's not a contour at all.
+   * Intersecting any number of circles always produces one exterior contour.
+   * Intersecting two circles never produces an interior contour, but carefully
+   * arranging three (or more) circles can produce contours in-between the circles.
+   * These are the interior contours.
+   */
+  get isInteriorContour(): boolean | undefined {
+    if (this._isInteriorContour !== undefined) {
+      return this._isInteriorContour;
     }
-    
+
+    if (!this.isContour) {
+      return undefined;
+    }
+
     let midPerim = 0;
     let cenPerim = 0;
     for(let a = 0; a < this.arcs.length - 1; a++) {
@@ -136,7 +162,7 @@ export default class Region {
       cenPerim += Math.hypot(arc1.x - arc2.x, arc1.y - arc2.y);
     }
 
-    return this._isInterior = midPerim < cenPerim;
+    return this._isInteriorContour = midPerim < cenPerim;
   }
 
   /**
