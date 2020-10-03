@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 const mean = require('lodash.mean');
 import { Intersection } from '../Types';
 import Arc from './Arc';
+import Circle from './Circle';
 
 /**
  * A region is a region of the 2D plane surrounded by connecting @see Arc entities.
@@ -96,6 +97,17 @@ export default class Region {
     });
     
     return this._perimeter = perimeter;
+  }
+
+  /**
+   * Checks if this region is fully enclosed by the reference circle.
+   * @param circle The reference circle.
+   */
+  isInCircle(circle: Circle): boolean {
+    return this.arcs.every(arc => (
+      arc.circle === circle ||
+      circle.isPointWithinCircle(arc.mx, arc.my)
+    ));
   }
 
   /**
