@@ -30,13 +30,23 @@ describe('Counting', () => {
     }
 
     let circInt2 = getIntersectionRegions([circle1, circle2]);
-    it('Intersecting two circles should produce three total regions', () => {
-        assert.equal(circInt2.regions.length, 3);
+    it('Intersecting two circles should produce four total regions', () => {
+        assert.equal(circInt2.regions.length, 4);
     });
     it('Intersecting two circles should contain no stand-alone circles', () => {
         assert.equal(circInt2.regions.filter(s => (s instanceof Circle)).length, 0);
     });
-    it('Intersecting two circles should contain three regions', () => {
-        assert.equal(circInt2.regions.filter(s => (s instanceof Region)).length, 3);
+    it('Intersecting two circles should contain four regions', () => {
+        assert.equal(circInt2.regions.filter(s => (s instanceof Region)).length, 4);
+    });
+    it('Intersecting two circles should contain three non-contour regions', () => {
+        assert.equal(circInt2.regions.filter(s => (s instanceof Region && !s.isContour)).length, 3);
+    });
+
+    it('Intersecting two circles should contain three non-contour regions', () => {
+        assert.equal(circInt2.regions.filter(s => (s instanceof Region && !s.isContour)).length, 3);
+    });
+    it('Intersecting two circles should contain one exterior contour', () => {
+        assert.equal(circInt2.regions.filter(s => (s instanceof Region && s.isContour && !s.isInteriorContour)).length, 1);
     });
 });
