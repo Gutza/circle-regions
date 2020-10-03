@@ -110,7 +110,7 @@ export const getIntersectionRegions = (circleDefinitions: IntersectionCircle[]) 
     regions: regions
       .filter(region =>
         (region instanceof Circle && region.isRegion) ||
-        (region instanceof Region && region.area > 0)
+        (region instanceof Region && !region.arcs.every(arc => !arc.isConvex(region)))
       )
       .sort((a, b) => b.area - a.area),
     /**
