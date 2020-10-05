@@ -1,8 +1,8 @@
 {
   "name": "circle-regions",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Circle Intersection Regions",
-  "main":  "./dist/library/index.js",
+  "main": "./dist/library/index.js",
   "types": "./dist/library/index.d.ts",
   "author": {
     "name": "Bogdan Stăncescu",
@@ -43,7 +43,7 @@
     "bitset": "^5.1.1",
     "lodash.floor": "^4.0.4",
     "lodash.mean": "^4.1.0",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.1"
   },
   "keywords": [
     "circle",
