@@ -90,7 +90,12 @@ export default class Region {
       areaPolygon += a.start.x * b.start.y - a.start.y * b.start.x;
     }
 
-    return this._area = Math.abs(areaPolygon / 2) + areaSegment;
+    if (this.isContour && !this.isInteriorContour) {
+        areaSegment*=-1;
+    }
+
+    this._area = Math.abs(areaPolygon / 2) + areaSegment;
+    return this._area;
   }
 
   /**

@@ -35,7 +35,14 @@ const getVectors = (circles: Circle[]) => {
   return vectors;
 };
 
-const mergeBitsets = (a: Arc, b: Arc) => (a.bitset as Bitset).or(b.bitset as Bitset).toString();
+const mergeBitsets = (a: Arc, b: Arc): string => {
+  try {
+    return (a.bitset as Bitset).or(b.bitset as Bitset).toString();
+  } catch(error) {
+    console.warn("Error in toString() for bitsets a", a.bitset, "b", b.bitset);
+    return (a.bitset as Bitset).toString();
+  }
+};
 
 const getRegions = (A: Vector, circles: Circle[], history: History, regions: Region[] = [], arcs: Arc[] = [], intersections: Intersections = {}) => {
   const BC = arcs[arcs.length - 1];
@@ -112,7 +119,15 @@ export const getIntersectionRegions = (circleDefinitions: IntersectionCircle[]) 
         region instanceof Region ||
         (region instanceof Circle && region.isRegion)
       )
-      .sort((a, b) => b.area - a.area),
+      .sort((a, b) => {
+        let aContour = a instanceof Region && a.isContour;
+        let bContour = b instanceof Region && b.isContour;
+        if (aContour == bContour) {
+          return a.area - b.area;
+        }
+
+        return aContour ? 1 : -1;
+      }),
     /**
      * The circles you passed to the function, now with guaranteed IDs -- and with areas.
      */
