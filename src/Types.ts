@@ -14,15 +14,21 @@ export interface IRegion {
     area: number;
 }
 
-export type TIntersectionType = "tangent" | "lens";
+export type TIntersectionType = "innerTangent" | "outerTangent" | "lens";
 
 export interface ICircleIntersectionPoint {
     point: IPoint,
     intersectionType: TIntersectionType;
 }
 
-export interface ICircleIntersection {
+export interface IVertex {
     otherCircle: Circle;
     thisAngle: number;
     intersection: ICircleIntersectionPoint;
+}
+
+export type TTangencyParity = "yin" | "yang" | "chaos";
+export interface ITangencyElement {
+    circle: Circle;
+    parity: TTangencyParity;
 }

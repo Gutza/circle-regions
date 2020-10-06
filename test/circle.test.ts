@@ -1,3 +1,4 @@
+/*
 import assert = require('assert');
 import Circle from '../src/geometry/Circle';
 
@@ -48,3 +49,4 @@ describe('Basic circle functionalities', () => {
         assert.equal(circ2seg2.intersection2.intersection.point.y, 4);
     });
 })
+*/
