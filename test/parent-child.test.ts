@@ -1,5 +1,5 @@
 const assert = require('assert');
-import { getIntersectionRegions } from '../library/intersectionEngine/getIntersectionRegions';
+import { IntersectionEngine } from '../library/intersectionEngine/IntersectionEngine';
 import { IntersectionCircle } from '../library/Types';
 
 describe('Parent-child', () => {
@@ -15,7 +15,8 @@ describe('Parent-child', () => {
         y: 0,
         radius: 1,
     }
-    let ints = getIntersectionRegions([parent, child]);
+    let ie = new IntersectionEngine();
+    let ints = ie.getIntersectionRegions([parent, child]);
 
     let darthCircles = ints.circles.filter(c=>c.id=="Darth");
     let lukeCircles = ints.circles.filter(c=>c.id=="Luke");

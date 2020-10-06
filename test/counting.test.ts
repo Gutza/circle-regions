@@ -1,11 +1,13 @@
 const assert = require('assert');
-import { getIntersectionRegions } from '../library/intersectionEngine/getIntersectionRegions';
+import { IntersectionEngine } from '../library/intersectionEngine/IntersectionEngine';
 import Circle from '../library/intersectionEngine/Circle';
 import Region from '../library/intersectionEngine/Region';
 import { IntersectionCircle } from '../library/Types';
 
 describe('Counting', () => {
-    let circInt0 = getIntersectionRegions([]);
+    let ie = new IntersectionEngine();
+
+    let circInt0 = ie.getIntersectionRegions([]);
     it('Intersecting no circles should produce an empty result', () => {
         assert.equal(circInt0.regions.length, 0);
     })
@@ -15,7 +17,7 @@ describe('Counting', () => {
         y: 0,
         radius: 1
     }
-    let circInt1 = getIntersectionRegions([circle1]);
+    let circInt1 = ie.getIntersectionRegions([circle1]);
     it('Intersecting one circle should produce one region', () => {
         assert.equal(circInt1.regions.length, 1);
     });
@@ -29,7 +31,7 @@ describe('Counting', () => {
         radius: 1
     }
 
-    let circInt2 = getIntersectionRegions([circle1, circle2]);
+    let circInt2 = ie.getIntersectionRegions([circle1, circle2]);
     it('Intersecting two circles should produce four total regions', () => {
         assert.equal(circInt2.regions.length, 4);
     });
