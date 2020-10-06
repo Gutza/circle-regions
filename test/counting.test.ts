@@ -1,7 +1,7 @@
 const assert = require('assert');
-import { getIntersectionRegions } from '../library/getIntersectionRegions/getIntersectionRegions';
-import Circle from '../library/getIntersectionRegions/Circle';
-import Region from '../library/getIntersectionRegions/Region';
+import { getIntersectionRegions } from '../library/intersectionEngine/getIntersectionRegions';
+import Circle from '../library/intersectionEngine/Circle';
+import Region from '../library/intersectionEngine/Region';
 import { IntersectionCircle } from '../library/Types';
 
 describe('Counting', () => {

@@ -1,5 +1,5 @@
 const assert = require('assert');
-import { getIntersectionRegions } from '../library/getIntersectionRegions/getIntersectionRegions';
+import { getIntersectionRegions } from '../library/intersectionEngine/getIntersectionRegions';
 import { IntersectionCircle } from '../library/Types';
 
 describe('Parent-child', () => {

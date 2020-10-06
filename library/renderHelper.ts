@@ -1,4 +1,4 @@
-import Region from './getIntersectionRegions/Region';
+import Region from './intersectionEngine/Region';
 
 /**
  * A helper function which renders a region as a polygon (actually, as a set of vertices)

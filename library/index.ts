@@ -1,2 +1,2 @@
 export { renderPoly } from './renderHelper';
-export { getIntersectionRegions } from './getIntersectionRegions/getIntersectionRegions';
+export { getIntersectionRegions } from './intersectionEngine/getIntersectionRegions';
