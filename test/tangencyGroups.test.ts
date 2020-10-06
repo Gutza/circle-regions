@@ -56,6 +56,7 @@ describe("Tangency groups for three circles AA-B", () => {
         });
         assert.equal(tanGroupCount, 1);
     });
+
     it('Three tangent circles AA-B should contain tangent groups with a delta of one', () => {
         assert.equal(Math.abs(yinCount - yangCount), 1);
     });
@@ -63,7 +64,15 @@ describe("Tangency groups for three circles AA-B", () => {
 
 graph.addCircle(new Circle(graph, {x: 4, y:0}, 4));
 
-describe("Tangency groups for four circles", () => {
+describe("Tangency groups for four circles AA-BB", () => {
+    it("Four tangent circles AA-BB should contain a single tangent group", () => {
+        let tanGroupCount = 0;
+        graph.nodes.forEach(node => {
+            node.tangencyGroups.forEach(() => tanGroupCount++);
+        });
+        assert.equal(tanGroupCount, 1);
+    });
+    
     let yinCount = 0;
     let yangCount = 0;
     graph.nodes.forEach(node => {
@@ -75,8 +84,11 @@ describe("Tangency groups for four circles", () => {
 
     dumpGroups("Four", graph);
 
-    it('Four tangent circles should contain equal numbers of yin and yang', () => {
+    it('Four tangent circles AA-BB should contain tangent groups with two yin', () => {
         assert.equal(yinCount, 2);
+    });
+
+    it('Four tangent circles AA-BB should contain tangent groups with two yang', () => {
         assert.equal(yangCount, 2);
     });
 });
