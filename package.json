@@ -2,8 +2,8 @@
   "name": "circle-regions",
   "version": "0.4.1",
   "description": "Circle Intersection Regions",
-  "main": "./dist/library/index.js",
-  "types": "./dist/library/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "author": {
     "name": "Bogdan Stăncescu",
     "url": "https://bogdan.stancescu.ro/"
@@ -29,8 +29,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
-    "@types/lodash.floor": "^4.0.6",
-    "@types/lodash.mean": "^4.1.6",
     "@types/mocha": "^8.0.3",
     "@types/node": "^8.0.14",
     "@types/uuid": "^8.3.0",
@@ -40,7 +38,6 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
-    "bitset": "^5.1.1",
     "lodash.floor": "^4.0.4",
     "lodash.mean": "^4.1.0",
     "uuid": "^8.3.1"
