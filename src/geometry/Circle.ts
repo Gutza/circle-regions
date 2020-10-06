@@ -203,10 +203,10 @@ export default class Circle implements IRegion {
                 continue;
             }
 
-            const nextInt = this._intersectionPoints[i] || this._intersectionPoints[0];
+            const nextInt = this._intersectionPoints[i+1] || this._intersectionPoints[0];
             segments.push(new CircleSegment(this, currInt, nextInt));
         }
-        
+
         return this._segments = segments;
     }
 }
