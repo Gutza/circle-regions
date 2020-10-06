@@ -36,29 +36,31 @@ export default class CircleNode {
                     parity: "chaos",
                 } ]
                 this._tangencyGroups.push(tanGroup2);
-            } else {
-                let
-                    parity1: TTangencyParity,
-                    parity2: TTangencyParity;
-
-                if (intersectionType == "innerTangent") {
-                    parity1 = parity2 = "yin";
-                } else if (intersectionType == "outerTangent") {
-                    parity1 = "yin";
-                    parity2 = "yang";
-                } else {
-                    throw new Error("Unknown intersection type: " + intersectionType);
-                }
-
-                const tanGroup = new TangencyGroup();
-                tanGroup.elements = [{
-                    circle: circle1,
-                    parity: parity1,
-                }, {
-                    circle: circle2,
-                    parity: parity2,
-                }];
+                return;
             }
+            
+            let
+                parity1: TTangencyParity,
+                parity2: TTangencyParity;
+
+            if (intersectionType == "innerTangent") {
+                parity1 = parity2 = "yin";
+            } else if (intersectionType == "outerTangent") {
+                parity1 = "yin";
+                parity2 = "yang";
+            } else {
+                throw new Error("Unknown intersection type: " + intersectionType);
+            }
+
+            const tanGroup = new TangencyGroup();
+            tanGroup.elements = [{
+                circle: circle1,
+                parity: parity1,
+            }, {
+                circle: circle2,
+                parity: parity2,
+            }];
+            this._tangencyGroups.push(tanGroup);
 
             return;
         }
@@ -74,7 +76,13 @@ export default class CircleNode {
             if (tgElements.length < 1 || tgElements.length > 2) {
                 throw new Error("Unexpected condition: " + tgElements.length + " tangency group elements contain either of the circles in an intersection pair!");
             }
-    
+
+            if (tgElements.length == 2 && intersectionType != "lens") {
+                // TODO: More defensive tests
+                foundCircle1 = foundCircle2 = true;
+                return;
+            }
+
             tgElements.forEach(tgElement => {
                 if (foundCircle1 && foundCircle1) {
                     // We already found both circles, there's no need to process any further tangency groups
@@ -172,5 +180,9 @@ export default class CircleNode {
 
     public isValid(): boolean {
         return this._tangencyGroups.length > 1;
+    }
+
+    public get tangencyGroups(): TangencyGroup[] {
+        return this._tangencyGroups;
     }
 }
