@@ -23,7 +23,6 @@ export default class CircleGraph {
         }
 
         if (sameCoordinates.length == 1) {
-            console.log("Adding circle to existing node");
             sameCoordinates[0].addCirclePair(circle1, circle2, intersectionType);
             return;
         }

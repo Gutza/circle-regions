@@ -6,7 +6,15 @@ const graph = new CircleGraph();
 graph.addCircle(new Circle(graph, {x: -3, y: 0}, 3));
 graph.addCircle(new Circle(graph, {x: 3, y: 0}, 3));
 
-describe("Tangency groups for two circles", () => {
+describe("Tangency groups for two circles A-B", () => {
+    it("Two tangent circles A-B should contain a single tangent group", () => {
+        let tanGroupCount = 0;
+        graph.nodes.forEach(node => {
+            node.tangencyGroups.forEach(() => tanGroupCount++);
+        });
+        assert.equal(tanGroupCount, 1);
+    });
+
     let yinCount = 0;
     let yangCount = 0;
     dumpGroups("Two", graph);
@@ -18,10 +26,10 @@ describe("Tangency groups for two circles", () => {
         });
     });
 
-    it('Two tangent circles should contain one yin', () => {
+    it('Two tangent circles A-B should contain one yin', () => {
         assert.equal(yinCount, 1);
     });
-    it('Two tangent circles should contain one yang', () => {
+    it('Two tangent circles A-B should contain one yang', () => {
         assert.equal(yangCount, 1);
     });
 
@@ -29,7 +37,7 @@ describe("Tangency groups for two circles", () => {
 
 graph.addCircle(new Circle(graph, {x: -4, y:0}, 4));
 
-describe("Tangency groups for three circles", () => {
+describe("Tangency groups for three circles AA-B", () => {
     let yinCount = 0;
     let yangCount = 0;
     graph.nodes.forEach(node => {
@@ -41,7 +49,14 @@ describe("Tangency groups for three circles", () => {
 
     dumpGroups("Three", graph);
 
-    it('Three tangent circles should contain a different number of yin and yang', () => {
+    it("Three tangent circles AA-B should contain a single tangent group", () => {
+        let tanGroupCount = 0;
+        graph.nodes.forEach(node => {
+            node.tangencyGroups.forEach(() => tanGroupCount++);
+        });
+        assert.equal(tanGroupCount, 1);
+    });
+    it('Three tangent circles AA-B should contain tangent groups with a delta of one', () => {
         assert.equal(Math.abs(yinCount - yangCount), 1);
     });
 });
