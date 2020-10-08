@@ -18,7 +18,7 @@ export default class CircleGraph {
         this._edges = [];
     }
 
-    public addNode(circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): CircleNode {
+    public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): CircleNode => {
         let sameCoordinates = this._nodes.filter(n =>
             round(n.coordinates.x) === round(intersectionPoint.x) &&
             round(n.coordinates.y) === round(intersectionPoint.y)
@@ -38,7 +38,7 @@ export default class CircleGraph {
         return newNode;
     }
 
-    public addEdge(edge: CircleEdge) {
+    public addEdge = (edge: CircleEdge) => {
         this._edges.push(edge);
         edge.node1.addEdge(edge);
         edge.node2.addEdge(edge);
@@ -55,7 +55,7 @@ export default class CircleGraph {
         this._circles.push(circle);
     }
 
-    public removeCircle(circle: Circle) {
+    public removeCircle = (circle: Circle) => {
         this._nodes.forEach(n => n.removeCircle(circle));
         this._nodes = this._nodes.filter(n => {
             if (n.isValid()) {
@@ -74,7 +74,7 @@ export default class CircleGraph {
         return this._nodes;
     }
 
-    public compute() {
+    public compute = () => {
         // TODO: Caching
         this._circles.forEach(circle => {
             const nodes = this._nodes.filter(n => n.tangencyGroups.some(tg => tg.elements.some(tge => tge.circle == circle)));
@@ -131,17 +131,25 @@ export default class CircleGraph {
 
     private traceLoop(startEdge: CircleEdge, direction: TTraversalDirection): CircleLoop | null {
         let loop: CircleLoop | null = new CircleLoop();
-        loop.edges.push(startEdge);
         let startNode: CircleNode;
         if (direction == "forward") {
-            startNode = startEdge.node2;
-        } else {
             startNode = startEdge.node1;
+        } else {
+            startNode = startEdge.node2;
         }
         let currentNode = startNode;
         let currentEdge: CircleEdge | undefined = startEdge;
 
         while (true) {
+            loop.edges.push(currentEdge);
+            if (direction == "forward") {
+                currentEdge.RegionRight = loop;
+            } else {
+                currentEdge.RegionLeft = loop;
+            }
+
+            currentEdge = currentNode.getNextEdge(currentEdge);
+
             if (currentEdge === undefined) {
                 console.log("Undefined next edge");
                 if (currentNode !== startNode) {
@@ -156,19 +164,11 @@ export default class CircleGraph {
                 return null;
             }
 
-            if (direction == "forward") {
-                currentEdge.RegionRight = loop;
-            } else {
-                currentEdge.RegionLeft = loop;
-            }
-
-            loop.edges.push(currentEdge);
             console.log("Node before tranversing x=", currentNode.coordinates.x, "y=", currentNode.coordinates.y);
             currentNode = currentNode.getOtherEnd(currentEdge);
             console.log("Node after tranversing x=", currentNode.coordinates.x, "y=", currentNode.coordinates.y);
-            currentEdge = currentNode.getNextEdge(currentEdge);
 
-            if (currentNode === startNode) {
+            if (currentEdge === startEdge) {
                 console.log("Finished loop", loop);
                 return loop;
             }

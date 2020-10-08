@@ -190,12 +190,17 @@ export default class CircleNode {
         return this._tangencyGroups;
     }
 
-    public getOtherEnd(edge: CircleEdge): CircleNode {
+    public getOtherEnd = (edge: CircleEdge): CircleNode => {
+        if (this === edge.node1) {
+            console.log("The other end is", edge.circle.id + "." + edge.id + "/end");
+        } else {
+            console.log("The other end is", edge.circle.id + "." + edge.id + "/start");
+        }
         return this === edge.node1 ? edge.node2 : edge.node1;
     }
 
     /**
-     * Always retrieve the next edge immediately to the right of the given edge, as it comes into this node.
+     * Always retrieve the next edge immediately to the left of the given edge, as it comes into this node.
      * @param edge 
      * @param direction 
      */
@@ -236,7 +241,7 @@ export default class CircleNode {
             return undefined;
         }
 
-        neighbors = neighbors.sort((a, b) => b.perpendicularAngle - a.perpendicularAngle);
+        neighbors = neighbors.sort((a, b) => a.perpendicularAngle - b.perpendicularAngle);
         console.log("Node x = " + this.coordinates.x.toFixed(2)+"; y = " + this.coordinates.y.toFixed(2));
         console.log("Edge " + edge.circle.id + "." + edge.id + "/" + (edge.node1 === this ? "start" : "end") + "@" + edge.circle.getVertexByNode(this)?.angle.toFixed(2) +
             " ref " + refAngle.toFixed(2));
@@ -244,26 +249,22 @@ export default class CircleNode {
             n.edge.circle.id + "." + n.edge.id + "/" + (n.edge.node1 === this ? "start" : "end")  + "@" + n.edge.circle.getVertexByNode(this)?.angle.toFixed(2) +
             " per " + n.perpendicularAngle.toFixed(2)
         ));
-        return neighbors.pop()?.edge;
+        return neighbors[0].edge;
     }
 
     private getPerpendicular(edge: CircleEdge, refAngle: number): number {
         // Edges are always naturally ordered trigonometrically
-        let prevNode: CircleNode;
-        let direction: TAngleDirection;
-        if (this === edge.node1) {
-            prevNode = edge.node2;
-            direction = -1;
-        } else {
-            prevNode = edge.node1;
-            direction = 1;
-        }
-
-        const prevVertex = edge.circle.getVertexByNode(prevNode);
         const thisVertex = edge.circle.getVertexByNode(this);
 
-        if (thisVertex === undefined || prevVertex === undefined) {
+        if (thisVertex === undefined) {
             throw new Error("Vertex not found on circle!");
+        }
+
+        let direction: TAngleDirection;
+        if (this === edge.node1) {
+            direction = -1;
+        } else {
+            direction = 1;
         }
 
         return normalizeAngle(thisVertex.angle + direction * Math.PI / 2 - refAngle);
