@@ -1,4 +1,6 @@
 import Circle from "../geometry/Circle";
+import CircleArc from "../geometry/CircleArc";
+import CircleRegion from "../geometry/CircleRegion";
 import CircleVertex from "../geometry/CircleVertex";
 import intersectCircles from "../geometry/utils/intersectCircles";
 import { round } from "../geometry/utils/numbers";
@@ -11,6 +13,7 @@ export default class Graph {
     private _nodes: GraphNode[];
     private _edges: GraphEdge[];
     private _circles: Circle[];
+    private _regions?: CircleRegion[] = undefined;
 
     constructor() {
         this._circles = [];
@@ -74,7 +77,7 @@ export default class Graph {
         return this._nodes;
     }
 
-    public compute = () => {
+    private _compute = (): GraphLoop[] => {
         // TODO: Caching
         this._circles.forEach(circle => {
             const nodes = this._nodes.filter(n => n.tangencyGroups.some(tg => tg.elements.some(tge => tge.circle == circle)));
@@ -121,12 +124,18 @@ export default class Graph {
             }
         }
 
+        // Only debugging
         console.log("== Finished all loops ==");
         loops.forEach((loop, loopIndex) => {
-            loop.edges.forEach((edge, edgeIndex) => {
-                console.log(loopIndex + "." + edgeIndex, edge.node1.coordinates.x + "," + edge.node1.coordinates.y, "-->", edge.node2.coordinates.x + "," + edge.node2.coordinates.y)
+            loop.oEdges.forEach((oEdge, edgeIndex) => {
+                let startNode = oEdge.direction == "forward" ? oEdge.edge.node1 : oEdge.edge.node2;
+                let endNode = oEdge.direction == "forward" ? oEdge.edge.node2 : oEdge.edge.node1;
+                console.log(loopIndex + "." + edgeIndex, startNode.coordinates.x + "," + startNode.coordinates.y, "-->", endNode.coordinates.x + "," + endNode.coordinates.y)
             })
-        })
+        });
+        // Finished debugging
+
+        return loops;
     }
 
     private traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): GraphLoop | null {
@@ -139,10 +148,14 @@ export default class Graph {
         }
         let currentEdgeEndNode = startEdgeEndNode;
         let currentEdge: GraphEdge | undefined = startEdge;
+        let currentEdgeDirection = direction;
 
         while (true) {
-            loop.edges.push(currentEdge);
-            if (currentEdgeEndNode === currentEdge.node2) {
+            loop.oEdges.push({
+                edge: currentEdge,
+                direction: currentEdgeDirection,
+            });
+            if (currentEdgeDirection == "forward") {
                 if (currentEdge.RegionLeft) {
                     throw new Error("Region left already set!");
                 }
@@ -171,7 +184,9 @@ export default class Graph {
             }
 
             console.log("Node before tranversing x=", currentEdgeEndNode.coordinates.x, "y=", currentEdgeEndNode.coordinates.y);
-            currentEdgeEndNode = currentEdgeEndNode.getOtherEnd(currentEdge);
+            const oEnd = currentEdgeEndNode.getOtherEnd(currentEdge);
+            currentEdgeEndNode = oEnd.node;
+            currentEdgeDirection = oEnd.direction;
             console.log("Node after tranversing x=", currentEdgeEndNode.coordinates.x, "y=", currentEdgeEndNode.coordinates.y);
 
             if (currentEdge === startEdge) {
@@ -179,5 +194,36 @@ export default class Graph {
                 return loop;
             }
         }
+    }
+
+    public get regions(): CircleRegion[] {
+        if (this._regions !== undefined) {
+            return this._regions;
+        }
+
+        const loops = this._compute();
+        this._regions = loops.map(loop => {
+            const arcs: CircleArc[] = [];
+            loop.oEdges.forEach(oEdge => {
+                const startNode = oEdge.direction == "forward" ? oEdge.edge.node1 : oEdge.edge.node2;
+                const endNode = oEdge.direction == "forward" ? oEdge.edge.node2 : oEdge.edge.node1;
+                const startVertex = oEdge.edge.circle.getVertexByNode(startNode);
+                const endVertex = oEdge.edge.circle.getVertexByNode(startNode);
+                if (startVertex === undefined || endVertex === undefined) {
+                    throw new Error("Failed finding vertex");
+                }
+                const startAngle = startVertex.angle;
+                const endAngle = endVertex.angle > startAngle ? endVertex.angle : endVertex.angle + 2 * Math.PI;
+                arcs.push(new CircleArc(
+                    oEdge.edge.circle,
+                    startAngle,
+                    endAngle,
+                    startNode.coordinates,
+                    endNode.coordinates
+                ));
+            });
+            return new CircleRegion(arcs);
+        });
+        return this._regions;
     }
 }

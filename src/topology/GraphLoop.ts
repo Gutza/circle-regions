@@ -1,5 +1,11 @@
+import { TTraversalDirection } from "../Types";
 import GraphEdge from "./GraphEdge";
 
 export default class GraphLoop {
-    public edges: GraphEdge[] = [];
+    public oEdges: IOrientedEdge[] = [];
+}
+
+interface IOrientedEdge {
+    edge: GraphEdge;
+    direction: TTraversalDirection;
 }

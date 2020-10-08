@@ -1,9 +1,15 @@
-import { IPoint, ITangencyElement, TIntersectionType, TTangencyParity, TTangencyType, TTraversalDirection } from "../Types";
+import { IGraphEnd, IPoint, TIntersectionType, TTangencyParity, TTangencyType } from "../Types";
 import Circle from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import TangencyGroup from "./TangencyGroup";
-import CircleVertex from "../geometry/CircleVertex";
 import { normalizeAngle } from '../geometry/utils/angles';
+
+interface IEdgeAngle {
+    perpendicularAngle: number;
+    edge: GraphEdge;
+}
+
+type TAngleDirection = -1 | 1;
 
 export default class GraphNode {
     private _tangencyGroups: TangencyGroup[];
@@ -190,13 +196,19 @@ export default class GraphNode {
         return this._tangencyGroups;
     }
 
-    public getOtherEnd = (edge: GraphEdge): GraphNode => {
+    public getOtherEnd = (edge: GraphEdge): IGraphEnd => {
         if (this === edge.node1) {
             console.log("The other end is", edge.circle.id + "." + edge.id + "/end");
         } else {
             console.log("The other end is", edge.circle.id + "." + edge.id + "/start");
         }
-        return this === edge.node1 ? edge.node2 : edge.node1;
+        return this === edge.node1 ? {
+            node: edge.node2,
+            direction: "forward",
+        } : {
+            node: edge.node1,
+            direction: "backward",
+        };
     }
 
     /**
@@ -270,10 +282,3 @@ export default class GraphNode {
         return normalizeAngle(thisVertex.angle + direction * Math.PI / 2 - refAngle);
     }
 }
-
-interface IEdgeAngle {
-    perpendicularAngle: number;
-    edge: GraphEdge;
-}
-
-type TAngleDirection = -1 | 1;

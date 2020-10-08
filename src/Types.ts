@@ -1,4 +1,5 @@
 import Circle from "./geometry/Circle";
+import GraphNode from "./topology/GraphNode";
 
 export interface IPoint {
     x: number;
@@ -35,3 +36,8 @@ export interface ITangencyElement {
 }
 
 export type TTraversalDirection = "forward" | "backward";
+
+export interface IGraphEnd {
+    node: GraphNode;
+    direction: TTraversalDirection;
+}
