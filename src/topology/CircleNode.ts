@@ -14,6 +14,7 @@ export default class CircleNode {
     }
 
     public addCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType) {
+        console.log("Intersection type", intersectionType);
         let tanGroups = this._tangencyGroups.filter(tanGroup => tanGroup.elements.some(tgElement => tgElement.circle === circle1 || tgElement.circle === circle2));
         if (tanGroups.length > 2) {
             // Easiest case: just die. This should never happen with good data.
@@ -21,8 +22,10 @@ export default class CircleNode {
         }
 
         if (tanGroups.length == 0) {
+            console.log("No tangency group matches");
             // Easy case: just create new tangency group(s)
-            if (intersectionType === "lens") {
+            if (intersectionType == "lens") {
+                console.log("No tangency group matches, and lens intersection");
                 const tanGroup1 = new TangencyGroup();
                 tanGroup1.elements = [ {
                     circle: circle1,
