@@ -1,5 +1,6 @@
 import Circle from "../geometry/Circle";
 import intersectCircles from "../geometry/utils/intersectCircles";
+import { round } from "../geometry/utils/round";
 import { IPoint, TIntersectionType } from "../Types";
 import CircleEdge from "./CircleEdge";
 import CircleNode from "./CircleNode";
@@ -17,7 +18,10 @@ export default class CircleGraph {
     }
 
     public addNode(circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType) {
-        let sameCoordinates = this._nodes.filter(n => n.coordinates.x === intersectionPoint.x && n.coordinates.y === intersectionPoint.y);
+        let sameCoordinates = this._nodes.filter(n =>
+            round(n.coordinates.x) === round(intersectionPoint.x) &&
+            round(n.coordinates.y) === round(intersectionPoint.y)
+        );
         if (sameCoordinates.length > 1) {
             throw new Error("Unexpected condition: multiple nodes with the same coordinates!");
         }

@@ -14,7 +14,8 @@ export interface IRegion {
     area: number;
 }
 
-export type TIntersectionType = "innerTangent" | "outerTangent" | "lens";
+export type TTangencyType = "innerTangent" | "outerTangent";
+export type TIntersectionType = "lens" | TTangencyType;
 
 export interface ICircleIntersectionPoint {
     point: IPoint,

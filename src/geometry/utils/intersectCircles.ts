@@ -1,6 +1,7 @@
 import CircleGraph from "../../topology/CircleGraph";
 import { IPoint } from "../../Types";
 import Circle from "../Circle";
+import { round } from "./round";
 
 export default (graph: CircleGraph, circle1: Circle, circle2: Circle): void => {
     if (circle1 === circle2) {
@@ -8,18 +9,19 @@ export default (graph: CircleGraph, circle1: Circle, circle2: Circle): void => {
         return;
     }
 
-    const centerDist = Math.hypot(circle1.center.x - circle2.center.x, circle1.center.y - circle2.center.y);
-    if (centerDist > circle1.radius + circle2.radius) {
+    // Math.sqrt(a**2 + b**2) is more precise than Math.hypot(a, b)
+    const centerDist = Math.sqrt((circle1.center.x - circle2.center.x) ** 2 + (circle1.center.y - circle2.center.y) ** 2);
+    if (round(centerDist) > round(circle1.radius + circle2.radius)) {
         return;
     }
 
-    if (circle1.radius > centerDist + circle2.radius) {
+    if (round(circle1.radius) > round(centerDist + circle2.radius)) {
         circle1.addChild(circle2);
         circle2.addParent(circle1);
         return;
     }
 
-    if (circle2.radius > centerDist + circle1.radius) {
+    if (round(circle2.radius) > round(centerDist + circle1.radius)) {
         circle2.addChild(circle1);
         circle1.addParent(circle2);
         return;
@@ -30,7 +32,7 @@ export default (graph: CircleGraph, circle1: Circle, circle2: Circle): void => {
     const x = circle1.center.x + a * (circle2.center.x - circle1.center.x) / centerDist;
     const y = circle1.center.y + a * (circle2.center.y - circle1.center.y) / centerDist;
 
-    if (circle1.radius + circle2.radius == centerDist) {
+    if (round(circle1.radius + circle2.radius) == round(centerDist)) {
         const tangentPoint: IPoint = {
             x: x,
             y: y,
@@ -39,7 +41,7 @@ export default (graph: CircleGraph, circle1: Circle, circle2: Circle): void => {
         return;
     }
 
-    if (Math.abs(circle1.radius - circle2.radius) == centerDist) {
+    if (round(Math.abs(circle1.radius - circle2.radius)) == round(centerDist)) {
         const tangentPoint: IPoint = {
             x: x,
             y: y,

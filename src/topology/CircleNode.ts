@@ -1,4 +1,4 @@
-import { IPoint, TIntersectionType, TTangencyParity } from "../Types";
+import { IPoint, ITangencyElement, TIntersectionType, TTangencyParity, TTangencyType } from "../Types";
 import Circle from "../geometry/Circle";
 import CircleEdge from "./CircleEdge";
 import TangencyGroup from "./TangencyGroup";
@@ -22,142 +22,136 @@ export default class CircleNode {
         }
 
         if (tanGroups.length == 0) {
-            console.log("No tangency group matches");
-            // Easy case: just create new tangency group(s)
-            if (intersectionType == "lens") {
-                console.log("No tangency group matches, and lens intersection");
-                const tanGroup1 = new TangencyGroup();
-                tanGroup1.elements = [ {
-                    circle: circle1,
-                    parity: "chaos",
-                } ]
-                this._tangencyGroups.push(tanGroup1);
+            return this._addNewCirclePair(circle1, circle2, intersectionType);
+        }
 
-                const tanGroup2 = new TangencyGroup();
-                tanGroup2.elements = [ {
-                    circle: circle2,
-                    parity: "chaos",
-                } ]
-                this._tangencyGroups.push(tanGroup2);
-                return;
+        let tanGroupsCircle1 = tanGroups.filter(tanGroup => tanGroup.elements.some(tgElement => tgElement.circle === circle1));
+        if (tanGroupsCircle1.length > 1) {
+            throw new Error("Unexpected condition: a circle is present in multiple tangency groups! [1]");
+        }
+
+        let tanGroupsCircle2 = tanGroups.filter(tanGroup => tanGroup.elements.some(tgElement => tgElement.circle === circle2));
+        if (tanGroupsCircle2.length > 1) {
+            throw new Error("Unexpected condition: a circle is present in multiple tangency groups! [2]");
+        }
+
+        if (intersectionType == "lens") {
+            if (tanGroupsCircle1.length == 0 || tanGroupsCircle2.length == 0) {
+                this._addNewCirclePair(circle1, circle2, intersectionType);
             }
-            
-            let
-                parity1: TTangencyParity,
-                parity2: TTangencyParity;
+            return;
+        }
 
-            if (intersectionType == "innerTangent") {
-                parity1 = parity2 = "yin";
-            } else if (intersectionType == "outerTangent") {
-                parity1 = "yin";
-                parity2 = "yang";
+        if (tanGroupsCircle1.length == 0) {
+            return this._addTangentCircle(circle1, circle2, intersectionType, tanGroupsCircle2[0]);
+        }
+
+        if (tanGroupsCircle2.length == 0) {
+            return this._addTangentCircle(circle2, circle1, intersectionType, tanGroupsCircle1[0]);
+        }
+
+        // Both circles are already here, but we might still need to retrofit the parities.
+        const tgElem1 = tanGroupsCircle1[0].elements.filter(tgElem => tgElem.circle === circle1);
+        if (tgElem1.length !== 1) {
+            throw new Error("Existing tangency element count is " + tgElem1.length + " [1]");
+        }
+
+        const tgElem2 = tanGroupsCircle1[0].elements.filter(tgElem => tgElem.circle === circle2);
+        if (tgElem2.length !== 1) {
+            throw new Error("Existing tangency element count is " + tgElem1.length + " [2]");
+        }
+
+        if (tgElem1[0].parity == "chaos" || tgElem2[0].parity == "chaos") {
+            if (tgElem1[0].parity == "chaos" && tgElem2[0].parity == "chaos") {
+                tgElem1[0].parity = "yin";
+            }
+
+            let knownElement = tgElem1[0].parity == "chaos" ? tgElem2[0] : tgElem1[0];
+            let chaoticElement = tgElem1[0].parity == "chaos" ? tgElem1[0] : tgElem2[0];
+            chaoticElement.parity = this.otherParity(knownElement.parity, intersectionType);
+            return;
+        }
+    }
+
+    public otherParity(knownParity: TTangencyParity, tangencyType: TTangencyType): TTangencyParity {
+        if (knownParity == "chaos") {
+            throw new Error("The known parity can't be chaos!");
+        }
+
+        if (knownParity == "yin") {
+            if (tangencyType == "innerTangent") {
+                return "yin";
             } else {
-                throw new Error("Unknown intersection type: " + intersectionType);
+                return "yang";
             }
-
-            const tanGroup = new TangencyGroup();
-            tanGroup.elements = [{
-                circle: circle1,
-                parity: parity1,
-            }, {
-                circle: circle2,
-                parity: parity2,
-            }];
-            this._tangencyGroups.push(tanGroup);
-
-            return;
         }
 
-        // Difficult case: we know at least one of the circles is already present in tangency groups.
-        // Retrofit the existing tangency groups, or add a new group for the missing circle.
+        if (tangencyType == "innerTangent") {
+            return "yang";
+        } else {
+            return "yin";
+        }
+    }
 
-        // TODO: We could do some more defensive checking here
-        let foundCircle1 = false, foundCircle2 = false;
+    private _addTangentCircle(newCircle: Circle, existingCircle: Circle, tangencyType: TTangencyType, existingGroup: TangencyGroup): void {
+        const tgExistingElements = existingGroup.elements.filter(tgElem => tgElem.circle === existingCircle);
+        if (tgExistingElements.length !== 1) {
+            throw new Error("Existing tangency element count is " + tgExistingElements.length);
+        }
+        const tgElem = tgExistingElements[0];
+        if (tgElem.parity == "chaos") {
+            tgElem.parity = "yin";
+        }
 
-        tanGroups.forEach(tanGroup => {
-            const tgElements = tanGroup.elements.filter(el => el.circle === circle1 || el.circle === circle2);
-            if (tgElements.length < 1 || tgElements.length > 2) {
-                throw new Error("Unexpected condition: " + tgElements.length + " tangency group elements contain either of the circles in an intersection pair!");
-            }
-
-            if (tgElements.length == 2 && intersectionType != "lens") {
-                // TODO: More defensive tests
-                foundCircle1 = foundCircle2 = true;
-                return;
-            }
-
-            tgElements.forEach(tgElement => {
-                if (foundCircle1 && foundCircle1) {
-                    // We already found both circles, there's no need to process any further tangency groups
-                    return;
-                }
-
-                let newCircle: Circle | undefined = undefined;
-                if (tgElement.circle === circle1) {
-                    foundCircle1 = true;
-                    newCircle = circle2;
-                } else if (tgElement.circle === circle2) {
-                    foundCircle2 = true;
-                    newCircle = circle1;
-                } else {
-                    throw new Error("Unexpected condition: the «matching» circle in the tangency group matches none of the intersecting circles!");
-                }
-    
-                if (intersectionType == "lens") {
-                    // Nothing interesting to do here any more
-                    return;
-                }
-
-                // We found the pair circle, and it's tangent to this circle. Whatever happens, we know we're done.
-                foundCircle1 = foundCircle2 = true;
-
-                if (tgElement.parity == "chaos") {
-                    // Retrofit the existing element, add a new element in this group, and we're done
-                    tgElement.parity = "yin";
-                    tanGroup.elements.push({
-                        circle: newCircle,
-                        parity: intersectionType == "innerTangent" ? "yin" : "yang",
-                    });
-                    return;
-                }
-
-                // Align the new circle to the existing circle, and we're done
-                let newParity: TTangencyParity | undefined = undefined;
-                if (intersectionType == "innerTangent") {
-                    newParity = tgElement.parity;
-                } else if (intersectionType == "outerTangent") {
-                    if (tgElement.parity == "yin") {
-                        newParity = "yang";
-                    } else if (tgElement.parity == "yang") {
-                        newParity = "yin";
-                    } else {
-                        throw new Error("Unexpected condition: expecting existing parity to be yin or yang; found " + tgElement.parity);
-                    }
-                } else {
-                    throw new Error("Unexpected condition: expecting either inner or outer tangent intersection type, found "+ intersectionType +"!");
-                }
-
-                tanGroup.elements.push({
-                    circle: newCircle,
-                    parity: newParity,
-                });
-                return;
-            });
+        existingGroup.elements.push({
+            circle: newCircle,
+            parity: this.otherParity(tgElem.parity, tangencyType),
         });
+    }
 
-        if (foundCircle1 && foundCircle2) {
+    private _addNewCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType): void {
+        console.log("No tangency group matches");
+        // Easy case: just create new tangency group(s)
+        if (intersectionType == "lens") {
+            console.log("No tangency group matches, and lens intersection");
+            const tanGroup1 = new TangencyGroup();
+            tanGroup1.elements = [ {
+                circle: circle1,
+                parity: "chaos",
+            } ]
+            this._tangencyGroups.push(tanGroup1);
+
+            const tanGroup2 = new TangencyGroup();
+            tanGroup2.elements = [ {
+                circle: circle2,
+                parity: "chaos",
+            } ]
+            this._tangencyGroups.push(tanGroup2);
             return;
-        }
-
-        if (!foundCircle1 && !foundCircle2) {
-            throw new Error("Unexpected condition: we should've found at least one of the circles, but found none!");
         }
         
-        let newGroup = new TangencyGroup();
-        newGroup.elements.push({
-            circle: foundCircle1 ? circle2 : circle1,
-            parity: "chaos",
-        });
+        let
+            parity1: TTangencyParity,
+            parity2: TTangencyParity;
+
+        if (intersectionType == "innerTangent") {
+            parity1 = parity2 = "yin";
+        } else if (intersectionType == "outerTangent") {
+            parity1 = "yin";
+            parity2 = "yang";
+        } else {
+            throw new Error("Unknown intersection type: " + intersectionType);
+        }
+
+        const tanGroup = new TangencyGroup();
+        tanGroup.elements = [{
+            circle: circle1,
+            parity: parity1,
+        }, {
+            circle: circle2,
+            parity: parity2,
+        }];
+        this._tangencyGroups.push(tanGroup);        
     }
 
     public addEdge = (edge: CircleEdge): void => {
