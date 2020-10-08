@@ -1,7 +1,7 @@
 import CircleGraph from "../../topology/CircleGraph";
 import { IPoint } from "../../Types";
 import Circle from "../Circle";
-import { round } from "./round";
+import { round } from "./numbers";
 
 export default (graph: CircleGraph, circle1: Circle, circle2: Circle): void => {
     if (circle1 === circle2) {

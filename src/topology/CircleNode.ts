@@ -1,12 +1,14 @@
-import { IPoint, ITangencyElement, TIntersectionType, TTangencyParity, TTangencyType } from "../Types";
+import { IPoint, ITangencyElement, TIntersectionType, TTangencyParity, TTangencyType, TTraversalDirection } from "../Types";
 import Circle from "../geometry/Circle";
 import CircleEdge from "./CircleEdge";
 import TangencyGroup from "./TangencyGroup";
+import CircleVertex from "../geometry/CircleVertex";
+import { normalizeAngle } from '../geometry/utils/angles';
 
 export default class CircleNode {
     private _tangencyGroups: TangencyGroup[];
     private _coordinates: IPoint;
-    private _edges?: CircleEdge[];
+    private _edges: CircleEdge[] = [];
 
     constructor(coordinates: IPoint) {
         this._coordinates = coordinates;
@@ -168,14 +170,16 @@ export default class CircleNode {
         return this._coordinates;
     }
 
-    public removeCircle(circle: Circle) {
+    public removeCircle(circle: Circle): boolean {
         // First, remove the elements which contain the given circle from all tangency groups
         this._tangencyGroups.forEach(tanGroup => {
             tanGroup.elements = tanGroup.elements.filter(tgElement => tgElement.circle !== circle);
         });
 
         // Next, remove the empty tangency groups
+        let prevLen = this._tangencyGroups.length;
         this._tangencyGroups = this._tangencyGroups.filter(tanGroup => tanGroup.elements.length > 0);
+        return prevLen != this.tangencyGroups.length;
     }
 
     public isValid(): boolean {
@@ -185,4 +189,90 @@ export default class CircleNode {
     public get tangencyGroups(): TangencyGroup[] {
         return this._tangencyGroups;
     }
+
+    public getOtherEnd(edge: CircleEdge): CircleNode {
+        return this === edge.node1 ? edge.node2 : edge.node1;
+    }
+
+    /**
+     * Always retrieve the next edge immediately to the right of the given edge, as it comes into this node.
+     * @param edge 
+     * @param direction 
+     */
+    public getNextEdge = (edge: CircleEdge): CircleEdge | undefined => {
+        console.log("Getting next edge");
+        let neighbors: IEdgeAngle[] = [];
+        const refAngle = normalizeAngle(this.getPerpendicular(edge, Math.PI));
+        const tanGroups = this._tangencyGroups.filter(tg => tg.elements.some(tge => tge.circle === edge.circle));
+        if (tanGroups.length !== 1) {
+            throw new Error("Edge circle not found in " + tanGroups.length + " tangency groups!");
+        }
+        const tgElems = tanGroups[0].elements.filter(tge => tge.circle === edge.circle);
+        if (tgElems.length !== 1) {
+            throw new Error("Edge circle found in " + tgElems.length + " tangency elements!");
+        }
+        if (tgElems[0].parity !== "chaos") {
+            throw new Error("Tangent regions not supported yet");
+        }
+
+        this._edges.forEach(nodeEdge => {
+            if (nodeEdge === edge) {
+                console.log("Processing edge: same edge");
+                return;
+            }
+            if (nodeEdge.circle === edge.circle) {
+                console.log("Processing edges: same circle");
+                return;
+            }
+            console.log("Processing edge: different edge");
+            neighbors.push({
+                edge: nodeEdge,
+                perpendicularAngle: this.getPerpendicular(nodeEdge, refAngle),
+            });
+        });
+
+        if (neighbors.length == 0) {
+            console.log("No neighbors");
+            return undefined;
+        }
+
+        neighbors = neighbors.sort((a, b) => b.perpendicularAngle - a.perpendicularAngle);
+        console.log("Node x = " + this.coordinates.x.toFixed(2)+"; y = " + this.coordinates.y.toFixed(2));
+        console.log("Edge " + edge.circle.id + "." + edge.id + "/" + (edge.node1 === this ? "start" : "end") + "@" + edge.circle.getVertexByNode(this)?.angle.toFixed(2) +
+            " ref " + refAngle.toFixed(2));
+        console.log("SORTED neighbors' angles", neighbors.map(n =>
+            n.edge.circle.id + "." + n.edge.id + "/" + (n.edge.node1 === this ? "start" : "end")  + "@" + n.edge.circle.getVertexByNode(this)?.angle.toFixed(2) +
+            " per " + n.perpendicularAngle.toFixed(2)
+        ));
+        return neighbors.pop()?.edge;
+    }
+
+    private getPerpendicular(edge: CircleEdge, refAngle: number): number {
+        // Edges are always naturally ordered trigonometrically
+        let prevNode: CircleNode;
+        let direction: TAngleDirection;
+        if (this === edge.node1) {
+            prevNode = edge.node2;
+            direction = -1;
+        } else {
+            prevNode = edge.node1;
+            direction = 1;
+        }
+
+        const prevVertex = edge.circle.getVertexByNode(prevNode);
+        const thisVertex = edge.circle.getVertexByNode(this);
+
+        if (thisVertex === undefined || prevVertex === undefined) {
+            throw new Error("Vertex not found on circle!");
+        }
+
+        return normalizeAngle(thisVertex.angle + direction * Math.PI / 2 - refAngle);
+    }
 }
+
+interface IEdgeAngle {
+    perpendicularAngle: number;
+    edge: CircleEdge;
+}
+
+type TAngleDirection = -1 | 1;

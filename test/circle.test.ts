@@ -1,3 +1,17 @@
+import assert = require('assert');
+
+import Circle from '../src/geometry/Circle';
+import CircleGraph from '../src/topology/CircleGraph';
+
+const graph = new CircleGraph();
+graph.addCircle(new Circle(graph, {x: -1, y: 0}, 2, "negativeCircle"));
+graph.addCircle(new Circle(graph, {x: +1, y: 0}, 2, "positiveCircle"));
+try {
+    graph.compute();
+} catch(err) {
+    console.warn("Error", err);
+}
+
 /*
 import assert = require('assert');
 import Circle from '../src/geometry/Circle';
