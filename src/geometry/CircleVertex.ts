@@ -1,12 +1,12 @@
-import CircleNode from "../topology/CircleNode";
+import GraphNode from "../topology/GraphNode";
 import Circle from "./Circle";
 import { atan2, normalizeAngle } from "./utils/angles";
 
 export default class CircleVertex {
     private _angle: number;
-    private _node: CircleNode;
+    private _node: GraphNode;
 
-    constructor(node: CircleNode, circle: Circle) {
+    constructor(node: GraphNode, circle: Circle) {
         this._node = node;
         this._angle = normalizeAngle(atan2(circle.center, node.coordinates));
     }
@@ -15,7 +15,7 @@ export default class CircleVertex {
         return this._angle;
     }
 
-    public get node(): CircleNode {
+    public get node(): GraphNode {
         return this._node;
     }
 }

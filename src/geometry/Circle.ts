@@ -1,13 +1,13 @@
 import { IPoint, IRegion } from "../Types";
-import CircleGraph from "../topology/CircleGraph";
+import Graph from "../topology/Graph";
 import CircleVertex from "./CircleVertex";
-import CircleNode from "../topology/CircleNode";
+import GraphNode from "../topology/GraphNode";
 
 /**
  * The main circle class.
  */
 export default class Circle implements IRegion {
-    private _graph: CircleGraph;
+    private _graph: Graph;
 
     private _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
@@ -42,7 +42,7 @@ export default class Circle implements IRegion {
     /**
      * Instantiate a new circle entity.
      */
-    constructor(graph: CircleGraph, center: IPoint, radius: number, id?: any) {
+    constructor(graph: Graph, center: IPoint, radius: number, id?: any) {
         this._graph = graph;
         this._center = center;
         this._radius = radius;
@@ -58,12 +58,12 @@ export default class Circle implements IRegion {
         this._sortedVertices = false;
     }
 
-    public removeVertexByNode(node: CircleNode) {
+    public removeVertexByNode(node: GraphNode) {
         this._vertices = this._vertices.filter(v => v.node !== node);
         // they are still sorted
     }
 
-    public getVertexByNode(node: CircleNode): CircleVertex | undefined {
+    public getVertexByNode(node: GraphNode): CircleVertex | undefined {
         let vertices = this._vertices.filter(v => v.node === node);
         if (vertices.length == 0) {
             return undefined;

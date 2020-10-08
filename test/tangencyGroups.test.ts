@@ -1,8 +1,8 @@
 import assert = require('assert');
 import Circle from '../src/geometry/Circle';
-import CircleGraph from '../src/topology/CircleGraph';
+import Graph from '../src/topology/Graph';
 
-const graph = new CircleGraph();
+const graph = new Graph();
 graph.addCircle(new Circle(graph, {x: -1, y: 0}, 1));
 graph.addCircle(new Circle(graph, {x: 2, y: 0}, 2));
 
@@ -109,7 +109,7 @@ describe("Tangency groups for five circles AA-BB + C", () => {
     });  
 });
 
-function dumpGroups(label: string, graph: CircleGraph, tanGroupNote?: string) {
+function dumpGroups(label: string, graph: Graph, tanGroupNote?: string) {
     return;
     console.log("-- <"+label+"> --");
     graph.nodes.forEach(node => {

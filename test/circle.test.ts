@@ -1,11 +1,19 @@
 import assert = require('assert');
 
 import Circle from '../src/geometry/Circle';
-import CircleGraph from '../src/topology/CircleGraph';
+import Graph from '../src/topology/Graph';
 
-const graph = new CircleGraph();
-graph.addCircle(new Circle(graph, {x: -1, y: 0}, 2, "negativeCircle"));
-graph.addCircle(new Circle(graph, {x: +1, y: 0}, 2, "positiveCircle"));
+const graph = new Graph();
+/*
+graph.addCircle(new Circle(graph, {x: -1, y: +0}, 2, "negC"));
+graph.addCircle(new Circle(graph, {x: +1, y: +0}, 2, "posC"));
+graph.addCircle(new Circle(graph, {x: +0, y: +1}, 2, "topC"));
+graph.addCircle(new Circle(graph, {x: +0, y: -1}, 2, "btmC"));
+*/
+graph.addCircle(new Circle(graph, {x: +0, y: +3.28}, 2, "topC"));
+graph.addCircle(new Circle(graph, {x: -1.78, y: +0}, 2, "btlC"));
+graph.addCircle(new Circle(graph, {x: +1.78, y: +0}, 2, "btrC"));
+
 try {
     graph.compute();
 } catch(err) {

@@ -3,13 +3,13 @@ import CircleVertex from "../geometry/CircleVertex";
 import intersectCircles from "../geometry/utils/intersectCircles";
 import { round } from "../geometry/utils/numbers";
 import { IPoint, TIntersectionType, TTraversalDirection } from "../Types";
-import CircleEdge from "./CircleEdge";
-import CircleLoop from "./CircleLoop";
-import CircleNode from "./CircleNode";
+import GraphEdge from "./GraphEdge";
+import GraphLoop from "./GraphLoop";
+import GraphNode from "./GraphNode";
 
-export default class CircleGraph {
-    private _nodes: CircleNode[];
-    private _edges: CircleEdge[];
+export default class Graph {
+    private _nodes: GraphNode[];
+    private _edges: GraphEdge[];
     private _circles: Circle[];
 
     constructor() {
@@ -18,7 +18,7 @@ export default class CircleGraph {
         this._edges = [];
     }
 
-    public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): CircleNode => {
+    public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
         let sameCoordinates = this._nodes.filter(n =>
             round(n.coordinates.x) === round(intersectionPoint.x) &&
             round(n.coordinates.y) === round(intersectionPoint.y)
@@ -32,13 +32,13 @@ export default class CircleGraph {
             return sameCoordinates[0];
         }
         
-        const newNode = new CircleNode(intersectionPoint);
+        const newNode = new GraphNode(intersectionPoint);
         newNode.addCirclePair(circle1, circle2, intersectionType);
         this._nodes.push(newNode);
         return newNode;
     }
 
-    public addEdge = (edge: CircleEdge) => {
+    public addEdge = (edge: GraphEdge) => {
         this._edges.push(edge);
         edge.node1.addEdge(edge);
         edge.node2.addEdge(edge);
@@ -70,7 +70,7 @@ export default class CircleGraph {
         this._circles = this._circles.filter(c => c !== circle);
     }
 
-    public get nodes(): CircleNode[] {
+    public get nodes(): GraphNode[] {
         return this._nodes;
     }
 
@@ -86,13 +86,13 @@ export default class CircleGraph {
         this._circles.forEach(circle => {
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                this.addEdge(new CircleEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, i));
+                this.addEdge(new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, i));
             }
         });
 
         console.log("Edge count", this._edges.length);
 
-        const loops: CircleLoop[] = [];
+        const loops: GraphLoop[] = [];
 
         while (true) {
             let some = false;
@@ -129,16 +129,16 @@ export default class CircleGraph {
         })
     }
 
-    private traceLoop(startEdge: CircleEdge, direction: TTraversalDirection): CircleLoop | null {
-        let loop: CircleLoop | null = new CircleLoop();
-        let startEdgeEndNode: CircleNode;
+    private traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): GraphLoop | null {
+        let loop: GraphLoop | null = new GraphLoop();
+        let startEdgeEndNode: GraphNode;
         if (direction == "forward") {
             startEdgeEndNode = startEdge.node2;
         } else {
             startEdgeEndNode = startEdge.node1;
         }
         let currentEdgeEndNode = startEdgeEndNode;
-        let currentEdge: CircleEdge | undefined = startEdge;
+        let currentEdge: GraphEdge | undefined = startEdge;
 
         while (true) {
             loop.edges.push(currentEdge);

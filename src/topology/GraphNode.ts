@@ -1,14 +1,14 @@
 import { IPoint, ITangencyElement, TIntersectionType, TTangencyParity, TTangencyType, TTraversalDirection } from "../Types";
 import Circle from "../geometry/Circle";
-import CircleEdge from "./CircleEdge";
+import GraphEdge from "./GraphEdge";
 import TangencyGroup from "./TangencyGroup";
 import CircleVertex from "../geometry/CircleVertex";
 import { normalizeAngle } from '../geometry/utils/angles';
 
-export default class CircleNode {
+export default class GraphNode {
     private _tangencyGroups: TangencyGroup[];
     private _coordinates: IPoint;
-    private _edges: CircleEdge[] = [];
+    private _edges: GraphEdge[] = [];
 
     constructor(coordinates: IPoint) {
         this._coordinates = coordinates;
@@ -159,7 +159,7 @@ export default class CircleNode {
         this._tangencyGroups.push(tanGroup);        
     }
 
-    public addEdge = (edge: CircleEdge): void => {
+    public addEdge = (edge: GraphEdge): void => {
         if (this._edges === undefined) {
             this._edges = [];
         }
@@ -190,7 +190,7 @@ export default class CircleNode {
         return this._tangencyGroups;
     }
 
-    public getOtherEnd = (edge: CircleEdge): CircleNode => {
+    public getOtherEnd = (edge: GraphEdge): GraphNode => {
         if (this === edge.node1) {
             console.log("The other end is", edge.circle.id + "." + edge.id + "/end");
         } else {
@@ -204,7 +204,7 @@ export default class CircleNode {
      * @param edge 
      * @param direction 
      */
-    public getNextEdge = (edge: CircleEdge): CircleEdge | undefined => {
+    public getNextEdge = (edge: GraphEdge): GraphEdge | undefined => {
         console.log("Getting next edge");
         let neighbors: IEdgeAngle[] = [];
         const refAngle = normalizeAngle(this.getPerpendicular(edge, Math.PI));
@@ -252,7 +252,7 @@ export default class CircleNode {
         return neighbors[0].edge;
     }
 
-    private getPerpendicular(edge: CircleEdge, refAngle: number): number {
+    private getPerpendicular(edge: GraphEdge, refAngle: number): number {
         // Edges are always naturally ordered trigonometrically
         const thisVertex = edge.circle.getVertexByNode(this);
 
@@ -273,7 +273,7 @@ export default class CircleNode {
 
 interface IEdgeAngle {
     perpendicularAngle: number;
-    edge: CircleEdge;
+    edge: GraphEdge;
 }
 
 type TAngleDirection = -1 | 1;
