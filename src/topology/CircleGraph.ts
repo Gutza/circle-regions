@@ -131,48 +131,48 @@ export default class CircleGraph {
 
     private traceLoop(startEdge: CircleEdge, direction: TTraversalDirection): CircleLoop | null {
         let loop: CircleLoop | null = new CircleLoop();
-        let startNode: CircleNode;
+        let startEdgeEndNode: CircleNode;
         if (direction == "forward") {
-            startNode = startEdge.node2;
+            startEdgeEndNode = startEdge.node2;
         } else {
-            startNode = startEdge.node1;
+            startEdgeEndNode = startEdge.node1;
         }
-        let currentNode = startNode;
+        let currentEdgeEndNode = startEdgeEndNode;
         let currentEdge: CircleEdge | undefined = startEdge;
 
         while (true) {
             loop.edges.push(currentEdge);
-            if (currentNode === currentEdge.node2) {
+            if (currentEdgeEndNode === currentEdge.node2) {
                 if (currentEdge.RegionLeft) {
-                    throw new Error("Overwriting region left");
+                    throw new Error("Region left already set!");
                 }
                 currentEdge.RegionLeft = loop;
             } else {
                 if (currentEdge.RegionRight) {
-                    throw new Error("Overwriting region right");
+                    throw new Error("Region right already set!");
                 }
                 currentEdge.RegionRight = loop;
             }
 
-            currentEdge = currentNode.getNextEdge(currentEdge);
+            currentEdge = currentEdgeEndNode.getNextEdge(currentEdge);
 
             if (currentEdge === undefined) {
                 console.log("Undefined next edge");
-                if (currentNode !== startNode) {
+                if (currentEdgeEndNode !== startEdgeEndNode) {
                     throw new Error("Unexpected condition: undefined edge after region was started!");
                 }
 
                 if (direction == "forward") {
-                    startEdge.RegionRight = null;
-                } else {
                     startEdge.RegionLeft = null;
+                } else {
+                    startEdge.RegionRight = null;
                 }
                 return null;
             }
 
-            console.log("Node before tranversing x=", currentNode.coordinates.x, "y=", currentNode.coordinates.y);
-            currentNode = currentNode.getOtherEnd(currentEdge);
-            console.log("Node after tranversing x=", currentNode.coordinates.x, "y=", currentNode.coordinates.y);
+            console.log("Node before tranversing x=", currentEdgeEndNode.coordinates.x, "y=", currentEdgeEndNode.coordinates.y);
+            currentEdgeEndNode = currentEdgeEndNode.getOtherEnd(currentEdge);
+            console.log("Node after tranversing x=", currentEdgeEndNode.coordinates.x, "y=", currentEdgeEndNode.coordinates.y);
 
             if (currentEdge === startEdge) {
                 console.log("Finished loop", loop);
