@@ -98,7 +98,7 @@ export default class CircleGraph {
             let some = false;
             for (let i = 0; i < this._edges.length; i++) {
                 const edge = this._edges[i];
-                if (edge.RegionRight === undefined) {
+                if (edge.RegionLeft === undefined) {
                     some = true;
                     const loop = this.traceLoop(edge, "forward");
                     if (loop !== null) {
@@ -106,7 +106,7 @@ export default class CircleGraph {
                     }
                     break;
                 }
-                if (edge.RegionLeft === undefined) {
+                if (edge.RegionRight === undefined) {
                     some = true;
                     const loop = this.traceLoop(edge, "backward");
                     if (loop !== null) {
@@ -133,19 +133,25 @@ export default class CircleGraph {
         let loop: CircleLoop | null = new CircleLoop();
         let startNode: CircleNode;
         if (direction == "forward") {
-            startNode = startEdge.node1;
-        } else {
             startNode = startEdge.node2;
+        } else {
+            startNode = startEdge.node1;
         }
         let currentNode = startNode;
         let currentEdge: CircleEdge | undefined = startEdge;
 
         while (true) {
             loop.edges.push(currentEdge);
-            if (direction == "forward") {
-                currentEdge.RegionRight = loop;
-            } else {
+            if (currentNode === currentEdge.node2) {
+                if (currentEdge.RegionLeft) {
+                    throw new Error("Overwriting region left");
+                }
                 currentEdge.RegionLeft = loop;
+            } else {
+                if (currentEdge.RegionRight) {
+                    throw new Error("Overwriting region right");
+                }
+                currentEdge.RegionRight = loop;
             }
 
             currentEdge = currentNode.getNextEdge(currentEdge);
