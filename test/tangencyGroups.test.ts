@@ -1,10 +1,10 @@
 import assert = require('assert');
-import Circle from '../src/geometry/Circle';
-import Graph from '../src/topology/Graph';
+import { Circle } from '../src/geometry/Circle';
+import { Graph } from '../src/topology/Graph';
 
 const graph = new Graph();
-graph.addCircle(new Circle(graph, {x: -1, y: 0}, 1));
-graph.addCircle(new Circle(graph, {x: 2, y: 0}, 2));
+graph.addCircle(new Circle({x: -1, y: 0}, 1));
+graph.addCircle(new Circle({x: 2, y: 0}, 2));
 
 describe("Tangency groups for two circles A-B", () => {
     dumpGroups("Two", graph);
@@ -34,7 +34,7 @@ describe("Tangency groups for two circles A-B", () => {
     });
 });
 
-graph.addCircle(new Circle(graph, {x: -3, y:0}, 3));
+graph.addCircle(new Circle({x: -3, y:0}, 3));
 
 describe("Tangency groups for three circles AA-B", () => {
     dumpGroups("Three", graph);
@@ -62,7 +62,7 @@ describe("Tangency groups for three circles AA-B", () => {
     });
 });
 
-graph.addCircle(new Circle(graph, {x: 4, y:0}, 4));
+graph.addCircle(new Circle({x: 4, y:0}, 4));
 
 describe("Tangency groups for four circles AA-BB", () => {
     dumpGroups("Four", graph);
@@ -94,7 +94,7 @@ describe("Tangency groups for four circles AA-BB", () => {
     });
 });
 
-graph.addCircle(new Circle(graph, {x: 0, y: 5}, 5));
+graph.addCircle(new Circle({x: 0, y: 5}, 5));
 
 describe("Tangency groups for five circles AA-BB + C", () => {
     dumpGroups("Five", graph);

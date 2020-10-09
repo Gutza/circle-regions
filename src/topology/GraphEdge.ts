@@ -1,4 +1,4 @@
-import Circle from "../geometry/Circle";
+import { Circle } from "../geometry/Circle";
 import GraphLoop from "./GraphLoop";
 import GraphNode from "./GraphNode";
 

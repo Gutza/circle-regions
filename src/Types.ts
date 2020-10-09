@@ -1,4 +1,4 @@
-import Circle from "./geometry/Circle";
+import { Circle } from "./geometry/Circle";
 import GraphNode from "./topology/GraphNode";
 
 export interface IPoint {

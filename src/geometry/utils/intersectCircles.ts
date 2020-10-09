@@ -1,6 +1,6 @@
-import Graph from "../../topology/Graph";
+import { Graph } from "../../topology/Graph";
 import { IPoint } from "../../Types";
-import Circle from "../Circle";
+import { Circle } from "../Circle";
 import { round } from "./numbers";
 
 export default (graph: Graph, circle1: Circle, circle2: Circle): void => {

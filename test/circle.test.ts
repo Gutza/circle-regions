@@ -1,18 +1,18 @@
 import assert = require('assert');
 
-import Circle from '../src/geometry/Circle';
-import Graph from '../src/topology/Graph';
+import { Circle } from '../src/geometry/Circle';
+import { Graph } from '../src/topology/Graph';
 
 const graph = new Graph();
 /*
-graph.addCircle(new Circle(graph, {x: -1, y: +0}, 2, "negC"));
-graph.addCircle(new Circle(graph, {x: +1, y: +0}, 2, "posC"));
-graph.addCircle(new Circle(graph, {x: +0, y: +1}, 2, "topC"));
-graph.addCircle(new Circle(graph, {x: +0, y: -1}, 2, "btmC"));
+graph.addCircle(new Circle({x: -1, y: +0}, 2, "negC"));
+graph.addCircle(new Circle({x: +1, y: +0}, 2, "posC"));
+graph.addCircle(new Circle({x: +0, y: +1}, 2, "topC"));
+graph.addCircle(new Circle({x: +0, y: -1}, 2, "btmC"));
 */
-graph.addCircle(new Circle(graph, {x: +0, y: +3.28}, 2, "topC"));
-graph.addCircle(new Circle(graph, {x: -1.78, y: +0}, 2, "btlC"));
-graph.addCircle(new Circle(graph, {x: +1.78, y: +0}, 2, "btrC"));
+graph.addCircle(new Circle({x: +0, y: +3.28}, 2, "topC"));
+graph.addCircle(new Circle({x: -1.78, y: +0}, 2, "btlC"));
+graph.addCircle(new Circle({x: +1.78, y: +0}, 2, "btrC"));
 
 try {
     graph.regions;

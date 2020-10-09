@@ -1,14 +1,12 @@
 import { IPoint, IRegion } from "../Types";
-import Graph from "../topology/Graph";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
+import { EventEmitter } from "events";
 
 /**
  * The main circle class.
  */
-export default class Circle implements IRegion {
-    private _graph: Graph;
-
+export class Circle extends EventEmitter implements IRegion {
     private _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
 
@@ -42,8 +40,9 @@ export default class Circle implements IRegion {
     /**
      * Instantiate a new circle entity.
      */
-    constructor(graph: Graph, center: IPoint, radius: number, id?: any) {
-        this._graph = graph;
+    constructor(center: IPoint, radius: number, id?: any) {
+        super();
+
         this._center = center;
         this._radius = radius;
         this.id = id;
@@ -97,7 +96,7 @@ export default class Circle implements IRegion {
      */
     set center(center: IPoint) {
         this._center = center;
-        this.clearGeometryCaches();
+        this.emit("clearGeometryCache", this);
     }
 
     /**
@@ -113,14 +112,7 @@ export default class Circle implements IRegion {
     set radius(radius: number) {
         this._area = undefined;
         this._radius = radius;
-        this.clearGeometryCaches();
-    }
-
-    /**
-     * Clear this circle's caches related to any of its geometric features (center or radius).
-     */
-    private clearGeometryCaches = () => {
-        this._graph.removeCircle(this);
+        this.emit("clearGeometryCache", this);
     }
 
     /**

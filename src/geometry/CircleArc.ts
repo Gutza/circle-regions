@@ -1,5 +1,5 @@
 import { IPoint } from "../Types";
-import Circle from "./Circle";
+import { Circle } from "./Circle";
 
 export default class CircleArc {
     private _circle: Circle;

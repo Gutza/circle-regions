@@ -1,5 +1,5 @@
 import GraphNode from "../topology/GraphNode";
-import Circle from "./Circle";
+import { Circle } from "./Circle";
 import { atan2, normalizeAngle } from "./utils/angles";
 
 export default class CircleVertex {

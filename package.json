@@ -2,8 +2,8 @@
   "name": "circle-regions",
   "version": "0.4.1",
   "description": "Circle Intersection Regions",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "author": {
     "name": "Bogdan Stăncescu",
     "url": "https://bogdan.stancescu.ro/"

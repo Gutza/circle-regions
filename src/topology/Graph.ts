@@ -1,4 +1,4 @@
-import Circle from "../geometry/Circle";
+import { Circle } from "../geometry/Circle";
 import CircleArc from "../geometry/CircleArc";
 import CircleRegion from "../geometry/CircleRegion";
 import CircleVertex from "../geometry/CircleVertex";
@@ -9,7 +9,7 @@ import GraphEdge from "./GraphEdge";
 import GraphLoop from "./GraphLoop";
 import GraphNode from "./GraphNode";
 
-export default class Graph {
+export class Graph {
     private _nodes: GraphNode[];
     private _edges: GraphEdge[];
     private _circles: Circle[];

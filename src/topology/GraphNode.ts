@@ -1,5 +1,5 @@
 import { IGraphEnd, IPoint, TIntersectionType, TTangencyParity, TTangencyType } from "../Types";
-import Circle from "../geometry/Circle";
+import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import TangencyGroup from "./TangencyGroup";
 import { normalizeAngle } from '../geometry/utils/angles';
