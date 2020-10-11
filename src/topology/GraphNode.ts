@@ -173,6 +173,7 @@ export default class GraphNode {
         // Next, remove the empty tangency groups
         let prevLen = this._tangencyGroups.length;
         this._tangencyGroups = this._tangencyGroups.filter(tanGroup => tanGroup.length > 0);
+        this._edges = this._edges.filter(edge => !circles.includes(edge.circle));
         return prevLen != this.tangencyGroups.length;
     }
 
