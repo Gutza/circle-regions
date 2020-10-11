@@ -15,9 +15,6 @@ export class RegionEngine {
     private _circles: Circle[] = [];
     private _regions?: CircleRegion[] = undefined;
 
-    constructor() {
-    }
-
     public addCircle = (circle: Circle) => {
         if (this._circles.includes(circle)) {
             console.warn("Circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
@@ -81,32 +78,6 @@ export class RegionEngine {
     }
 
     private _resetCircleCaches = (circle: Circle) => {
-console.log("_resetCircleCaches("+circle.id+")");
-        // Affected nodes are all nodes which include this circle.
-        const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => tge.circle == circle)));
-
-        // Remove this circle from all affected nodes
-        affectedNodes.forEach(node => node.removeCircle(circle));
-console.log("Node count before filtering", this._nodes.length, "(affected", affectedNodes.length, ")");
-        this._nodes = this._nodes.filter((node): boolean => {
-            if (!affectedNodes.includes(node)) {
-                return true;
-            }
-
-            this._circles.forEach(circle => {
-                circle.removeVertexByNode(node);
-            });
-
-            return node.isValid();
-        });
-console.log("Node count after filtering", this._nodes.length);
-console.log("Edge count before filtering", this._edges.length);
-        this._edges = this._edges.filter(edge => {
-            console.log("Edge circle", edge.circle.id, edge.circle !== circle ? "differs from" : "is the same as", circle.id);
-            console.log("Circle", edge.circle.id, edge.circle.isDirty ? "is dirty" : "is clean");
-            return (edge.circle !== circle) && !edge.circle.isDirty
-        });
-console.log("Edge count after filtering", this._edges.length);
         this._regions = undefined;
     }
 
@@ -243,16 +214,40 @@ console.log("Edge count after filtering", this._edges.length);
         return loops;
     }
 
-    public get regions(): CircleRegion[] {
-        if (this._regions !== undefined) {
-            console.log("Cached regions");
-            return this._regions;
-        }
+    private _resetDirtyCaches = () => {
+        const dirtyCircles = this._circles.filter(circle => circle.isDirty);
+        console.log("_resetDirtyCaches on", dirtyCircles.length, "circles");
 
-        const loops = this._computeLoops();
-console.log("Edge count at region time", this._edges.length);
-        let newRegions: CircleRegion[] = loops.map(loop => {
+        // Affected nodes are all nodes which include dirty circles.
+        const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => dirtyCircles.includes(tge.circle))));
+
+        // Remove the dirty circles from all affected nodes.
+        affectedNodes.forEach(node => node.removeCircles(dirtyCircles));
+console.log("Node count before filtering", this._nodes.length, "(affected", affectedNodes.length, ")");
+        this._nodes = this._nodes.filter((node): boolean => {
+            if (!affectedNodes.includes(node)) {
+                return true;
+            }
+
+            this._circles.forEach(circle => {
+                circle.removeVertexByNode(node);
+            });
+
+            return node.isValid();
+        });
+console.log("Node count after filtering", this._nodes.length);
+console.log("Edge count before filtering", this._edges.length);
+        this._edges = this._edges.filter(edge => {
+            return !dirtyCircles.includes(edge.circle) && !edge.circle.isDirty
+        });
+console.log("Edge count after filtering", this._edges.length);
+
+    }
+
+    private _computeRegions = (loops: GraphLoop[]): CircleRegion[] => {
+        const newRegions: CircleRegion[] = loops.map(loop => {
             const arcs: CircleArc[] = [];
+            // TODO: Optimize isContour, we're processing the same array twice
             let isContour = loop.oEdges.every(edge => edge.direction == "backward");
             loop.oEdges.forEach(oEdge => {
                 const startNode = oEdge.edge.node1;
@@ -276,9 +271,20 @@ console.log("Edge count at region time", this._edges.length);
             return new ArcPolygon(arcs, isContour);
         });
 
-        newRegions = newRegions.concat(this._circles.filter(circle => circle.vertices.length == 0));
+        return newRegions.concat(this._circles.filter(circle => circle.vertices.length == 0));
+    }
 
-        return this._regions = newRegions;
+    public get regions(): CircleRegion[] {
+        if (this._regions !== undefined) {
+            console.log("Cached regions");
+            return this._regions;
+        }
+
+        this._resetDirtyCaches();
+        
+        console.log("Edge count at region time", this._edges.length);
+
+        return this._regions = this._computeRegions(this._computeLoops());
     }
 
     public get circles(): Circle[] {

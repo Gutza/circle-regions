@@ -164,10 +164,10 @@ export default class GraphNode {
         return this._coordinates;
     }
 
-    public removeCircle(circle: Circle): boolean {
-        // First, remove the elements which contain the given circle from all tangency groups
+    public removeCircles(circles: Circle[]): boolean {
+        // First, remove the elements which contain the given circles from all tangency groups
         for (let i = 0; i < this._tangencyGroups.length; i++) {
-            this._tangencyGroups[i] = this._tangencyGroups[i].filter(tgElement => tgElement.circle !== circle);
+            this._tangencyGroups[i] = this._tangencyGroups[i].filter(tgElement => !circles.includes(tgElement.circle));
         }
 
         // Next, remove the empty tangency groups
