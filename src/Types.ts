@@ -1,3 +1,4 @@
+import ArcPolygon from "./geometry/ArcPolygon";
 import { Circle } from "./geometry/Circle";
 import GraphNode from "./topology/GraphNode";
 
@@ -41,3 +42,5 @@ export interface IGraphEnd {
     node: GraphNode;
     direction: TTraversalDirection;
 }
+
+export type CircleRegion = Circle | ArcPolygon;

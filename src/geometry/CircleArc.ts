@@ -7,15 +7,21 @@ export default class CircleArc {
     private _endAngle: number;
     private _startPoint: IPoint;
     private _endPoint: IPoint;
+    private _isClockwise: boolean;
 
-    constructor(circle: Circle, startAngle: number, endAngle: number, startPoint: IPoint, endPoint: IPoint) {
+    constructor(circle: Circle, startAngle: number, endAngle: number, startPoint: IPoint, endPoint: IPoint, isClockwise: boolean) {
         this._circle = circle;
         this._startAngle = startAngle;
         this._endAngle = endAngle;
         this._startPoint = startPoint;
         this._endPoint = endPoint;
+        this._isClockwise = isClockwise;
     }
 
+    public get isClockwise(): boolean {
+        return this._isClockwise;
+    }
+    
     public get circle(): Circle {
         return this._circle;
     }

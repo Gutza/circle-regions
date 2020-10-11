@@ -1,10 +1,10 @@
 import { Circle } from "../geometry/Circle";
 import CircleArc from "../geometry/CircleArc";
-import CircleRegion from "../geometry/CircleRegion";
+import ArcPolygon from "../geometry/ArcPolygon";
 import CircleVertex from "../geometry/CircleVertex";
 import intersectCircles from "../geometry/utils/intersectCircles";
 import { round } from "../geometry/utils/numbers";
-import { IPoint, TIntersectionType, TTraversalDirection } from "../Types";
+import { CircleRegion, IPoint, TIntersectionType, TTraversalDirection } from "../Types";
 import GraphEdge from "./GraphEdge";
 import GraphLoop from "./GraphLoop";
 import GraphNode from "./GraphNode";
@@ -204,26 +204,31 @@ export class Graph {
         const loops = this._compute();
         this._regions = loops.map(loop => {
             const arcs: CircleArc[] = [];
+            let isContour = loop.oEdges.every(edge => edge.direction == "backward");
             loop.oEdges.forEach(oEdge => {
-                const startNode = oEdge.direction == "forward" ? oEdge.edge.node1 : oEdge.edge.node2;
-                const endNode = oEdge.direction == "forward" ? oEdge.edge.node2 : oEdge.edge.node1;
+                const startNode = oEdge.edge.node1;
+                const endNode = oEdge.edge.node2;
                 const startVertex = oEdge.edge.circle.getVertexByNode(startNode);
-                const endVertex = oEdge.edge.circle.getVertexByNode(startNode);
+                const endVertex = oEdge.edge.circle.getVertexByNode(endNode);
                 if (startVertex === undefined || endVertex === undefined) {
                     throw new Error("Failed finding vertex");
                 }
                 const startAngle = startVertex.angle;
-                const endAngle = endVertex.angle > startAngle ? endVertex.angle : endVertex.angle + 2 * Math.PI;
+                const endAngle = endVertex.angle;
                 arcs.push(new CircleArc(
                     oEdge.edge.circle,
                     startAngle,
                     endAngle,
                     startNode.coordinates,
-                    endNode.coordinates
+                    endNode.coordinates,
+                    oEdge.direction == "backward",
                 ));
             });
-            return new CircleRegion(arcs);
+            return new ArcPolygon(arcs, isContour);
         });
+
+        this._regions = this._regions.concat(this._circles.filter(circle => circle.vertices.length == 0));
+
         return this._regions;
     }
 }
