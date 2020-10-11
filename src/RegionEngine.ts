@@ -103,7 +103,7 @@ export class RegionEngine {
 
         // TODO: Caching
         this._circles.forEach(circle => {
-            const nodes = this._nodes.filter(n => n.tangencyGroups.some(tg => tg.elements.some(tge => tge.circle == circle)));
+            const nodes = this._nodes.filter(n => n.tangencyGroups.some(tg => tg.some(tge => tge.circle == circle)));
             nodes.forEach(node => {
                 circle.addVertex(new CircleVertex(node, circle));
             });

@@ -35,6 +35,7 @@ export interface ITangencyElement {
     circle: Circle;
     parity: TTangencyParity;
 }
+export type ITangencyGroup = ITangencyElement[];
 
 export type TTraversalDirection = "forward" | "backward";
 

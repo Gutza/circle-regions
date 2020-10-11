@@ -22,8 +22,8 @@ describe("Tangency groups for two circles A-B", () => {
 
     engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yin").length;
-            yangCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yang").length;
+            yinCount += tanGroup.filter(tgElement => tgElement.parity === "yin").length;
+            yangCount += tanGroup.filter(tgElement => tgElement.parity === "yang").length;
         });
     });
 
@@ -44,8 +44,8 @@ describe("Tangency groups for three circles AA-B", () => {
     let yangCount = 0;
     engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yin").length;
-            yangCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yang").length;
+            yinCount += tanGroup.filter(tgElement => tgElement.parity === "yin").length;
+            yangCount += tanGroup.filter(tgElement => tgElement.parity === "yang").length;
         });
     });
 
@@ -81,8 +81,8 @@ describe("Tangency groups for four circles AA-BB", () => {
     let yangCount = 0;
     engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yin").length;
-            yangCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yang").length;
+            yinCount += tanGroup.filter(tgElement => tgElement.parity === "yin").length;
+            yangCount += tanGroup.filter(tgElement => tgElement.parity === "yang").length;
         });
     });
 
@@ -116,9 +116,9 @@ function dumpGroups(label: string, graph: RegionEngine, tanGroupNote?: string) {
     graph.nodes.forEach(node => {
         console.log("» Node [" + node.coordinates.x + "," + node.coordinates.y + "] tanGroups", node.tangencyGroups, tanGroupNote || "");
         node.tangencyGroups.forEach(tanGroup => {
-            console.log("»» Tangency group elements", tanGroup.elements);
+            console.log("»» Tangency group elements", tanGroup);
             return;
-            tanGroup.elements.forEach(tgElement => {
+            tanGroup.forEach(tgElement => {
                 console.log("»»» Tangency group element", tgElement);
             })
         })
