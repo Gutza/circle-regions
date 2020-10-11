@@ -16,6 +16,8 @@ export class RegionEngine {
     private _regions?: CircleRegion[] = undefined;
 
     public addCircle = (circle: Circle) => {
+        this._regions = undefined;
+
         if (this._circles.includes(circle)) {
             console.warn("Circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
             return;
@@ -29,8 +31,6 @@ export class RegionEngine {
         circle.on(onMoveEvent, this.onCircleEvent);
         circle.on(onResizeEvent, this.onCircleEvent);
         this._circles.push(circle);
-
-        this._regions = undefined;
     }
 
     public removeCircle = (circle: Circle) => {
@@ -223,7 +223,8 @@ export class RegionEngine {
 
         // Remove the dirty circles from all affected nodes.
         affectedNodes.forEach(node => node.removeCircles(dirtyCircles));
-console.log("Node count before filtering", this._nodes.length, "(affected", affectedNodes.length, ")");
+
+        console.log("Node count before filtering", this._nodes.length, "(affected", affectedNodes.length, ")");
         this._nodes = this._nodes.filter((node): boolean => {
             if (!affectedNodes.includes(node)) {
                 return true;
@@ -235,13 +236,11 @@ console.log("Node count before filtering", this._nodes.length, "(affected", affe
 
             return node.isValid();
         });
-console.log("Node count after filtering", this._nodes.length);
-console.log("Edge count before filtering", this._edges.length);
-        this._edges = this._edges.filter(edge => {
-            return !dirtyCircles.includes(edge.circle) && !edge.circle.isDirty
-        });
-console.log("Edge count after filtering", this._edges.length);
+        console.log("Node count after filtering", this._nodes.length);
 
+        console.log("Edge count before filtering", this._edges.length);
+        this._edges = this._edges.filter(edge => !dirtyCircles.includes(edge.circle));
+        console.log("Edge count after filtering", this._edges.length);
     }
 
     private _computeRegions = (loops: GraphLoop[]): CircleRegion[] => {
@@ -284,7 +283,15 @@ console.log("Edge count after filtering", this._edges.length);
         
         console.log("Edge count at region time", this._edges.length);
 
-        return this._regions = this._computeRegions(this._computeLoops());
+        const loops = this._computeLoops();
+
+        console.log("Loop count", loops.length);
+
+        this._regions = this._computeRegions(loops);
+
+        console.log("Computed regions");
+
+        return this._regions;
     }
 
     public get circles(): Circle[] {
