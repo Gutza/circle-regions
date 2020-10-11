@@ -1,4 +1,4 @@
-import { CircleRegion, IBoundingBox, IPoint, IRegion, onMoveEvent, onResizeEvent } from "../Types";
+import { IBoundingBox, IRegion, onMoveEvent, onResizeEvent } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { EventEmitter } from "events";
@@ -41,11 +41,7 @@ export class Circle extends EventEmitter implements IRegion {
 
     private _bbox?: IBoundingBox;
 
-    public hasDirtyVertices: boolean = true;
-
-    public hasDirtyEdges: boolean = true;
-
-    public hasDirtyHierarchy: boolean = true;
+    public isDirty: boolean = false; // it gets set to true when added to a RegionEngine
 
     /**
      * Instantiate a new circle entity.
@@ -71,12 +67,16 @@ export class Circle extends EventEmitter implements IRegion {
 
         this._vertices.push(vertex);
         this._sortedVertices = false;
-        this.hasDirtyEdges = true;
+        this.isDirty = true;
     }
 
     public removeVertexByNode(node: GraphNode) {
+        if (!this._vertices.some(v => v.node === node)) {
+            return;
+        }
+
         this._vertices = this._vertices.filter(v => v.node !== node);
-        this.hasDirtyEdges = true;
+        this.isDirty = true;
         // they are still sorted
     }
 
@@ -144,9 +144,7 @@ export class Circle extends EventEmitter implements IRegion {
     private _resetCommonGeometryCaches = () => {
         this._bbox = undefined;
         this._vertices = [];
-        this.hasDirtyVertices = true;
-        this.hasDirtyEdges = true;
-        this.hasDirtyHierarchy = true;
+        this.isDirty = true;
     }
 
     /**
