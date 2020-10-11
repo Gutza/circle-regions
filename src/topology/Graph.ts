@@ -55,9 +55,6 @@ export class Graph {
             return;
         }
 
-        this._circles.filter(gc => circle.boundingBoxOverlap(gc)).forEach(otherCircle => {
-            intersectCircles(this, circle, otherCircle);
-        });
         this._circles.push(circle);
     }
 
@@ -80,7 +77,19 @@ export class Graph {
         return this._nodes;
     }
 
-    private _compute = (): GraphLoop[] => {
+    private _computeLoops = (): GraphLoop[] => {
+        // TODO: Sweep line
+        for (let i = 0; i < this._circles.length-1; i++) {
+            const c1 = this._circles[i];
+            for (let j = i+1; j < this._circles.length; j++) {
+                const c2 = this._circles[j];
+                if (!c1.boundingBoxOverlap(c2)) {
+                    continue;
+                }
+                intersectCircles(this, c1, c2);
+            }
+        }
+
         // TODO: Caching
         this._circles.forEach(circle => {
             const nodes = this._nodes.filter(n => n.tangencyGroups.some(tg => tg.elements.some(tge => tge.circle == circle)));
@@ -187,7 +196,7 @@ export class Graph {
             return this._regions;
         }
 
-        const loops = this._compute();
+        const loops = this._computeLoops();
         this._regions = loops.map(loop => {
             const arcs: CircleArc[] = [];
             let isContour = loop.oEdges.every(edge => edge.direction == "backward");
