@@ -10,15 +10,12 @@ import GraphLoop from "./GraphLoop";
 import GraphNode from "./GraphNode";
 
 export class Graph {
-    private _nodes: GraphNode[];
-    private _edges: GraphEdge[];
-    private _circles: Circle[];
+    private _nodes: GraphNode[] = [];
+    private _edges: GraphEdge[] = [];
+    private _circles: Circle[] = [];
     private _regions?: CircleRegion[] = undefined;
 
     constructor() {
-        this._circles = [];
-        this._nodes = [];
-        this._edges = [];
     }
 
     public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
@@ -52,6 +49,16 @@ export class Graph {
             console.warn("Circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
             return;
         }
+
+        if (this._circles.some(gc => (
+            round(gc.center.x) == round(circle.center.x) &&
+            round(gc.center.y) == round(circle.center.y) &&
+            round(gc.radius) == round(circle.radius)
+        ))) {
+            console.warn("Another circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
+            return;
+        }
+
         this._circles.forEach(otherCircle => {
             intersectCircles(this, circle, otherCircle);
         });
