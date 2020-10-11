@@ -86,13 +86,9 @@ export class RegionEngine {
     }
 
     private _traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): GraphLoop | null {
-        let loop: GraphLoop | null = new GraphLoop();
-        let startEdgeEndNode: GraphNode;
-        if (direction == "forward") {
-            startEdgeEndNode = startEdge.node2;
-        } else {
-            startEdgeEndNode = startEdge.node1;
-        }
+        const loop = new GraphLoop();
+        const startEdgeEndNode = direction == "forward" ? startEdge.node2 : startEdge.node1;
+
         let currentEdgeEndNode = startEdgeEndNode;
         let currentEdge: GraphEdge | undefined = startEdge;
         let currentEdgeDirection = direction;
@@ -161,7 +157,7 @@ export class RegionEngine {
         }
 
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
-        console.log("Reprocessing", dirtyCircles.length, "dirty circles, out of", this._circles.length, "total");
+        console.log("Reprocessing vertices for", dirtyCircles.length, "dirty circles, out of", this._circles.length, "total");
         dirtyCircles.forEach(circle => {
             const nodes = this._nodes.filter(node => node.tangencyGroups.some(tg => tg.some(tge => tge.circle == circle)));
             nodes.forEach(node => {
