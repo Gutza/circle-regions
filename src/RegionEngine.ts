@@ -18,6 +18,24 @@ export class RegionEngine {
     constructor() {
     }
 
+    public addCircle = (circle: Circle) => {
+        if (this._circles.includes(circle)) {
+            console.warn("Circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
+            return;
+        }
+
+        if (this._circles.some(gc => gc.equals(circle))) {
+            console.warn("Another circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
+            return;
+        }
+        circle.isDirty = true;
+        circle.on(onMoveEvent, this.onCircleEvent);
+        circle.on(onResizeEvent, this.onCircleEvent);
+        this._circles.push(circle);
+
+        this._regions = undefined;
+    }
+
     public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
         let sameCoordinates = this._nodes.filter(n =>
             round(n.coordinates.x) === round(intersectionPoint.x) &&
@@ -27,7 +45,7 @@ export class RegionEngine {
         if (sameCoordinates.length > 1) {
             throw new Error("Unexpected condition: multiple nodes with the same coordinates!");
         }
-
+console.log("Touching circle", circle1.id, "and", circle2.id);
         circle1.isDirty = true;
         circle2.isDirty = true;
 
@@ -48,39 +66,15 @@ export class RegionEngine {
         edge.node2.addEdge(edge);
     }
 
-    public addCircle = (circle: Circle) => {
-        this._threadCount++;
-        if (this._circles.includes(circle)) {
-            console.warn("Circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
-            return;
-        }
-
-        if (this._circles.some(gc => gc.equals(circle))) {
-            console.warn("Another circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
-            return;
-        }
-
-        circle.on(onMoveEvent, this.onCircleEvent);
-        circle.on(onResizeEvent, this.onCircleEvent);
-        this._circles.push(circle);
-
-        this._regions = undefined;
-        this._threadCount--;
-    }
-
     public removeCircle = (circle: Circle) => {
         circle.removeListener(onMoveEvent, this.onCircleEvent);
         circle.removeListener(onResizeEvent, this.onCircleEvent);
-        this._threadCount++;
         this._circles = this._circles.filter(c => c !== circle);
         this._resetCircleCaches(circle);
-        this._threadCount--;
     }
 
     public onCircleEvent = (circle: Circle) => {
-        this._threadCount++;
         this._resetCircleCaches(circle);
-        this._threadCount--;
     }
 
     private _resetCircleCaches = (circle: Circle) => {
@@ -177,10 +171,13 @@ console.log("Edge count after filtering", this._edges.length);
             const c1 = this._circles[i];
             for (let j = i+1; j < this._circles.length; j++) {
                 const c2 = this._circles[j];
+                console.log("computeLoops on", c1.id, "and", c2.id);
                 if (!c1.isDirty && !c2.isDirty) {
+                    console.log("computeLoops: both are clean");
                     continue;
                 }
                 if (!c1.boundingBoxOverlap(c2)) {
+                    console.log("computeLoops: bboxes don't overlap");
                     continue;
                 }
                 intersectCircles(this, c1, c2);
@@ -197,6 +194,11 @@ console.log("Edge count after filtering", this._edges.length);
         });
 
         dirtyCircles.forEach(circle => {
+            this._edges.forEach(edge => {
+                if (edge.circle === circle) {
+                    console.warn("Circle", circle.id, "still has edges in _computeLoops()!");
+                }
+            });
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
                 this.addEdge(new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, i));
@@ -236,18 +238,10 @@ console.log("Edge count after filtering", this._edges.length);
         return loops;
     }
 
-    private _threadCount: number = 0;
-
     public get regions(): CircleRegion[] {
         if (this._regions !== undefined) {
             return this._regions;
         }
-        if (this._threadCount > 1) {
-            console.log("Computing", this._threadCount);
-            return this._regions || [];
-        }
-
-        this._threadCount++;
 
         const loops = this._computeLoops();
 console.log("Edge count at region time", this._edges.length);
@@ -277,8 +271,6 @@ console.log("Edge count at region time", this._edges.length);
         });
 
         newRegions = newRegions.concat(this._circles.filter(circle => circle.vertices.length == 0));
-
-        this._threadCount--;
 
         return this._regions = newRegions;
     }

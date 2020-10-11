@@ -4,6 +4,7 @@ import { Circle } from "../Circle";
 import { round } from "./numbers";
 
 export default (graph: RegionEngine, circle1: Circle, circle2: Circle): void => {
+    console.log("Intersecting circles", circle1.id, "and", circle2.id);
     if (circle1 === circle2) {
         console.warn("Don't intersect a circle with itself!");
         return;
