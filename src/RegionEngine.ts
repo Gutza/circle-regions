@@ -36,6 +36,13 @@ export class RegionEngine {
         this._regions = undefined;
     }
 
+    public removeCircle = (circle: Circle) => {
+        circle.removeListener(onMoveEvent, this.onCircleEvent);
+        circle.removeListener(onResizeEvent, this.onCircleEvent);
+        this._circles = this._circles.filter(c => c !== circle);
+        this._resetCircleCaches(circle);
+    }
+
     public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
         let sameCoordinates = this._nodes.filter(n =>
             round(n.coordinates.x) === round(intersectionPoint.x) &&
@@ -45,7 +52,9 @@ export class RegionEngine {
         if (sameCoordinates.length > 1) {
             throw new Error("Unexpected condition: multiple nodes with the same coordinates!");
         }
-console.log("Touching circle", circle1.id, "and", circle2.id);
+
+        console.log("Touching circles", circle1.id, "and", circle2.id, "in RegionEngine.addNode()");
+
         circle1.isDirty = true;
         circle2.isDirty = true;
 
@@ -66,14 +75,8 @@ console.log("Touching circle", circle1.id, "and", circle2.id);
         edge.node2.addEdge(edge);
     }
 
-    public removeCircle = (circle: Circle) => {
-        circle.removeListener(onMoveEvent, this.onCircleEvent);
-        circle.removeListener(onResizeEvent, this.onCircleEvent);
-        this._circles = this._circles.filter(c => c !== circle);
-        this._resetCircleCaches(circle);
-    }
-
     public onCircleEvent = (circle: Circle) => {
+        console.log("Resetting circle caches for circle", circle.id);
         this._resetCircleCaches(circle);
     }
 
@@ -169,7 +172,9 @@ console.log("Edge count after filtering", this._edges.length);
         // TODO: Sweep line
         for (let i = 0; i < this._circles.length-1; i++) {
             const c1 = this._circles[i];
+            console.log("in computeLoops, i="+i);
             for (let j = i+1; j < this._circles.length; j++) {
+                console.log("in computeLoops, j="+j);
                 const c2 = this._circles[j];
                 console.log("computeLoops on", c1.id, "and", c2.id);
                 if (!c1.isDirty && !c2.isDirty) {
@@ -240,6 +245,7 @@ console.log("Edge count after filtering", this._edges.length);
 
     public get regions(): CircleRegion[] {
         if (this._regions !== undefined) {
+            console.log("Cached regions");
             return this._regions;
         }
 

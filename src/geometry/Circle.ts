@@ -57,6 +57,7 @@ export class Circle extends EventEmitter implements IRegion {
 
     public onCenterMove = (center: Point) => {
         this._resetCommonGeometryCaches();
+        this.isDirty = true;
         this.emit(onMoveEvent, this);
     }
 
@@ -127,6 +128,7 @@ export class Circle extends EventEmitter implements IRegion {
     set center(center: Point) {
         this._center.removeListener(onMoveEvent, this.onCenterMove);
         this._center = center;
+        this._center.on(onMoveEvent, this.onCenterMove);
         this._resetCommonGeometryCaches();
         this.emit(onMoveEvent, this);
     }
