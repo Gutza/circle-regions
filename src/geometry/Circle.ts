@@ -1,8 +1,9 @@
-import { IBoundingBox, IPoint, IRegion } from "../Types";
+import { CircleRegion, IBoundingBox, IPoint, IRegion, onMoveEvent, onResizeEvent } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { EventEmitter } from "events";
 import { round } from "./utils/numbers";
+import { Point } from "./Point";
 
 /**
  * The main circle class.
@@ -26,7 +27,7 @@ export class Circle extends EventEmitter implements IRegion {
     /**
      * This circle's center coordinates.
      */
-    private _center: IPoint;
+    private _center: Point;
 
     /**
      * The circle's radius.
@@ -43,12 +44,17 @@ export class Circle extends EventEmitter implements IRegion {
     /**
      * Instantiate a new circle entity.
      */
-    constructor(center: IPoint, radius: number, id?: any) {
+    constructor(center: Point, radius: number, id?: any) {
         super();
 
         this._center = center;
+        this._center.on(onMoveEvent, this.onCenterMove);
         this._radius = radius;
         this.id = id;
+    }
+
+    public onCenterMove = (e: string | symbol, ...args: any[]) => {
+        this.emit(e, this);
     }
 
     public addVertex(vertex: CircleVertex) {
@@ -66,13 +72,19 @@ export class Circle extends EventEmitter implements IRegion {
     }
 
     public getVertexByNode(node: GraphNode): CircleVertex | undefined {
+        if (this._vertices === undefined) {
+            return undefined;
+        }
+
         let vertices = this._vertices.filter(v => v.node === node);
         if (vertices.length == 0) {
             return undefined;
         }
+
         if (vertices.length > 1) {
             throw new Error("Multiple vertices with the same node on the same circle!");
         }
+
         return vertices[0];
     }
 
@@ -89,17 +101,8 @@ export class Circle extends EventEmitter implements IRegion {
     /**
      * Retrieve this circle's center coordinates.
      */
-    get center(): IPoint {
+    get center(): Point {
         return this._center;
-    }
-
-    /**
-     * Move this circle.
-     */
-    set center(center: IPoint) {
-        this._center = center;
-        this._bbox = undefined;
-        this.emit("clearGeometryCache", this);
     }
 
     /**
@@ -110,13 +113,27 @@ export class Circle extends EventEmitter implements IRegion {
     }
 
     /**
+     * Move this circle.
+     */
+    set center(center: Point) {
+        this._center.removeListener(onMoveEvent, this.onCenterMove);
+        this._center = center;
+        this._resetCommonGeometryCaches();
+        this.emit(onMoveEvent, this);
+    }
+
+    /**
      * Change this circle's radius.
      */
     set radius(radius: number) {
         this._area = undefined;
         this._radius = radius;
+        this._resetCommonGeometryCaches();
+        this.emit(onResizeEvent, this);
+    }
+
+    private _resetCommonGeometryCaches = () => {
         this._bbox = undefined;
-        this.emit("clearGeometryCache", this);
     }
 
     /**

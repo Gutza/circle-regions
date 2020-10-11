@@ -104,7 +104,7 @@ export class Graph {
                 const edge = this._edges[i];
                 if (edge.RegionLeft === undefined) {
                     some = true;
-                    const loop = this.traceLoop(edge, "forward");
+                    const loop = this._traceLoop(edge, "forward");
                     if (loop !== null) {
                         loops.push(loop);
                     }
@@ -112,7 +112,7 @@ export class Graph {
                 }
                 if (edge.RegionRight === undefined) {
                     some = true;
-                    const loop = this.traceLoop(edge, "backward");
+                    const loop = this._traceLoop(edge, "backward");
                     if (loop !== null) {
                         loops.push(loop);
                     }
@@ -128,7 +128,7 @@ export class Graph {
         return loops;
     }
 
-    private traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): GraphLoop | null {
+    private _traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): GraphLoop | null {
         let loop: GraphLoop | null = new GraphLoop();
         let startEdgeEndNode: GraphNode;
         if (direction == "forward") {

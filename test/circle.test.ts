@@ -1,6 +1,7 @@
 import assert = require('assert');
 
 import { Circle } from '../src/geometry/Circle';
+import { Point } from '../src/geometry/Point';
 import { Graph } from '../src/topology/Graph';
 
 const graph = new Graph();
@@ -10,9 +11,9 @@ graph.addCircle(new Circle({x: +1, y: +0}, 2, "posC"));
 graph.addCircle(new Circle({x: +0, y: +1}, 2, "topC"));
 graph.addCircle(new Circle({x: +0, y: -1}, 2, "btmC"));
 */
-graph.addCircle(new Circle({x: +0, y: +3.28}, 2, "topC"));
-graph.addCircle(new Circle({x: -1.78, y: +0}, 2, "btlC"));
-graph.addCircle(new Circle({x: +1.78, y: +0}, 2, "btrC"));
+graph.addCircle(new Circle(new Point(+0.00, +3.28), 2, "topC"));
+graph.addCircle(new Circle(new Point(-1.78, +0.00), 2, "btlC"));
+graph.addCircle(new Circle(new Point(+1.78, +0.00), 2, "btrC"));
 
 try {
     graph.regions;

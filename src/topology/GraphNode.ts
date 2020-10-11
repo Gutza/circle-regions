@@ -4,13 +4,6 @@ import GraphEdge from "./GraphEdge";
 import TangencyGroup from "./TangencyGroup";
 import { normalizeAngle } from '../geometry/utils/angles';
 
-interface IEdgeAngle {
-    perpendicularAngle: number;
-    edge: GraphEdge;
-}
-
-type TAngleDirection = -1 | 1;
-
 export default class GraphNode {
     private _tangencyGroups: TangencyGroup[];
     private _coordinates: IPoint;
@@ -206,11 +199,6 @@ export default class GraphNode {
         };
     }
 
-    /**
-     * Always retrieve the next edge immediately to the left of the given edge, as it comes into this node.
-     * @param edge 
-     * @param direction 
-     */
     public getNextEdge = (edge: GraphEdge): GraphEdge | undefined => {
         const refAngle = normalizeAngle(this.getPerpendicular(edge, Math.PI));
         const tanGroups = this._tangencyGroups.filter(tg => tg.elements.some(tge => tge.circle === edge.circle));
@@ -227,6 +215,7 @@ export default class GraphNode {
 
         let minPerpendicularAngle = Number.MAX_VALUE;
         let nextEdge: GraphEdge | undefined = undefined;
+
         this._edges.forEach(nodeEdge => {
             if (nodeEdge === edge || nodeEdge.circle === edge.circle) {
                 return;
@@ -250,13 +239,6 @@ export default class GraphNode {
             throw new Error("Vertex not found on circle!");
         }
 
-        let direction: TAngleDirection;
-        if (this === edge.node1) {
-            direction = -1;
-        } else {
-            direction = 1;
-        }
-
-        return normalizeAngle(thisVertex.angle + direction * Math.PI / 2 - refAngle);
+        return normalizeAngle(thisVertex.angle + (this === edge.node1 ? -1 : 1) * Math.PI / 2 - refAngle);
     }
 }

@@ -49,3 +49,6 @@ export interface IBoundingBox {
     minPoint: IPoint;
     maxPoint: IPoint;
 }
+
+export const onMoveEvent: symbol = Symbol('move');
+export const onResizeEvent: symbol = Symbol('resize');
