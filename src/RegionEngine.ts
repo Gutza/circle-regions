@@ -65,22 +65,28 @@ export class RegionEngine {
     public removeCircle = (circle: Circle) => {
         circle.removeListener(onMoveEvent, this.onCircleEvent);
         circle.removeListener(onResizeEvent, this.onCircleEvent);
-        this._nodes.forEach(n => n.removeCircle(circle));
-        this._nodes = this._nodes.filter(n => {
-            if (n.isValid()) {
+        this._circles = this._circles.filter(c => c !== circle);
+        this._resetCircleCaches(circle);
+    }
+
+    public onCircleEvent = (circle: Circle) => {
+        this._resetCircleCaches(circle);
+    }
+
+    private _resetCircleCaches = (circle: Circle) => {
+        const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => tge.circle == circle)));
+
+        affectedNodes.forEach(node => node.removeCircle(circle));
+        this._nodes = this._nodes.filter(node => {
+            if (!affectedNodes.includes(node) || node.isValid()) {
                 return true;
             }
 
             this._circles.forEach(circle => {
-                circle.removeVertexByNode(n);
+                circle.removeVertexByNode(node);
             });
             return false;
         }); // a valid node represents a valid intersection
-        this._circles = this._circles.filter(c => c !== circle);
-        this._regions = undefined;
-    }
-
-    public onCircleEvent = (circle: Circle) => {
         this._regions = undefined;
     }
 
@@ -94,6 +100,9 @@ export class RegionEngine {
             const c1 = this._circles[i];
             for (let j = i+1; j < this._circles.length; j++) {
                 const c2 = this._circles[j];
+                if (!c1.hasDirtyVertices && !c2.hasDirtyVertices) {
+                    continue;
+                }
                 if (!c1.boundingBoxOverlap(c2)) {
                     continue;
                 }
@@ -103,7 +112,7 @@ export class RegionEngine {
 
         // TODO: Caching
         this._circles.forEach(circle => {
-            const nodes = this._nodes.filter(n => n.tangencyGroups.some(tg => tg.some(tge => tge.circle == circle)));
+            const nodes = this._nodes.filter(node => node.tangencyGroups.some(tg => tg.some(tge => tge.circle == circle)));
             nodes.forEach(node => {
                 circle.addVertex(new CircleVertex(node, circle));
             });

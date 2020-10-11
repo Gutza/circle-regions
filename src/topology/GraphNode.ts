@@ -166,9 +166,9 @@ export default class GraphNode {
 
     public removeCircle(circle: Circle): boolean {
         // First, remove the elements which contain the given circle from all tangency groups
-        this._tangencyGroups.forEach(tanGroup => {
-            tanGroup = tanGroup.filter(tgElement => tgElement.circle !== circle);
-        });
+        for (let i = 0; i < this._tangencyGroups.length; i++) {
+            this._tangencyGroups[i] = this._tangencyGroups[i].filter(tgElement => tgElement.circle !== circle);
+        }
 
         // Next, remove the empty tangency groups
         let prevLen = this._tangencyGroups.length;
@@ -177,7 +177,7 @@ export default class GraphNode {
     }
 
     public isValid(): boolean {
-        return this._tangencyGroups.length > 1;
+        return 1 < this._tangencyGroups.reduce<number>((prevCount, tanGroup): number => prevCount + tanGroup.length, 0);
     }
 
     public get tangencyGroups(): ITangencyGroup[] {

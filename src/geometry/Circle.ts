@@ -41,11 +41,11 @@ export class Circle extends EventEmitter implements IRegion {
 
     private _bbox?: IBoundingBox;
 
-    private _hasDirtyVertices: boolean = true;
+    public hasDirtyVertices: boolean = true;
 
-    private _hasDirtyEdges: boolean = true;
+    public hasDirtyEdges: boolean = true;
 
-    private _hasDirtyHierarchy: boolean = true;
+    public hasDirtyHierarchy: boolean = true;
 
     /**
      * Instantiate a new circle entity.
@@ -65,18 +65,18 @@ export class Circle extends EventEmitter implements IRegion {
     }
 
     public addVertex(vertex: CircleVertex) {
-        if (this._vertices.includes(vertex)) {
+        if (this._vertices.includes(vertex) || this._vertices.some(v => v.node === vertex.node)) {
             return;
         }
 
         this._vertices.push(vertex);
         this._sortedVertices = false;
-        this._hasDirtyEdges = true;
+        this.hasDirtyEdges = true;
     }
 
     public removeVertexByNode(node: GraphNode) {
         this._vertices = this._vertices.filter(v => v.node !== node);
-        this._hasDirtyEdges = true;
+        this.hasDirtyEdges = true;
         // they are still sorted
     }
 
@@ -144,9 +144,9 @@ export class Circle extends EventEmitter implements IRegion {
     private _resetCommonGeometryCaches = () => {
         this._bbox = undefined;
         this._vertices = [];
-        this._hasDirtyVertices = true;
-        this._hasDirtyEdges = true;
-        this._hasDirtyHierarchy = true;
+        this.hasDirtyVertices = true;
+        this.hasDirtyEdges = true;
+        this.hasDirtyHierarchy = true;
     }
 
     /**
@@ -195,29 +195,5 @@ export class Circle extends EventEmitter implements IRegion {
         round(this.center.y) == round(that.center.y) &&
         round(this.radius) == round(that.radius)
     );
-
-    public get hasDirtyVertices(): boolean {
-        return this._hasDirtyVertices;
-    }
-
-    public setCleanVertices = () => {
-        this._hasDirtyVertices = false;
-    }
-
-    public get hasDirtyEdges(): boolean {
-        return this._hasDirtyEdges;
-    }
-
-    public setCleanEdges = () => {
-        this._hasDirtyEdges = false;
-    }
-
-    public get hasDirtyHierarchy(): boolean {
-        return this._hasDirtyHierarchy;
-    }
-
-    public setCleanHierarchy = () => {
-        this._hasDirtyHierarchy = false;
-    }
 
 }
