@@ -1,16 +1,16 @@
 import assert = require('assert');
 import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
-import { Graph } from '../src/topology/Graph';
+import { RegionEngine } from '../src/RegionEngine';
 
-const graph = new Graph();
-graph.addCircle(new Circle(new Point(-1, 0), 1));
-graph.addCircle(new Circle(new Point(2, 0), 2));
+const engine = new RegionEngine();
+engine.addCircle(new Circle(new Point(-1, 0), 1));
+engine.addCircle(new Circle(new Point(2, 0), 2));
 
 describe("Tangency groups for two circles A-B", () => {
-    dumpGroups("Two", graph);
+    dumpGroups("Two", engine);
     let tanGroupCount = 0;
-    graph.nodes.forEach(node => {
+    engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(() => tanGroupCount++);
     });
     it("Two tangent circles A-B should contain a single tangency group", () => {
@@ -20,7 +20,7 @@ describe("Tangency groups for two circles A-B", () => {
     let yinCount = 0;
     let yangCount = 0;
 
-    graph.nodes.forEach(node => {
+    engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
             yinCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yin").length;
             yangCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yang").length;
@@ -35,14 +35,14 @@ describe("Tangency groups for two circles A-B", () => {
     });
 });
 
-graph.addCircle(new Circle(new Point(-3, 0), 3));
+engine.addCircle(new Circle(new Point(-3, 0), 3));
 
 describe("Tangency groups for three circles AA-B", () => {
-    dumpGroups("Three", graph);
+    dumpGroups("Three", engine);
 
     let yinCount = 0;
     let yangCount = 0;
-    graph.nodes.forEach(node => {
+    engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
             yinCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yin").length;
             yangCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yang").length;
@@ -50,7 +50,7 @@ describe("Tangency groups for three circles AA-B", () => {
     });
 
     let tanGroupCount = 0;
-    graph.nodes.forEach(node => {
+    engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(() => tanGroupCount++);
     });
 
@@ -63,13 +63,13 @@ describe("Tangency groups for three circles AA-B", () => {
     });
 });
 
-graph.addCircle(new Circle(new Point(4, 0), 4));
+engine.addCircle(new Circle(new Point(4, 0), 4));
 
 describe("Tangency groups for four circles AA-BB", () => {
-    dumpGroups("Four", graph);
+    dumpGroups("Four", engine);
 
     let tanGroupCount = 0;
-    graph.nodes.forEach(node => {
+    engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(() => tanGroupCount++);
     });
 
@@ -79,7 +79,7 @@ describe("Tangency groups for four circles AA-BB", () => {
     
     let yinCount = 0;
     let yangCount = 0;
-    graph.nodes.forEach(node => {
+    engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
             yinCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yin").length;
             yangCount += tanGroup.elements.filter(tgElement => tgElement.parity === "yang").length;
@@ -95,13 +95,13 @@ describe("Tangency groups for four circles AA-BB", () => {
     });
 });
 
-graph.addCircle(new Circle(new Point(0, 5), 5));
+engine.addCircle(new Circle(new Point(0, 5), 5));
 
 describe("Tangency groups for five circles AA-BB + C", () => {
-    dumpGroups("Five", graph);
+    dumpGroups("Five", engine);
 
     let tanGroupCount = 0;
-    graph.nodes.forEach(node => {
+    engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(() => tanGroupCount++);
     });
 
@@ -110,7 +110,7 @@ describe("Tangency groups for five circles AA-BB + C", () => {
     });  
 });
 
-function dumpGroups(label: string, graph: Graph, tanGroupNote?: string) {
+function dumpGroups(label: string, graph: RegionEngine, tanGroupNote?: string) {
     return;
     console.log("-- <"+label+"> --");
     graph.nodes.forEach(node => {

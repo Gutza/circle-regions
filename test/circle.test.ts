@@ -2,21 +2,21 @@ import assert = require('assert');
 
 import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
-import { Graph } from '../src/topology/Graph';
+import { RegionEngine } from '../src/RegionEngine';
 
-const graph = new Graph();
+const engine = new RegionEngine();
 /*
 graph.addCircle(new Circle({x: -1, y: +0}, 2, "negC"));
 graph.addCircle(new Circle({x: +1, y: +0}, 2, "posC"));
 graph.addCircle(new Circle({x: +0, y: +1}, 2, "topC"));
 graph.addCircle(new Circle({x: +0, y: -1}, 2, "btmC"));
 */
-graph.addCircle(new Circle(new Point(+0.00, +3.28), 2, "topC"));
-graph.addCircle(new Circle(new Point(-1.78, +0.00), 2, "btlC"));
-graph.addCircle(new Circle(new Point(+1.78, +0.00), 2, "btrC"));
+engine.addCircle(new Circle(new Point(+0.00, +3.28), 2, "topC"));
+engine.addCircle(new Circle(new Point(-1.78, +0.00), 2, "btlC"));
+engine.addCircle(new Circle(new Point(+1.78, +0.00), 2, "btrC"));
 
 try {
-    graph.regions;
+    engine.regions;
 } catch(err) {
     console.warn("Error", err);
 }

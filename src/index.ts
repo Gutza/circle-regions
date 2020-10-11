@@ -1,3 +1,3 @@
 export { Circle } from "./geometry/Circle";
-export { Graph } from "./topology/Graph";
+export { RegionEngine } from "./RegionEngine";
 export { Point } from "./geometry/Point";

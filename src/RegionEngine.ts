@@ -1,15 +1,15 @@
-import { Circle } from "../geometry/Circle";
-import CircleArc from "../geometry/CircleArc";
-import ArcPolygon from "../geometry/ArcPolygon";
-import CircleVertex from "../geometry/CircleVertex";
-import intersectCircles from "../geometry/utils/intersectCircles";
-import { round } from "../geometry/utils/numbers";
-import { CircleRegion, IPoint, TIntersectionType, TTraversalDirection } from "../Types";
-import GraphEdge from "./GraphEdge";
-import GraphLoop from "./GraphLoop";
-import GraphNode from "./GraphNode";
+import { Circle } from "./geometry/Circle";
+import CircleArc from "./geometry/CircleArc";
+import ArcPolygon from "./geometry/ArcPolygon";
+import CircleVertex from "./geometry/CircleVertex";
+import intersectCircles from "./geometry/utils/intersectCircles";
+import { round } from "./geometry/utils/numbers";
+import { CircleRegion, IPoint, TIntersectionType, TTraversalDirection } from "./Types";
+import GraphEdge from "./topology/GraphEdge";
+import GraphLoop from "./topology/GraphLoop";
+import GraphNode from "./topology/GraphNode";
 
-export class Graph {
+export class RegionEngine {
     private _nodes: GraphNode[] = [];
     private _edges: GraphEdge[] = [];
     private _circles: Circle[] = [];
@@ -225,5 +225,9 @@ export class Graph {
         this._regions = this._regions.concat(this._circles.filter(circle => circle.vertices.length == 0));
 
         return this._regions;
+    }
+
+    public get circles(): Circle[] {
+        return this._circles;
     }
 }

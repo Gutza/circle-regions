@@ -1,9 +1,9 @@
-import { Graph } from "../../topology/Graph";
+import { RegionEngine } from "../../RegionEngine";
 import { IPoint } from "../../Types";
 import { Circle } from "../Circle";
 import { round } from "./numbers";
 
-export default (graph: Graph, circle1: Circle, circle2: Circle): void => {
+export default (graph: RegionEngine, circle1: Circle, circle2: Circle): void => {
     if (circle1 === circle2) {
         console.warn("Don't intersect a circle with itself!");
         return;
