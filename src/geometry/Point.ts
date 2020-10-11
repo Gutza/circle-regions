@@ -21,13 +21,11 @@ export class Point extends EventEmitter implements IPoint {
 
     public set x(x: number) {
         this._x = x;
-        console.log("Emitting point move (x)");
-        this.emit(onMoveEvent);
+        this.emit(onMoveEvent, this);
     }
 
     public set y(y: number) {
         this._y = y;
-        console.log("Emitting point move (y)");
-        this.emit(onMoveEvent);
+        this.emit(onMoveEvent, this);
     }
 }

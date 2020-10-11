@@ -4,7 +4,7 @@ import ArcPolygon from "./geometry/ArcPolygon";
 import CircleVertex from "./geometry/CircleVertex";
 import intersectCircles from "./geometry/utils/intersectCircles";
 import { round } from "./geometry/utils/numbers";
-import { CircleRegion, IPoint, TIntersectionType, TTraversalDirection } from "./Types";
+import { CircleRegion, IPoint, onMoveEvent, onResizeEvent, TIntersectionType, TTraversalDirection } from "./Types";
 import GraphEdge from "./topology/GraphEdge";
 import GraphLoop from "./topology/GraphLoop";
 import GraphNode from "./topology/GraphNode";
@@ -55,10 +55,16 @@ export class RegionEngine {
             return;
         }
 
+        circle.on(onMoveEvent, this.onCircleEvent);
+        circle.on(onResizeEvent, this.onCircleEvent);
         this._circles.push(circle);
+
+        this._regions = undefined;
     }
 
     public removeCircle = (circle: Circle) => {
+        circle.removeListener(onMoveEvent, this.onCircleEvent);
+        circle.removeListener(onResizeEvent, this.onCircleEvent);
         this._nodes.forEach(n => n.removeCircle(circle));
         this._nodes = this._nodes.filter(n => {
             if (n.isValid()) {
@@ -71,6 +77,11 @@ export class RegionEngine {
             return false;
         }); // a valid node represents a valid intersection
         this._circles = this._circles.filter(c => c !== circle);
+        this._regions = undefined;
+    }
+
+    public onCircleEvent = (circle: Circle) => {
+        this._regions = undefined;
     }
 
     public get nodes(): GraphNode[] {

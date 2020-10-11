@@ -59,9 +59,9 @@ export class Circle extends EventEmitter implements IRegion {
         this.id = id;
     }
 
-    public onCenterMove = (e: string | symbol, ...args: any[]) => {
+    public onCenterMove = (center: Point) => {
         this._resetCommonGeometryCaches();
-        this.emit(e, this);
+        this.emit(onMoveEvent, this);
     }
 
     public addVertex(vertex: CircleVertex) {
