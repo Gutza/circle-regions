@@ -1,9 +1,10 @@
 import { EventEmitter } from "events";
-import { IPoint, onMoveEvent } from "../Types";
+import { IPoint, IGeometryHandler } from "../Types";
 
 export class Point extends EventEmitter implements IPoint {
     private _x: number;
     private _y: number;
+    private _handler?: IGeometryHandler;
 
     constructor(x: number, y: number) {
         super();
@@ -19,13 +20,25 @@ export class Point extends EventEmitter implements IPoint {
         return this._y;
     }
 
+    public setGeometryHandler(handler: IGeometryHandler) {
+        this._handler = handler;
+    }
+
+    public resetGeometryHandler() {
+        this._handler = undefined;
+    }
+
     public set x(x: number) {
         this._x = x;
-        this.emit(onMoveEvent, this);
+        if (this._handler !== undefined) {
+            this._handler.handleMove();
+        }
     }
 
     public set y(y: number) {
         this._y = y;
-        this.emit(onMoveEvent, this);
+        if (this._handler !== undefined) {
+            this._handler.handleMove();
+        }
     }
 }

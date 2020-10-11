@@ -25,7 +25,8 @@
     "build": "tsc --build",
     "clean": "tsc --build --clean",
     "prebrowserify": "npm run build",
-    "browserify": "npx browserify dist/src/index.js -t babelify -o circle-regions.Bundle.js -s circle-regions"
+    "browserify": "npx browserify dist/src/index.js -t babelify -o circle-regions.Bundle.js -s circle-regions",
+    "postbrowserify": "copy circle-regions.Bundle.js ..\\A250001\\"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",

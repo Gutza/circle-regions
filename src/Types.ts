@@ -51,5 +51,6 @@ export interface IBoundingBox {
     maxPoint: IPoint;
 }
 
-export const onMoveEvent: symbol = Symbol('move');
-export const onResizeEvent: symbol = Symbol('resize');
+export interface IGeometryHandler {
+    handleMove: (any)
+}
