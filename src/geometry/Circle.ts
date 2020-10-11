@@ -1,4 +1,4 @@
-import { IPoint, IRegion } from "../Types";
+import { IBoundingBox, IPoint, IRegion } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { EventEmitter } from "events";
@@ -36,6 +36,8 @@ export class Circle extends EventEmitter implements IRegion {
      * Internal cache for the circle's area.
      */
     private _area?: number;
+
+    private _bbox?: IBoundingBox;
 
     /**
      * Instantiate a new circle entity.
@@ -96,6 +98,7 @@ export class Circle extends EventEmitter implements IRegion {
      */
     set center(center: IPoint) {
         this._center = center;
+        this._bbox = undefined;
         this.emit("clearGeometryCache", this);
     }
 
@@ -112,6 +115,7 @@ export class Circle extends EventEmitter implements IRegion {
     set radius(radius: number) {
         this._area = undefined;
         this._radius = radius;
+        this._bbox = undefined;
         this.emit("clearGeometryCache", this);
     }
 
@@ -133,4 +137,26 @@ export class Circle extends EventEmitter implements IRegion {
     public addParent = (circle: Circle): void => {
         this._parents.push(circle);
     }
+
+    public get boundingBox(): IBoundingBox {
+        if (this._bbox !== undefined) {
+            return this._bbox;
+        }
+
+        return this._bbox = {
+            minPoint: {
+                x: this.center.x - this.radius,
+                y: this.center.y - this.radius,
+            },
+            maxPoint: {
+                x: this.center.x + this.radius,
+                y: this.center.y + this.radius,
+            }
+        };
+    }
+
+    public boundingBoxOverlap = (that: Circle): boolean => (
+        Math.sign(this.boundingBox.minPoint.x - that.boundingBox.maxPoint.x) * Math.sign(this.boundingBox.maxPoint.x - that.boundingBox.minPoint.x) < 0.5 &&
+        Math.sign(this.boundingBox.minPoint.y - that.boundingBox.maxPoint.y) * Math.sign(this.boundingBox.maxPoint.y - that.boundingBox.minPoint.y) < 0.5
+    );
 }

@@ -59,7 +59,7 @@ export class Graph {
             return;
         }
 
-        this._circles.forEach(otherCircle => {
+        this._circles.filter(gc => circle.boundingBoxOverlap(gc)).forEach(otherCircle => {
             intersectCircles(this, circle, otherCircle);
         });
         this._circles.push(circle);

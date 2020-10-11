@@ -44,3 +44,8 @@ export interface IGraphEnd {
 }
 
 export type CircleRegion = Circle | ArcPolygon;
+
+export interface IBoundingBox {
+    minPoint: IPoint;
+    maxPoint: IPoint;
+}
