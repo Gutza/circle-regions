@@ -9,6 +9,11 @@ export default (graph: Graph, circle1: Circle, circle2: Circle): void => {
         return;
     }
 
+    if (circle1.equals(circle2)) {
+        console.warn("Don't intersect a circle with an identical one");
+        return;
+    }
+
     // Math.sqrt(a**2 + b**2) is more precise than Math.hypot(a, b)
     const centerDist = Math.sqrt((circle1.center.x - circle2.center.x) ** 2 + (circle1.center.y - circle2.center.y) ** 2);
     if (round(centerDist) > round(circle1.radius + circle2.radius)) {

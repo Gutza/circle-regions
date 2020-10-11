@@ -50,11 +50,7 @@ export class Graph {
             return;
         }
 
-        if (this._circles.some(gc => (
-            round(gc.center.x) == round(circle.center.x) &&
-            round(gc.center.y) == round(circle.center.y) &&
-            round(gc.radius) == round(circle.radius)
-        ))) {
+        if (this._circles.some(gc => gc.equals(circle))) {
             console.warn("Another circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
             return;
         }
@@ -100,8 +96,6 @@ export class Graph {
             }
         });
 
-        console.log("Edge count", this._edges.length);
-
         const loops: GraphLoop[] = [];
 
         while (true) {
@@ -130,17 +124,6 @@ export class Graph {
                 break;
             }
         }
-
-        // Only debugging
-        console.log("== Finished all loops ==");
-        loops.forEach((loop, loopIndex) => {
-            loop.oEdges.forEach((oEdge, edgeIndex) => {
-                let startNode = oEdge.direction == "forward" ? oEdge.edge.node1 : oEdge.edge.node2;
-                let endNode = oEdge.direction == "forward" ? oEdge.edge.node2 : oEdge.edge.node1;
-                console.log(loopIndex + "." + edgeIndex, startNode.coordinates.x + "," + startNode.coordinates.y, "-->", endNode.coordinates.x + "," + endNode.coordinates.y)
-            })
-        });
-        // Finished debugging
 
         return loops;
     }
@@ -177,7 +160,6 @@ export class Graph {
             currentEdge = currentEdgeEndNode.getNextEdge(currentEdge);
 
             if (currentEdge === undefined) {
-                console.log("Undefined next edge");
                 if (currentEdgeEndNode !== startEdgeEndNode) {
                     throw new Error("Unexpected condition: undefined edge after region was started!");
                 }
@@ -190,14 +172,11 @@ export class Graph {
                 return null;
             }
 
-            console.log("Node before tranversing x=", currentEdgeEndNode.coordinates.x, "y=", currentEdgeEndNode.coordinates.y);
             const oEnd = currentEdgeEndNode.getOtherEnd(currentEdge);
             currentEdgeEndNode = oEnd.node;
             currentEdgeDirection = oEnd.direction;
-            console.log("Node after tranversing x=", currentEdgeEndNode.coordinates.x, "y=", currentEdgeEndNode.coordinates.y);
 
             if (currentEdge === startEdge) {
-                console.log("Finished loop", loop);
                 return loop;
             }
         }

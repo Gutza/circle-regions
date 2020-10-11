@@ -2,6 +2,7 @@ import { IBoundingBox, IPoint, IRegion } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { EventEmitter } from "events";
+import { round } from "./utils/numbers";
 
 /**
  * The main circle class.
@@ -82,7 +83,6 @@ export class Circle extends EventEmitter implements IRegion {
 
         this._vertices = this._vertices.sort((a, b) => a.angle - b.angle);
         this._sortedVertices = true;
-        this._vertices.forEach(v => console.log(v.angle));
         return this._vertices;
     }
 
@@ -159,4 +159,11 @@ export class Circle extends EventEmitter implements IRegion {
         Math.sign(this.boundingBox.minPoint.x - that.boundingBox.maxPoint.x) * Math.sign(this.boundingBox.maxPoint.x - that.boundingBox.minPoint.x) < 0.5 &&
         Math.sign(this.boundingBox.minPoint.y - that.boundingBox.maxPoint.y) * Math.sign(this.boundingBox.maxPoint.y - that.boundingBox.minPoint.y) < 0.5
     );
+
+    public equals = (that: Circle): boolean => (
+        round(this.center.x) == round(that.center.x) &&
+        round(this.center.y) == round(that.center.y) &&
+        round(this.radius) == round(that.radius)
+    );
 }
+

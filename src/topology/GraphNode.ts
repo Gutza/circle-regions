@@ -197,11 +197,6 @@ export default class GraphNode {
     }
 
     public getOtherEnd = (edge: GraphEdge): IGraphEnd => {
-        if (this === edge.node1) {
-            console.log("The other end is", edge.circle.id + "." + edge.id + "/end");
-        } else {
-            console.log("The other end is", edge.circle.id + "." + edge.id + "/start");
-        }
         return this === edge.node1 ? {
             node: edge.node2,
             direction: "forward",
@@ -217,8 +212,6 @@ export default class GraphNode {
      * @param direction 
      */
     public getNextEdge = (edge: GraphEdge): GraphEdge | undefined => {
-        console.log("Getting next edge");
-        let neighbors: IEdgeAngle[] = [];
         const refAngle = normalizeAngle(this.getPerpendicular(edge, Math.PI));
         const tanGroups = this._tangencyGroups.filter(tg => tg.elements.some(tge => tge.circle === edge.circle));
         if (tanGroups.length !== 1) {
@@ -232,36 +225,21 @@ export default class GraphNode {
             throw new Error("Tangent regions not supported yet");
         }
 
+        let minPerpendicularAngle = Number.MAX_VALUE;
+        let nextEdge: GraphEdge | undefined = undefined;
         this._edges.forEach(nodeEdge => {
-            if (nodeEdge === edge) {
-                console.log("Processing edge: same edge");
+            if (nodeEdge === edge || nodeEdge.circle === edge.circle) {
                 return;
             }
-            if (nodeEdge.circle === edge.circle) {
-                console.log("Processing edges: same circle");
+            const perpendicularAngle = this.getPerpendicular(nodeEdge, refAngle);
+            if (perpendicularAngle > minPerpendicularAngle) {
                 return;
             }
-            console.log("Processing edge: different edge");
-            neighbors.push({
-                edge: nodeEdge,
-                perpendicularAngle: this.getPerpendicular(nodeEdge, refAngle),
-            });
+
+            minPerpendicularAngle = perpendicularAngle;
+            nextEdge = nodeEdge;
         });
-
-        if (neighbors.length == 0) {
-            console.log("No neighbors");
-            return undefined;
-        }
-
-        neighbors = neighbors.sort((a, b) => a.perpendicularAngle - b.perpendicularAngle);
-        console.log("Node x = " + this.coordinates.x.toFixed(2)+"; y = " + this.coordinates.y.toFixed(2));
-        console.log("Edge " + edge.circle.id + "." + edge.id + "/" + (edge.node1 === this ? "start" : "end") + "@" + edge.circle.getVertexByNode(this)?.angle.toFixed(2) +
-            " ref " + refAngle.toFixed(2));
-        console.log("SORTED neighbors' angles", neighbors.map(n =>
-            n.edge.circle.id + "." + n.edge.id + "/" + (n.edge.node1 === this ? "start" : "end")  + "@" + n.edge.circle.getVertexByNode(this)?.angle.toFixed(2) +
-            " per " + n.perpendicularAngle.toFixed(2)
-        ));
-        return neighbors[0].edge;
+        return nextEdge;
     }
 
     private getPerpendicular(edge: GraphEdge, refAngle: number): number {
