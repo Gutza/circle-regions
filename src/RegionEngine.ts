@@ -66,12 +66,6 @@ export class RegionEngine {
         return newNode;
     }
 
-    public addEdge = (edge: GraphEdge) => {
-        this._edges.push(edge);
-        edge.node1.addEdge(edge);
-        edge.node2.addEdge(edge);
-    }
-
     public onCircleEvent = (circle: Circle) => {
         console.log("Resetting circle caches for circle", circle.id);
         this._resetCircleCaches(circle);
@@ -173,7 +167,10 @@ export class RegionEngine {
             });
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                this.addEdge(new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, i));
+                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, i);
+                this._edges.push(newEdge);
+                newEdge.node1.addEdge(newEdge);
+                newEdge.node2.addEdge(newEdge);
             }
             circle.isDirty = false;
         });
