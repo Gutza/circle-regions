@@ -41,7 +41,6 @@
   "dependencies": {
     "lodash.floor": "^4.0.4",
     "lodash.mean": "^4.1.0",
-    "lodash.round": "^4.0.4",
     "uuid": "^8.3.1"
   },
   "keywords": [
