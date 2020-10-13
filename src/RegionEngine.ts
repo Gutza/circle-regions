@@ -78,8 +78,8 @@ export class RegionEngine {
         return this._nodes;
     }
 
-    private _traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): IGraphCycle | null {
-        const loop: IGraphCycle = {
+    private _extractGraphCycle(startEdge: GraphEdge, direction: TTraversalDirection): IGraphCycle | null {
+        const cycle: IGraphCycle = {
             oEdges: [],
         }
         const startEdgeEndNode = direction == "forward" ? startEdge.node2 : startEdge.node1;
@@ -89,7 +89,7 @@ export class RegionEngine {
         let currentEdgeDirection = direction;
 
         while (true) {
-            loop.oEdges.push({
+            cycle.oEdges.push({
                 edge: currentEdge,
                 direction: currentEdgeDirection,
             });
@@ -97,12 +97,12 @@ export class RegionEngine {
                 if (currentEdge.LeftCycle) {
                     throw new Error("Region left already set!");
                 }
-                currentEdge.LeftCycle = loop;
+                currentEdge.LeftCycle = cycle;
             } else {
                 if (currentEdge.RightCycle) {
                     throw new Error("Region right already set!");
                 }
-                currentEdge.RightCycle = loop;
+                currentEdge.RightCycle = cycle;
             }
 
             currentEdge = currentEdgeEndNode.getNextEdge(currentEdge);
@@ -125,7 +125,7 @@ export class RegionEngine {
             currentEdgeDirection = oEnd.direction;
 
             if (currentEdge === startEdge) {
-                return loop;
+                return cycle;
             }
         }
     }
@@ -207,6 +207,7 @@ export class RegionEngine {
             return false;
         });
 
+
         this._edges.forEach(cleanEdge => {
             if (!!cleanEdge.LeftCycle && cleanEdge.LeftCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
                 cleanEdge.LeftCycle = undefined;
@@ -246,26 +247,27 @@ export class RegionEngine {
     }
 
     // (4/5)
-    private _computeLoops = (): IGraphCycle[] => {
-        const loops: IGraphCycle[] = [];
+    private _extractGraphCycles = (): IGraphCycle[] => {
+        const cycles: IGraphCycle[] = [];
 
         while (true) {
             let some = false;
+
             for (let i = 0; i < this._edges.length; i++) {
                 const edge = this._edges[i];
                 if (edge.LeftCycle === undefined) {
                     some = true;
-                    const loop = this._traceLoop(edge, "forward");
-                    if (loop !== null) {
-                        loops.push(loop);
+                    const cycle = this._extractGraphCycle(edge, "forward");
+                    if (cycle !== null) {
+                        cycles.push(cycle);
                     }
                     break;
                 }
                 if (edge.RightCycle === undefined) {
                     some = true;
-                    const loop = this._traceLoop(edge, "backward");
-                    if (loop !== null) {
-                        loops.push(loop);
+                    const cycle = this._extractGraphCycle(edge, "backward");
+                    if (cycle !== null) {
+                        cycles.push(cycle);
                     }
                     break;
                 }
@@ -276,16 +278,16 @@ export class RegionEngine {
             }
         }
 
-        return loops;
+        return cycles;
     }
 
     // (5/5)
-    private _computeRegions = (loops: IGraphCycle[]): CircleRegion[] => {
-        const newRegions: CircleRegion[] = loops.map(loop => {
+    private _computeRegions = (cycles: IGraphCycle[]): CircleRegion[] => {
+        const newRegions: CircleRegion[] = cycles.map(cycle => {
             const arcs: CircleArc[] = [];
             // TODO: Optimize isContour, we're processing the same array twice
-            let isContour = loop.oEdges.every(edge => edge.direction == "backward");
-            loop.oEdges.forEach(oEdge => {
+            let isContour = cycle.oEdges.every(edge => edge.direction == "backward");
+            cycle.oEdges.forEach(oEdge => {
                 const startNode = oEdge.edge.node1;
                 const endNode = oEdge.edge.node2;
                 const startVertex = oEdge.edge.circle.getVertexByNode(startNode);
@@ -328,12 +330,12 @@ export class RegionEngine {
         this._rebuildDirtyEdges();
 
         // (4/5)
-        const loops = this._computeLoops();
+        const cycles = this._extractGraphCycles();
 
-        console.log("Loop count", loops.length);
+        console.log("Cycle count", cycles.length);
 
         // (5/5)
-        this._regions = this._computeRegions(loops);
+        this._regions = this._computeRegions(cycles);
 
         console.log("Computed regions");
 
