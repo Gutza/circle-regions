@@ -117,7 +117,7 @@ export class RegionEngine {
                 return null;
             }
 
-            const oEnd = currentEdgeEndNode.getOtherEnd(currentEdge);
+            const oEnd = currentEdgeEndNode.getOtherEnd(currentEdge, direction);
             currentEdgeEndNode = oEnd.node;
             currentEdgeDirection = oEnd.direction;
 
@@ -247,10 +247,12 @@ export class RegionEngine {
             });
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c" + circle.id + "e" + i);
+                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c." + circle.id + "/e." + i);
                 this._edges.push(newEdge);
                 newEdge.node1.addEdge(newEdge);
-                newEdge.node2.addEdge(newEdge);
+                if (circle.vertices.length > 1) {
+                    newEdge.node2.addEdge(newEdge);
+                }
             }
             circle.isDirty = false;
         });

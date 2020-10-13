@@ -4,8 +4,8 @@ import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
 
 const engine = new RegionEngine();
-engine.addCircle(new Circle(new Point(-1, 0), 1));
-engine.addCircle(new Circle(new Point(2, 0), 2));
+engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));
+engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));
 engine.regions;
 
 describe("Tangency groups for two circles A-B", () => {

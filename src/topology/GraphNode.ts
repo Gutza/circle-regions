@@ -1,4 +1,4 @@
-import { IGraphEnd, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType } from "../Types";
+import { IGraphEnd, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType, TTraversalDirection } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
@@ -186,7 +186,14 @@ export default class GraphNode {
         return this._tangencyGroups;
     }
 
-    public getOtherEnd = (edge: GraphEdge): IGraphEnd => {
+    public getOtherEnd = (edge: GraphEdge, direction: TTraversalDirection): IGraphEnd => {
+        if (edge.node1 === edge.node2) {
+            const otherDirection: TTraversalDirection = direction === "backward" ? "forward" : "backward";
+            return {
+                node: edge.node1,
+                direction: otherDirection,
+            };
+        }
         return this === edge.node1 ? {
             node: edge.node2,
             direction: "forward",

@@ -18,7 +18,7 @@ engine.addCircle(new Circle(new Point(+1.78, +0.00), 2, "btrC"));
 try {
     engine.regions;
 } catch(err) {
-    console.warn("Error", err);
+    console.warn("Error in circle.tests!", err);
 }
 
 /*
