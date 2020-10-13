@@ -196,7 +196,27 @@ export class RegionEngine {
     // (3/5)
     private _rebuildDirtyEdges = () => {
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
-        this._edges = this._edges.filter(edge => !dirtyCircles.includes(edge.circle));
+        
+        const dirtyEdges: GraphEdge[] = [];
+        this._edges = this._edges.filter(edge => {
+            if (!dirtyCircles.includes(edge.circle)) {
+                return true;
+            }
+
+            dirtyEdges.push(edge);
+            return false;
+        });
+
+        this._edges.forEach(cleanEdge => {
+            if (!!cleanEdge.RegionLeft && cleanEdge.RegionLeft.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
+                cleanEdge.RegionLeft = undefined;
+            }
+
+            if (!!cleanEdge.RegionRight && cleanEdge.RegionRight.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
+                cleanEdge.RegionRight = undefined;
+            }
+        });
+
         console.log("Adding vertices to", dirtyCircles.length, "dirty circles, out of", this._circles.length, "total");
         dirtyCircles.forEach(dirtyCircle => {
             const nodes = this._nodes.filter(node => node.tangencyGroups.some(tg => tg.some(tge => tge.circle == dirtyCircle)));
