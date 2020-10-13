@@ -285,9 +285,9 @@ export class RegionEngine {
     private _computeRegions = (cycles: IGraphCycle[]): CircleRegion[] => {
         const newRegions: CircleRegion[] = cycles.map(cycle => {
             const arcs: CircleArc[] = [];
-            // TODO: Optimize isContour, we're processing the same array twice
-            let isContour = cycle.oEdges.every(edge => edge.direction == "backward");
+            let isContour = true;
             cycle.oEdges.forEach(oEdge => {
+                isContour = isContour && oEdge.direction == "backward";
                 const startNode = oEdge.edge.node1;
                 const endNode = oEdge.edge.node2;
                 const startVertex = oEdge.edge.circle.getVertexByNode(startNode);
