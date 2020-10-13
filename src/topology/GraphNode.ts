@@ -281,59 +281,61 @@ export default class GraphNode {
 
         const refAngle = normalizeAngle(this.getPerpendicular(currentEdge, Math.PI));
 
-        this._edges.forEach(nodeEdge => {
-            const nodeEdgeTanGroup = this._tangencyGroups.find(tg => tg.some(tge => tge.circle === nodeEdge.circle));
-            if (nodeEdgeTanGroup === undefined) {
-                throw new Error("Circle not found in any tangency group!");
-            }
-
-            if (visitedTgGroups.includes(nodeEdgeTanGroup)) {
+        this._tangencyGroups.forEach(tg => {
+            if (tg === tanGroups[0]) {
+                // This either only contains the current edge's circle (if chaos),
+                // or it was already processed in _getNextTangentEdge() (if real tangency group)
                 return;
             }
-            visitedTgGroups.push(nodeEdgeTanGroup);
 
-            if (nodeEdgeTanGroup.every(tge => tge.parity === "chaos")) {
-                if (nodeEdgeTanGroup.length !== 1) {
-                    throw new Error("Tangency group with " + nodeEdgeTanGroup.length + " elements, all of which are chaos!");
+            if (tg.every(tge => tge.parity === "chaos")) {
+                if (tg.length !== 1) {
+                    throw new Error("Tangency group with " + tg.length + " elements, all of which are chaos!");
                 }
 
                 // Easy case: just a regular intersection
-                const perpendicularAngle = this.getPerpendicular(nodeEdge, refAngle);
-                if (perpendicularAngle > minPerpendicularAngle) {
+                const tgEdges = this._edges.filter(edge => edge.circle === tg[0].circle);
+
+                tgEdges.forEach(tgEdge => {
+                    const perpendicularAngle = this.getPerpendicular(tgEdge, refAngle);
+                    if (perpendicularAngle > minPerpendicularAngle) {
+                        return;
+                    }
+    
+                    minPerpendicularAngle = perpendicularAngle;
+                    nextEdge = tgEdge;
+    
+                    if (0 == round(minPerpendicularAngle)) {
+                        console.log("Zero angle", currentEdge.circle.id, tgEdge.circle.id);
+                    }
+    
                     return;
-                }
-
-                minPerpendicularAngle = perpendicularAngle;
-                nextEdge = nodeEdge;
-
-                if (0 == round(minPerpendicularAngle)) {
-                    console.log("Zero angle", currentEdge.circle.id, nextEdge.circle.id);
-                }
-
-                return;
+                })
             }
 
             console.log("TANGENCY MECHANISM");
             const candidates: Circle[] = [];
-            const smallestYins = nodeEdgeTanGroup.filter(tge => tge.parity === "yin").sort((a, b) => a.circle.radius - b.circle.radius);
-            if (smallestYins.length > 0) {
-                candidates.push(smallestYins[0].circle);
+            const smallestYinCircles = tg.filter(tge => tge.parity === "yin").sort((a, b) => a.circle.radius - b.circle.radius);
+            if (smallestYinCircles.length > 0) {
+                candidates.push(smallestYinCircles[0].circle);
             }
-            const smallestYangs = nodeEdgeTanGroup.filter(tge => tge.parity === "yang").sort((a, b) => a.circle.radius - b.circle.radius);
-            if (smallestYangs.length > 0) {
-                candidates.push(smallestYangs[0].circle);
+            const smallestYangCircles = tg.filter(tge => tge.parity === "yang").sort((a, b) => a.circle.radius - b.circle.radius);
+            if (smallestYangCircles.length > 0) {
+                candidates.push(smallestYangCircles[0].circle);
             }
 
-            this._edges.filter(candidateEdge => candidates.includes(candidateEdge.circle)).forEach(nodeEdge => {
-                const perpendicularAngle = this.getPerpendicular(nodeEdge, refAngle);
-                if (perpendicularAngle > minPerpendicularAngle) {
+            this._edges.
+                filter(candidateEdge => candidates.includes(candidateEdge.circle)).
+                forEach(candidateEdge => {
+                    const perpendicularAngle = this.getPerpendicular(candidateEdge, refAngle);
+                    if (perpendicularAngle > minPerpendicularAngle) {
+                        return;
+                    }
+
+                    minPerpendicularAngle = perpendicularAngle;
+                    nextEdge = candidateEdge;
                     return;
-                }
-
-                minPerpendicularAngle = perpendicularAngle;
-                nextEdge = nodeEdge;
-                return;
-            });
+                });
         });
         return nextEdge;
     }
