@@ -272,7 +272,6 @@ export default class GraphNode {
         }
 
         if (tgElems[0].parity !== "chaos") {
-            console.log("== TANGENCY REGION DETECTION ===");
             const nextTangentEdge = this._getNextTangentEdge(currentEdge, tanGroups[0], tgElems[0]);
             if (nextTangentEdge !== undefined) {
                 console.log("Next tangent edge found");

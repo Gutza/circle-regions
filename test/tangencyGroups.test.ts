@@ -3,9 +3,29 @@ import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
 
+console.log("=== Two tangent circles ===");
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));
 engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));
+console.log("=== Three tangent circles ===");
+engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
+console.log("=== Four tangent circles ===");
+engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
+console.log("=== Four tangent circles + chaotic circle ===");
+engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
+engine.regions;
+
+// TEMPORARY DEBUGGING
+console.log("=== Three tangent circles ===");
+engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
+engine.regions;
+
+console.log("=== Four tangent circles ===");
+engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
+engine.regions;
+
+console.log("=== Four tangent circles + chaotic circle ===");
+engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
 engine.regions;
 
 describe("Tangency groups for two circles A-B", () => {
@@ -36,7 +56,8 @@ describe("Tangency groups for two circles A-B", () => {
     });
 });
 
-engine.addCircle(new Circle(new Point(-3, 0), 3));
+console.log("=== Three tangent circles ===");
+engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
 engine.regions;
 
 describe("Tangency groups for three circles AA-B", () => {
@@ -65,7 +86,8 @@ describe("Tangency groups for three circles AA-B", () => {
     });
 });
 
-engine.addCircle(new Circle(new Point(4, 0), 4));
+console.log("=== Four tangent circles ===");
+engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
 engine.regions;
 
 describe("Tangency groups for four circles AA-BB", () => {
@@ -98,7 +120,8 @@ describe("Tangency groups for four circles AA-BB", () => {
     });
 });
 
-engine.addCircle(new Circle(new Point(0, 5), 5));
+console.log("=== Four tangent circles + chaotic circle ===");
+engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
 engine.regions;
 
 describe("Tangency groups for five circles AA-BB + C", () => {
