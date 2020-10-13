@@ -268,19 +268,16 @@ export default class GraphNode {
             console.log("== TANGENCY REGION DETECTION ===");
             const nextTangentEdge = this._getNextTangentEdge(currentEdge, tanGroups[0], tgElems[0]);
             if (nextTangentEdge !== undefined) {
+                console.log("Next tangent edge found");
                 return nextTangentEdge;
             }
+            console.log("Next tangent edge NOT found");
         }
 
         let minPerpendicularAngle = Number.MAX_VALUE;
         let nextEdge: GraphEdge | undefined = undefined;
 
-        const visitedTgGroups: ITangencyGroup[] = [];
-        const currentEdgeTgGroup = this._tangencyGroups.find(tg => tg.some(tge => tge.circle === currentEdge.circle));
-        if (currentEdgeTgGroup === undefined) {
-            throw new Error("Failed finding the current edge's tangengy group!");
-        }
-        visitedTgGroups.push(currentEdgeTgGroup);
+        const visitedTgGroups: ITangencyGroup[] = [ tanGroups[0] ];
 
         const refAngle = normalizeAngle(this.getPerpendicular(currentEdge, Math.PI));
 
@@ -297,7 +294,7 @@ export default class GraphNode {
 
             if (nodeEdgeTanGroup.every(tge => tge.parity === "chaos")) {
                 if (nodeEdgeTanGroup.length !== 1) {
-                    throw new Error("Tangency group with " + nodeEdgeTanGroup.length + " elements, some of which are not chaos!");
+                    throw new Error("Tangency group with " + nodeEdgeTanGroup.length + " elements, all of which are chaos!");
                 }
 
                 // Easy case: just a regular intersection
@@ -316,6 +313,7 @@ export default class GraphNode {
                 return;
             }
 
+            console.log("TANGENCY MECHANISM");
             const candidates: Circle[] = [];
             const smallestYins = nodeEdgeTanGroup.filter(tge => tge.parity === "yin").sort((a, b) => a.circle.radius - b.circle.radius);
             if (smallestYins.length > 0) {
