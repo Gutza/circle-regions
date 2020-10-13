@@ -55,7 +55,7 @@ export interface IBoundingBox {
 export const onMoveEvent: symbol = Symbol('move');
 export const onResizeEvent: symbol = Symbol('resize');
 
-export interface IGraphLoop {
+export interface IGraphCycle {
     oEdges: IOrientedEdge[];
 }
 
