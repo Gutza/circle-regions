@@ -6,6 +6,7 @@ import { RegionEngine } from '../src/RegionEngine';
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1));
 engine.addCircle(new Circle(new Point(2, 0), 2));
+engine.regions;
 
 describe("Tangency groups for two circles A-B", () => {
     dumpGroups("Two", engine);
@@ -36,6 +37,7 @@ describe("Tangency groups for two circles A-B", () => {
 });
 
 engine.addCircle(new Circle(new Point(-3, 0), 3));
+engine.regions;
 
 describe("Tangency groups for three circles AA-B", () => {
     dumpGroups("Three", engine);
@@ -64,6 +66,7 @@ describe("Tangency groups for three circles AA-B", () => {
 });
 
 engine.addCircle(new Circle(new Point(4, 0), 4));
+engine.regions;
 
 describe("Tangency groups for four circles AA-BB", () => {
     dumpGroups("Four", engine);
@@ -96,6 +99,7 @@ describe("Tangency groups for four circles AA-BB", () => {
 });
 
 engine.addCircle(new Circle(new Point(0, 5), 5));
+engine.regions;
 
 describe("Tangency groups for five circles AA-BB + C", () => {
     dumpGroups("Five", engine);

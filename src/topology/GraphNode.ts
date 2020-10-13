@@ -1,7 +1,8 @@
-import { IGraphEnd, IPoint, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType } from "../Types";
+import { IGraphEnd, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
+import { round } from "../geometry/utils/numbers";
 
 export default class GraphNode {
     private _tangencyGroups: ITangencyGroup[];
@@ -195,34 +196,146 @@ export default class GraphNode {
         };
     }
 
-    public getNextEdge = (edge: GraphEdge): GraphEdge | undefined => {
-        const refAngle = normalizeAngle(this.getPerpendicular(edge, Math.PI));
-        const tanGroups = this._tangencyGroups.filter(tg => tg.some(tge => tge.circle === edge.circle));
-        if (tanGroups.length !== 1) {
-            throw new Error("Edge circle not found in " + tanGroups.length + " tangency groups!");
+    private _getNextTangentEdge = (currentEdge: GraphEdge, edgeTanGroup: ITangencyGroup, edgeTanElem: ITangencyElement): GraphEdge | undefined => {
+        /**
+         * All circles in a tangency group share the same incidence angle, and
+         * elements with the same parity are less divergent than elements with opposite parities.
+         */
+        // Descending order
+        const sameSideNeighbors = edgeTanGroup.
+            filter(tge => tge !== edgeTanElem && tge.parity === edgeTanElem.parity).
+            sort((a, b) => b.circle.radius - a.circle.radius);
+        
+        if (sameSideNeighbors.length > 0) {
+            let winningTangencyElement: ITangencyElement | undefined = undefined;
+            let getSameEdgeEnd: Function;
+            if (this === currentEdge.node1) {
+                winningTangencyElement = sameSideNeighbors.reverse().find(winningEdge => winningEdge.circle.radius > currentEdge.circle.radius);
+                getSameEdgeEnd = (edge: GraphEdge): GraphNode => edge.node1;
+            } else {
+                winningTangencyElement = sameSideNeighbors.find(winningEdge => winningEdge.circle.radius < currentEdge.circle.radius);
+                getSameEdgeEnd = (edge: GraphEdge): GraphNode => edge.node2;
+            }
+
+            if (winningTangencyElement !== undefined) {
+                // Found a same side neighbor with a larger circle! Now let's find the edge.
+                const winningEdges = this._edges.filter(edge => edge.circle === winningTangencyElement?.circle && this === getSameEdgeEnd(edge));
+                if (winningEdges.length !== 1) {
+                    throw new Error("Inner tangent edge found " + winningEdges.length + " times!");
+                }
+
+                console.log("Winning inner");
+                return winningEdges[0];
+            }
         }
-        const tgElems = tanGroups[0].filter(tge => tge.circle === edge.circle);
+
+        // No luck on the same side; let's check the opposite side, but only if it still makes sense to
+        if (this === currentEdge.node2) {
+            return undefined;
+        }
+        const oppositeParity: TTangencyParity = edgeTanElem.parity === "yin" ? "yang" : "yin";
+
+        // Descending order
+        const oppositeSideNeighbors = edgeTanGroup.
+            filter(tge => tge !== edgeTanElem && tge.parity === oppositeParity).
+            sort((a, b) => b.circle.radius - a.circle.radius);
+
+        if (oppositeSideNeighbors.length === 0) {
+            return undefined;
+        }
+
+        const winningEdges = this._edges.filter(edge => edge.circle === oppositeSideNeighbors[0].circle && edge.node2 === this);
+        if (winningEdges.length !== 1) {
+            throw new Error("Outer tangent edge found " + winningEdges.length + " times!");
+        }
+
+        console.log("Winning outer");
+        return winningEdges[0];
+    }
+
+    public getNextEdge = (currentEdge: GraphEdge): GraphEdge | undefined => {
+        const tanGroups = this._tangencyGroups.filter(tg => tg.some(tge => tge.circle === currentEdge.circle));
+        if (tanGroups.length !== 1) {
+            throw new Error("Edge circle found in " + tanGroups.length + " tangency groups!");
+        }
+
+        const tgElems = tanGroups[0].filter(tge => tge.circle === currentEdge.circle);
         if (tgElems.length !== 1) {
             throw new Error("Edge circle found in " + tgElems.length + " tangency elements!");
         }
+
         if (tgElems[0].parity !== "chaos") {
-            throw new Error("Tangent regions not supported yet");
+            console.log("== TANGENCY REGION DETECTION ===");
+            const nextTangentEdge = this._getNextTangentEdge(currentEdge, tanGroups[0], tgElems[0]);
+            if (nextTangentEdge !== undefined) {
+                return nextTangentEdge;
+            }
         }
 
         let minPerpendicularAngle = Number.MAX_VALUE;
         let nextEdge: GraphEdge | undefined = undefined;
 
+        const visitedTgGroups: ITangencyGroup[] = [];
+        const currentEdgeTgGroup = this._tangencyGroups.find(tg => tg.some(tge => tge.circle === currentEdge.circle));
+        if (currentEdgeTgGroup === undefined) {
+            throw new Error("Failed finding the current edge's tangengy group!");
+        }
+        visitedTgGroups.push(currentEdgeTgGroup);
+
+        const refAngle = normalizeAngle(this.getPerpendicular(currentEdge, Math.PI));
+
         this._edges.forEach(nodeEdge => {
-            if (nodeEdge === edge || nodeEdge.circle === edge.circle) {
+            const nodeEdgeTanGroup = this._tangencyGroups.find(tg => tg.some(tge => tge.circle === nodeEdge.circle));
+            if (nodeEdgeTanGroup === undefined) {
+                throw new Error("Circle not found in any tangency group!");
+            }
+
+            if (visitedTgGroups.includes(nodeEdgeTanGroup)) {
                 return;
             }
-            const perpendicularAngle = this.getPerpendicular(nodeEdge, refAngle);
-            if (perpendicularAngle > minPerpendicularAngle) {
+            visitedTgGroups.push(nodeEdgeTanGroup);
+
+            if (nodeEdgeTanGroup.every(tge => tge.parity === "chaos")) {
+                if (nodeEdgeTanGroup.length !== 1) {
+                    throw new Error("Tangency group with " + nodeEdgeTanGroup.length + " elements, some of which are not chaos!");
+                }
+
+                // Easy case: just a regular intersection
+                const perpendicularAngle = this.getPerpendicular(nodeEdge, refAngle);
+                if (perpendicularAngle > minPerpendicularAngle) {
+                    return;
+                }
+
+                minPerpendicularAngle = perpendicularAngle;
+                nextEdge = nodeEdge;
+
+                if (0 == round(minPerpendicularAngle)) {
+                    console.log("Zero angle", currentEdge.circle.id, nextEdge.circle.id);
+                }
+
                 return;
             }
 
-            minPerpendicularAngle = perpendicularAngle;
-            nextEdge = nodeEdge;
+            const candidates: Circle[] = [];
+            const smallestYins = nodeEdgeTanGroup.filter(tge => tge.parity === "yin").sort((a, b) => a.circle.radius - b.circle.radius);
+            if (smallestYins.length > 0) {
+                candidates.push(smallestYins[0].circle);
+            }
+            const smallestYangs = nodeEdgeTanGroup.filter(tge => tge.parity === "yang").sort((a, b) => a.circle.radius - b.circle.radius);
+            if (smallestYangs.length > 0) {
+                candidates.push(smallestYangs[0].circle);
+            }
+
+            this._edges.filter(candidateEdge => candidates.includes(candidateEdge.circle)).forEach(nodeEdge => {
+                const perpendicularAngle = this.getPerpendicular(nodeEdge, refAngle);
+                if (perpendicularAngle > minPerpendicularAngle) {
+                    return;
+                }
+
+                minPerpendicularAngle = perpendicularAngle;
+                nextEdge = nodeEdge;
+                return;
+            });
         });
         return nextEdge;
     }

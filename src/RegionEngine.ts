@@ -143,7 +143,7 @@ export class RegionEngine {
             }
             circle.children = circle.children.filter(child => !dirtyCircles.includes(child));
             circle.parents = circle.children.filter(parent => !dirtyCircles.includes(parent));
-        })
+        });
 
         // Affected nodes are all nodes which include dirty circles.
         const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => dirtyCircles.includes(tge.circle))));
