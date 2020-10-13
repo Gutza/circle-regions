@@ -7,6 +7,9 @@ console.log("=== Two tangent circles ===");
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));
 engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));
+//   Comment this block to get "Error: Inner tangent edge found 2 times!" during "=== Four tangent circles ===" -- probably a caching issue
+// Uncomment this block to get "Error: Region right already set!"         during "=== Four tangent circles + chaotic circle ===" -- probably a real tangency computation issue
+/*
 console.log("=== Three tangent circles ===");
 engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
 console.log("=== Four tangent circles ===");
@@ -14,6 +17,8 @@ engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
 console.log("=== Four tangent circles + chaotic circle ===");
 engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
 engine.regions;
+*/
+// /block
 
 // TEMPORARY DEBUGGING
 console.log("=== Three tangent circles ===");
