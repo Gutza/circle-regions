@@ -1,5 +1,5 @@
 import { Circle } from "../geometry/Circle";
-import GraphLoop from "./GraphLoop";
+import { IGraphLoop } from "../Types";
 import GraphNode from "./GraphNode";
 
 export default class GraphEdge {
@@ -9,8 +9,8 @@ export default class GraphEdge {
 
     public id?: any;
 
-    public RegionLeft: undefined | GraphLoop | null = undefined;
-    public RegionRight: undefined | GraphLoop | null = undefined;
+    public RegionLeft: undefined | IGraphLoop | null = undefined;
+    public RegionRight: undefined | IGraphLoop | null = undefined;
 
     constructor(circle: Circle, node1: GraphNode, node2: GraphNode, id?: any) {
         this._circle = circle;
