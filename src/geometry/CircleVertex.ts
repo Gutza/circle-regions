@@ -1,6 +1,6 @@
 import GraphNode from "../topology/GraphNode";
 import { Circle } from "./Circle";
-import { atan2, normalizeAngle } from "./utils/angles";
+import { normalizeAngle } from "./utils/angles";
 
 export default class CircleVertex {
     private _angle: number;
@@ -8,7 +8,9 @@ export default class CircleVertex {
 
     constructor(node: GraphNode, circle: Circle) {
         this._node = node;
-        this._angle = normalizeAngle(atan2(circle.center, node.coordinates));
+        this._angle = normalizeAngle(
+            Math.atan2(node.coordinates.y - circle.center.y, node.coordinates.x - circle.center.x)
+        );
     }
 
     public get angle(): number {
