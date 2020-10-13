@@ -49,8 +49,6 @@ export class RegionEngine {
             throw new Error("Unexpected condition: multiple nodes with the same coordinates!");
         }
 
-        console.log("Touching circles", circle1.id, "and", circle2.id, "in RegionEngine.addNode()");
-
         circle1.isDirty = true;
         circle2.isDirty = true;
 
@@ -66,7 +64,6 @@ export class RegionEngine {
     }
 
     public onCircleEvent = (circle: Circle) => {
-        console.log("Resetting circle caches for circle", circle.id);
         this._resetCircleCaches(circle);
     }
 
@@ -133,7 +130,6 @@ export class RegionEngine {
     // (1/5)
     private _removeDirtyNodesVertices = () => {
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
-        console.log("_resetDirtyCaches on", dirtyCircles.length, "circles");
 
         // Affected nodes are all nodes which include dirty circles.
         const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => dirtyCircles.includes(tge.circle))));
@@ -141,11 +137,12 @@ export class RegionEngine {
         // Remove the dirty circles from all affected nodes.
         affectedNodes.forEach(node => node.removeCircles(dirtyCircles));
 
-        console.log("Node count before filtering", this._nodes.length, "(affected", affectedNodes.length, ")");
         this._nodes = this._nodes.filter((node): boolean => {
             if (!affectedNodes.includes(node)) {
                 return true;
             }
+
+            // TODO: Is it worth improving this? We could clean up all circles again if the node isn't valid.
 
             this._circles.forEach(circle => {
                 circle.removeVertexByNode(node);
@@ -153,7 +150,6 @@ export class RegionEngine {
 
             return node.isValid();
         });
-        console.log("Node count after filtering", this._nodes.length);
     }
 
     /**
@@ -218,7 +214,6 @@ export class RegionEngine {
             }
         });
 
-        console.log("Adding vertices to", dirtyCircles.length, "dirty circles, out of", this._circles.length, "total");
         dirtyCircles.forEach(dirtyCircle => {
             const nodes = this._nodes.filter(node => node.tangencyGroups.some(tg => tg.some(tge => tge.circle == dirtyCircle)));
             nodes.forEach(node => {
@@ -237,7 +232,6 @@ export class RegionEngine {
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
                 const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, i);
-                console.log("Adding edge to circle", circle.id,"(existing", this._edges.length, "total)");
                 this._edges.push(newEdge);
                 newEdge.node1.addEdge(newEdge);
                 newEdge.node2.addEdge(newEdge);
@@ -314,15 +308,12 @@ export class RegionEngine {
 
     public get regions(): CircleRegion[] {
         if (this._regions !== undefined) {
-            console.log("Cached regions");
             return this._regions;
         }
 
         //  (1/5)
         this._removeDirtyNodesVertices();
         
-        console.log("Edge count at region time", this._edges.length);
-
         // (2/5)
         this._computeIntersections();
 
@@ -332,12 +323,8 @@ export class RegionEngine {
         // (4/5)
         const cycles = this._extractGraphCycles();
 
-        console.log("Cycle count", cycles.length);
-
         // (5/5)
         this._regions = this._computeRegions(cycles);
-
-        console.log("Computed regions");
 
         return this._regions;
     }
