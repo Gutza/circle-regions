@@ -135,6 +135,16 @@ export class RegionEngine {
     private _removeDirtyNodesVertices = (): void => {
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
 
+        this._circles.forEach(circle => {
+            if (dirtyCircles.includes(circle)) {
+                circle.parents = [];
+                circle.children = [];
+                return;
+            }
+            circle.children = circle.children.filter(child => !dirtyCircles.includes(child));
+            circle.parents = circle.children.filter(parent => !dirtyCircles.includes(parent));
+        })
+
         // Affected nodes are all nodes which include dirty circles.
         const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => dirtyCircles.includes(tge.circle))));
 
@@ -166,7 +176,7 @@ export class RegionEngine {
      * gets contaminated -- its vertices need re-sorting, its edges deleted and re-created,
      * and all adjacent regions need to be deleted and re-computed.
      * 
-     * As such, dirty vertex and node cleanup must be performed before computing the
+     * As such, dirty child/parent, vertex and node cleanup must be performed before computing the
      * intersections, while edge and region cleanup must be done after computing them.
      * 
      * This also means the set of dirty circles potentially increases in size during
@@ -209,7 +219,6 @@ export class RegionEngine {
             dirtyEdges.push(edge);
             return false;
         });
-
 
         this._edges.forEach(cleanEdge => {
             if (!!cleanEdge.LeftCycle && cleanEdge.LeftCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {

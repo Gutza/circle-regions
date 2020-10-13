@@ -21,14 +21,14 @@ export default (graph: RegionEngine, circle1: Circle, circle2: Circle): void => 
     }
 
     if (round(circle1.radius) > round(centerDist + circle2.radius)) {
-        circle1.addChild(circle2);
-        circle2.addParent(circle1);
+        circle1.children.push(circle2);
+        circle2.parents.push(circle1);
         return;
     }
 
     if (round(circle2.radius) > round(centerDist + circle1.radius)) {
-        circle2.addChild(circle1);
-        circle1.addParent(circle2);
+        circle2.children.push(circle1);
+        circle1.parents.push(circle2);
         return;
     }
 

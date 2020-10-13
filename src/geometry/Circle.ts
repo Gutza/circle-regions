@@ -17,12 +17,12 @@ export class Circle extends EventEmitter implements IRegion {
     /**
      * This circle's "children" (i.e. other circles from the intersection set which are fully enclosed in this one).
      */
-    private _children: Circle[] = [];
+    public children: Circle[] = [];
 
     /**
      * This circle's "parents" (i.e. other circles from the intersection set which fully enclose this one).
      */
-    private _parents: Circle[] = [];
+    public parents: Circle[] = [];
 
     /**
      * This circle's center coordinates.
@@ -158,14 +158,6 @@ export class Circle extends EventEmitter implements IRegion {
         }
 
         return this._area = Math.PI * this.radius ** 2;
-    }
-
-    public addChild = (circle: Circle): void => {
-        this._children.push(circle);
-    }
-
-    public addParent = (circle: Circle): void => {
-        this._parents.push(circle);
     }
 
     public get boundingBox(): IBoundingBox {
