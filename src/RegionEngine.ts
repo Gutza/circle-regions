@@ -4,9 +4,8 @@ import ArcPolygon from "./geometry/ArcPolygon";
 import CircleVertex from "./geometry/CircleVertex";
 import intersectCircles from "./geometry/utils/intersectCircles";
 import { round } from "./geometry/utils/numbers";
-import { CircleRegion, IPoint, onMoveEvent, onResizeEvent, TIntersectionType, TTraversalDirection } from "./Types";
+import { CircleRegion, IGraphLoop, IPoint, onMoveEvent, onResizeEvent, TIntersectionType, TTraversalDirection } from "./Types";
 import GraphEdge from "./topology/GraphEdge";
-import GraphLoop from "./topology/GraphLoop";
 import GraphNode from "./topology/GraphNode";
 
 export class RegionEngine {
@@ -79,8 +78,10 @@ export class RegionEngine {
         return this._nodes;
     }
 
-    private _traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): GraphLoop | null {
-        const loop = new GraphLoop();
+    private _traceLoop(startEdge: GraphEdge, direction: TTraversalDirection): IGraphLoop | null {
+        const loop: IGraphLoop = {
+            oEdges: [],
+        }
         const startEdgeEndNode = direction == "forward" ? startEdge.node2 : startEdge.node1;
 
         let currentEdgeEndNode = startEdgeEndNode;
@@ -200,6 +201,8 @@ export class RegionEngine {
         dirtyCircles.forEach(dirtyCircle => {
             const nodes = this._nodes.filter(node => node.tangencyGroups.some(tg => tg.some(tge => tge.circle == dirtyCircle)));
             nodes.forEach(node => {
+                // This is safe: circle.addVertex() refuses to re-add existing vertices,
+                // and new vertices pointing to a node contained in an existing vertex.
                 dirtyCircle.addVertex(new CircleVertex(node, dirtyCircle));
             });
         });
@@ -223,8 +226,8 @@ export class RegionEngine {
     }
 
     // (4/5)
-    private _computeLoops = (): GraphLoop[] => {
-        const loops: GraphLoop[] = [];
+    private _computeLoops = (): IGraphLoop[] => {
+        const loops: IGraphLoop[] = [];
 
         while (true) {
             let some = false;
@@ -257,7 +260,7 @@ export class RegionEngine {
     }
 
     // (5/5)
-    private _computeRegions = (loops: GraphLoop[]): CircleRegion[] => {
+    private _computeRegions = (loops: IGraphLoop[]): CircleRegion[] => {
         const newRegions: CircleRegion[] = loops.map(loop => {
             const arcs: CircleArc[] = [];
             // TODO: Optimize isContour, we're processing the same array twice

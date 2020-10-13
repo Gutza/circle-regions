@@ -1,5 +1,6 @@
 import ArcPolygon from "./geometry/ArcPolygon";
 import { Circle } from "./geometry/Circle";
+import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
 export interface IPoint {
@@ -53,3 +54,12 @@ export interface IBoundingBox {
 
 export const onMoveEvent: symbol = Symbol('move');
 export const onResizeEvent: symbol = Symbol('resize');
+
+export interface IGraphLoop {
+    oEdges: IOrientedEdge[];
+}
+
+interface IOrientedEdge {
+    edge: GraphEdge;
+    direction: TTraversalDirection;
+}
