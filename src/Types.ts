@@ -1,5 +1,5 @@
-import ArcPolygon from "./geometry/ArcPolygon";
 import { Circle } from "./geometry/Circle";
+import CircleArc from "./geometry/CircleArc";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
@@ -45,8 +45,6 @@ export interface IGraphEnd {
     direction: TTraversalDirection;
 }
 
-export type CircleRegion = Circle | ArcPolygon;
-
 export interface IBoundingBox {
     minPoint: IPoint;
     maxPoint: IPoint;
@@ -55,11 +53,22 @@ export interface IBoundingBox {
 export const onMoveEvent: symbol = Symbol('move');
 export const onResizeEvent: symbol = Symbol('resize');
 
+// No need to export
+interface IOrientedEdge {
+    edge: GraphEdge;
+    direction: TTraversalDirection;
+}
+
 export interface IGraphCycle {
     oEdges: IOrientedEdge[];
 }
 
-interface IOrientedEdge {
-    edge: GraphEdge;
-    direction: TTraversalDirection;
+export interface ICircleRegions {
+    circles: Circle[];
+    contours: IArcPolygon[];
+    regions: IArcPolygon[];
+}
+
+export interface IArcPolygon {
+    arcs: CircleArc[];
 }

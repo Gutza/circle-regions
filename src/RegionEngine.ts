@@ -1,10 +1,9 @@
 import { Circle } from "./geometry/Circle";
 import CircleArc from "./geometry/CircleArc";
-import ArcPolygon from "./geometry/ArcPolygon";
 import CircleVertex from "./geometry/CircleVertex";
 import intersectCircles from "./geometry/utils/intersectCircles";
 import { round } from "./geometry/utils/numbers";
-import { CircleRegion, IGraphCycle, IPoint, onMoveEvent, onResizeEvent, TIntersectionType, TTraversalDirection } from "./Types";
+import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, onMoveEvent, onResizeEvent, TIntersectionType, TTraversalDirection } from "./Types";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
@@ -12,10 +11,15 @@ export class RegionEngine {
     private _nodes: GraphNode[] = [];
     private _edges: GraphEdge[] = [];
     private _circles: Circle[] = [];
-    private _regions?: CircleRegion[] = undefined;
+    private _regions: ICircleRegions = {
+        circles: [],
+        contours: [],
+        regions: [],
+    };
+    private _dirtyRegions: boolean = false;
 
     public addCircle = (circle: Circle) => {
-        this._regions = undefined;
+        this._dirtyRegions = true;
 
         if (this._circles.includes(circle)) {
             console.warn("Circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
@@ -36,7 +40,7 @@ export class RegionEngine {
         circle.removeListener(onMoveEvent, this.onCircleEvent);
         circle.removeListener(onResizeEvent, this.onCircleEvent);
         this._circles = this._circles.filter(c => c !== circle);
-        this._resetCircleCaches(circle);
+        this._dirtyRegions = true;
     }
 
     public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
@@ -64,11 +68,7 @@ export class RegionEngine {
     }
 
     public onCircleEvent = (circle: Circle) => {
-        this._resetCircleCaches(circle);
-    }
-
-    private _resetCircleCaches = (circle: Circle) => {
-        this._regions = undefined;
+        this._dirtyRegions = true;
     }
 
     public get nodes(): GraphNode[] {
@@ -127,8 +127,12 @@ export class RegionEngine {
         }
     }
     
+    private _removeDirtyRegions = (dirtyCircles: Circle[], regions: IArcPolygon[]): IArcPolygon[] => (
+        regions.filter(region => region.arcs.every(arc => !dirtyCircles.includes(arc.circle)))
+    );
+
     // (1/5)
-    private _removeDirtyNodesVertices = () => {
+    private _removeDirtyNodesVertices = (): void => {
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
 
         // Affected nodes are all nodes which include dirty circles.
@@ -192,6 +196,9 @@ export class RegionEngine {
     // (3/5)
     private _rebuildDirtyEdges = () => {
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
+
+        this._regions.contours = this._removeDirtyRegions(dirtyCircles, this._regions.contours);
+        this._regions.regions = this._removeDirtyRegions(dirtyCircles, this._regions.regions);
         
         const dirtyEdges: GraphEdge[] = [];
         this._edges = this._edges.filter(edge => {
@@ -231,7 +238,7 @@ export class RegionEngine {
             });
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, i);
+                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c" + circle.id + "e" + i);
                 this._edges.push(newEdge);
                 newEdge.node1.addEdge(newEdge);
                 newEdge.node2.addEdge(newEdge);
@@ -276,8 +283,10 @@ export class RegionEngine {
     }
 
     // (5/5)
-    private _computeRegions = (cycles: IGraphCycle[]): CircleRegion[] => {
-        const newRegions: CircleRegion[] = cycles.map(cycle => {
+    private _refreshRegions = (cycles: IGraphCycle[]): void => {
+        this._regions.circles = this._circles.filter(circle => circle.vertices.length == 0);
+
+        cycles.forEach(cycle => {
             const arcs: CircleArc[] = [];
             let isContour = true;
             cycle.oEdges.forEach(oEdge => {
@@ -300,14 +309,16 @@ export class RegionEngine {
                     oEdge.direction == "backward",
                 ));
             });
-            return new ArcPolygon(arcs, isContour);
+            if (isContour) {
+                this._regions.contours.push({arcs: arcs});
+            } else {
+                this._regions.regions.push({arcs: arcs});
+            }
         });
-
-        return newRegions.concat(this._circles.filter(circle => circle.vertices.length == 0));
     }
 
-    public get regions(): CircleRegion[] {
-        if (this._regions !== undefined) {
+    public get regions(): ICircleRegions {
+        if (!this._dirtyRegions) {
             return this._regions;
         }
 
@@ -324,8 +335,9 @@ export class RegionEngine {
         const cycles = this._extractGraphCycles();
 
         // (5/5)
-        this._regions = this._computeRegions(cycles);
+        this._refreshRegions(cycles);
 
+        this._dirtyRegions = false;
         return this._regions;
     }
 
