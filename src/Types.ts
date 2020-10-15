@@ -72,3 +72,8 @@ export interface ICircleRegions {
 export interface IArcPolygon {
     arcs: CircleArc[];
 }
+
+export interface INextTangentEdge {
+    edge: GraphEdge;
+    sameSide: boolean;
+}

@@ -1,4 +1,4 @@
-import { IGraphEnd, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType, TTraversalDirection } from "../Types";
+import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType, TTraversalDirection } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
@@ -186,24 +186,25 @@ export default class GraphNode {
         return this._tangencyGroups;
     }
 
-    public getOtherEnd = (edge: GraphEdge, direction: TTraversalDirection): IGraphEnd => {
-        if (edge.node1 === edge.node2) {
+    public getOtherEnd = (tanEdge: INextTangentEdge, direction: TTraversalDirection): IGraphEnd => {
+        if (tanEdge.edge.node1 === tanEdge.edge.node2) {
             const otherDirection: TTraversalDirection = direction === "backward" ? "forward" : "backward";
+            const newDirection: TTraversalDirection = tanEdge.sameSide ? otherDirection : direction;
             return {
-                node: edge.node1,
-                direction: otherDirection,
+                node: tanEdge.edge.node1,
+                direction: newDirection,
             };
         }
-        return this === edge.node1 ? {
-            node: edge.node2,
+        return this === tanEdge.edge.node1 ? {
+            node: tanEdge.edge.node2,
             direction: "forward",
         } : {
-            node: edge.node1,
+            node: tanEdge.edge.node1,
             direction: "backward",
         };
     }
 
-    private _getNextTangentEdge = (currentEdge: GraphEdge, edgeTanGroup: ITangencyGroup, edgeTanElem: ITangencyElement): GraphEdge | undefined => {
+    private _getNextTangentEdge = (currentEdge: GraphEdge, currentDirection: TTraversalDirection, edgeTanGroup: ITangencyGroup, edgeTanElem: ITangencyElement): INextTangentEdge | undefined => {
         /**
          * All circles in a tangency group share the same incidence angle, and
          * elements with the same parity are less divergent than elements with opposite parities.
@@ -216,12 +217,12 @@ export default class GraphNode {
         if (sameSideNeighbors.length > 0) {
             let winningTangencyElement: ITangencyElement | undefined = undefined;
             let getSameEdgeEnd: Function;
-            if (this === currentEdge.node1) {
-                winningTangencyElement = sameSideNeighbors.reverse().find(winningEdge => winningEdge.circle.radius > currentEdge.circle.radius);
-                getSameEdgeEnd = (edge: GraphEdge): GraphNode => edge.node1;
-            } else {
+            if (currentDirection == "forward") {
                 winningTangencyElement = sameSideNeighbors.find(winningEdge => winningEdge.circle.radius < currentEdge.circle.radius);
                 getSameEdgeEnd = (edge: GraphEdge): GraphNode => edge.node2;
+            } else {
+                winningTangencyElement = sameSideNeighbors.reverse().find(winningEdge => winningEdge.circle.radius > currentEdge.circle.radius);
+                getSameEdgeEnd = (edge: GraphEdge): GraphNode => edge.node1;
             }
 
             if (winningTangencyElement !== undefined) {
@@ -232,12 +233,15 @@ export default class GraphNode {
                 }
 
                 console.log("Winning inner");
-                return winningEdges[0];
+                return {
+                    edge: winningEdges[0],
+                    sameSide: true,
+                };
             }
         }
 
         // No luck on the same side; let's check the opposite side, but only if it still makes sense to
-        if (this === currentEdge.node2) {
+        if (currentDirection === "forward") {
             return undefined;
         }
         const oppositeParity: TTangencyParity = edgeTanElem.parity === "yin" ? "yang" : "yin";
@@ -257,10 +261,13 @@ export default class GraphNode {
         }
 
         console.log("Winning outer");
-        return winningEdges[0];
+        return {
+            edge: winningEdges[0],
+            sameSide: false,
+        };
     }
 
-    public getNextEdge = (currentEdge: GraphEdge): GraphEdge | undefined => {
+    public getNextEdge = (currentEdge: GraphEdge, currentDirection: TTraversalDirection): INextTangentEdge | undefined => {
         const tanGroups = this._tangencyGroups.filter(tg => tg.some(tge => tge.circle === currentEdge.circle));
         if (tanGroups.length !== 1) {
             throw new Error("Edge circle found in " + tanGroups.length + " tangency groups!");
@@ -272,16 +279,16 @@ export default class GraphNode {
         }
 
         if (tgElems[0].parity !== "chaos") {
-            const nextTangentEdge = this._getNextTangentEdge(currentEdge, tanGroups[0], tgElems[0]);
+            const nextTangentEdge = this._getNextTangentEdge(currentEdge, currentDirection, tanGroups[0], tgElems[0]);
             if (nextTangentEdge !== undefined) {
-                console.log("Next tangent edge found");
+                console.log("Tangent edge", currentEdge.id, "/", currentDirection, "->", nextTangentEdge.edge.id);
                 return nextTangentEdge;
             }
-            console.log("Next tangent edge NOT found");
+            console.log("Tangent edge", currentEdge.id, "/", currentDirection,"is a dead end");
         }
 
         let minPerpendicularAngle = Number.MAX_VALUE;
-        let nextEdge: GraphEdge | undefined = undefined;
+        let nextEdge: INextTangentEdge | undefined = undefined;
 
         const visitedTgGroups: ITangencyGroup[] = [ tanGroups[0] ];
 
@@ -309,7 +316,10 @@ export default class GraphNode {
                     }
     
                     minPerpendicularAngle = perpendicularAngle;
-                    nextEdge = tgEdge;
+                    nextEdge = {
+                        edge: tgEdge,
+                        sameSide: true,
+                    };
     
                     if (0 == round(minPerpendicularAngle)) {
                         console.log("Zero angle", currentEdge.circle.id, tgEdge.circle.id);
@@ -339,7 +349,10 @@ export default class GraphNode {
                     }
 
                     minPerpendicularAngle = perpendicularAngle;
-                    nextEdge = candidateEdge;
+                    nextEdge = { 
+                        edge: candidateEdge,
+                        sameSide: true,
+                    };
                     return;
                 });
         });
