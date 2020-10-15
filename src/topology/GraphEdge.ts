@@ -9,8 +9,8 @@ export default class GraphEdge {
 
     public id?: any;
 
-    public TrigLeftCycle: undefined | IGraphCycle | null = undefined;
-    public ClockLeftCycle: undefined | IGraphCycle | null = undefined;
+    public InnerCycle: undefined | IGraphCycle | null = undefined;
+    public OuterCycle: undefined | IGraphCycle | null = undefined;
 
     constructor(circle: Circle, node1: GraphNode, node2: GraphNode, id?: any) {
         this._circle = circle;

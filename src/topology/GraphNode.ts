@@ -240,7 +240,9 @@ export default class GraphNode {
             }
         }
 
-        // No luck on the same side; let's check the opposite side, but only if it still makes sense to
+        // No luck on the same side; look for an outer region by picking the largest
+        // circle on the opposite side -- but only if we're traversing backwards
+        // (when we traverse forwards we're looking for inner regions)
         if (currentDirection === "forward") {
             return undefined;
         }

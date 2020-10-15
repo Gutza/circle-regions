@@ -90,15 +90,15 @@ export class RegionEngine {
                 direction: currentEdgeDirection,
             });
             if (currentEdgeDirection == "forward") {
-                if (currentEdge.TrigLeftCycle) {
-                    throw new Error("Region left/trig already set for "+currentEdge.id+"!");
+                if (currentEdge.InnerCycle) {
+                    throw new Error("Inner cycle already set for "+currentEdge.id+"!");
                 }
-                currentEdge.TrigLeftCycle = cycle;
+                currentEdge.InnerCycle = cycle;
             } else {
-                if (currentEdge.ClockLeftCycle) {
-                    throw new Error("Region left/clock already set for "+currentEdge.id+"!");
+                if (currentEdge.OuterCycle) {
+                    throw new Error("Outer cycle already set for "+currentEdge.id+"!");
                 }
-                currentEdge.ClockLeftCycle = cycle;
+                currentEdge.OuterCycle = cycle;
             }
 
             const nextEdge = currentEdgeEndNode.getNextEdge(currentEdge, currentEdgeDirection);
@@ -109,15 +109,15 @@ export class RegionEngine {
                 }
 
                 if (direction == "forward") {
-                    startEdge.TrigLeftCycle = null;
+                    startEdge.InnerCycle = null;
                 } else {
-                    startEdge.ClockLeftCycle = null;
+                    startEdge.OuterCycle = null;
                 }
                 return null;
             }
 
             const oEnd = currentEdgeEndNode.getOtherEnd(nextEdge, currentEdgeDirection);
-            
+
             currentEdge = nextEdge.edge;
             currentEdgeEndNode = oEnd.node;
             currentEdgeDirection = oEnd.direction;
@@ -227,12 +227,12 @@ export class RegionEngine {
         });
 
         this._edges.forEach(cleanEdge => {
-            if (!!cleanEdge.TrigLeftCycle && cleanEdge.TrigLeftCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
-                cleanEdge.TrigLeftCycle = undefined;
+            if (!!cleanEdge.InnerCycle && cleanEdge.InnerCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
+                cleanEdge.InnerCycle = undefined;
             }
 
-            if (!!cleanEdge.ClockLeftCycle && cleanEdge.ClockLeftCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
-                cleanEdge.ClockLeftCycle = undefined;
+            if (!!cleanEdge.OuterCycle && cleanEdge.OuterCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
+                cleanEdge.OuterCycle = undefined;
             }
         });
 
@@ -269,13 +269,13 @@ export class RegionEngine {
         const cycles: IGraphCycle[] = [];
 
         this._edges.forEach(edge => {
-            if (edge.TrigLeftCycle === undefined) {
+            if (edge.InnerCycle === undefined) {
                 const cycle = this._extractGraphCycle(edge, "forward");
                 if (cycle !== null) {
                     cycles.push(cycle);
                 }
             }
-            if (edge.ClockLeftCycle === undefined) {
+            if (edge.OuterCycle === undefined) {
                 const cycle = this._extractGraphCycle(edge, "backward");
                 if (cycle !== null) {
                     cycles.push(cycle);
