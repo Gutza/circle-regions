@@ -337,7 +337,7 @@ export default class GraphNode {
             }
 
             console.log("TANGENCY MECHANISM");
-            const candidates: Circle[] = [];
+            let candidates: Circle[] = [];
             const smallestYinCircles = tg.filter(tge => tge.parity === "yin").sort((a, b) => a.circle.radius - b.circle.radius);
             if (smallestYinCircles.length > 0) {
                 candidates.push(smallestYinCircles[0].circle);
@@ -348,7 +348,35 @@ export default class GraphNode {
             }
 
             this._edges.
-                filter(candidateEdge => candidates.includes(candidateEdge.circle)).
+                filter(candidateEdge => candidates.includes(candidateEdge.circle) && candidateEdge.node1 === this).
+                forEach(candidateEdge => {
+                    const perpendicularAngle = this.getPerpendicular(candidateEdge, refAngle);
+                    if (perpendicularAngle > minPerpendicularAngle) {
+                        return;
+                    }
+
+                    minPerpendicularAngle = perpendicularAngle;
+                    nextEdge = { 
+                        edge: candidateEdge,
+                        sameSide: true,
+                    };
+                    return;
+                });
+
+            if (nextEdge !== undefined) {
+                return;
+            }
+
+            candidates = [];
+            if (smallestYinCircles.length > 0) {
+                candidates.push(smallestYinCircles[smallestYinCircles.length-1].circle);
+            }
+            if (smallestYangCircles.length > 0) {
+                candidates.push(smallestYangCircles[smallestYangCircles.length-1].circle);
+            }
+
+            this._edges.
+                filter(candidateEdge => candidates.includes(candidateEdge.circle) && candidateEdge.node2 === this).
                 forEach(candidateEdge => {
                     const perpendicularAngle = this.getPerpendicular(candidateEdge, refAngle);
                     if (perpendicularAngle > minPerpendicularAngle) {
@@ -363,6 +391,7 @@ export default class GraphNode {
                     return;
                 });
         });
+        
         return nextEdge;
     }
 
