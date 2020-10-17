@@ -102,6 +102,7 @@ export class RegionEngine {
             }
 
             const nextEdge = currentEdgeEndNode.getNextEdge(currentEdge, currentEdgeDirection);
+            console.log(currentEdge.id, "-->", nextEdge?.edge.id);
 
             if (nextEdge === undefined) {
                 if (currentEdgeEndNode !== startEdgeEndNode) {
@@ -139,6 +140,7 @@ export class RegionEngine {
 
     // (1/5)
     private _removeDirtyNodesVertices = (): void => {
+        this.nodes.forEach(node => node.touched = false);
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
 
         this._circles.forEach(circle => {
@@ -168,7 +170,7 @@ export class RegionEngine {
                 circle.removeVertexByNode(node);
             });
 
-            return node.isValid();
+            return false;
         });
     }
 
@@ -254,9 +256,21 @@ export class RegionEngine {
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
                 const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c." + circle.id + "/e." + i);
+                let inhibitNewEdge: boolean = false;
+                this._edges.forEach(edge => {
+                    if (!edge.equals(newEdge)) {
+                        return;
+                    }
+
+                    edge.InnerCycle = undefined;
+                    edge.OuterCycle = undefined;
+                });
+                if (inhibitNewEdge) {
+                    continue;
+                }
                 this._edges.push(newEdge);
                 newEdge.node1.addEdge(newEdge);
-                if (circle.vertices.length > 1) {
+                if (newEdge.node1 !== newEdge.node2) {
                     newEdge.node2.addEdge(newEdge);
                 }
             }

@@ -30,4 +30,8 @@ export default class GraphEdge {
     public get circle(): Circle {
         return this._circle;
     }
+
+    public equals = (that: GraphEdge): boolean => {
+        return this.circle === that.circle && this.node1 === that.node1 && this.node2 === that.node2;
+    }
 }

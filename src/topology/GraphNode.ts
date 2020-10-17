@@ -5,6 +5,7 @@ import { normalizeAngle } from '../geometry/utils/angles';
 import { round } from "../geometry/utils/numbers";
 
 export default class GraphNode {
+    public touched: boolean = true;
     private _tangencyGroups: ITangencyGroup[];
     private _coordinates: IPoint;
     private _edges: GraphEdge[] = [];
@@ -15,6 +16,10 @@ export default class GraphNode {
     }
 
     public addCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType) {
+        if (!this.touched) {
+            this._edges = [];
+            this.touched = true;
+        }
         let tanGroups = this._tangencyGroups.filter(tanGroup => tanGroup.some(tgElement => tgElement.circle === circle1 || tgElement.circle === circle2));
         if (tanGroups.length > 2) {
             // Easiest case: just die. This should never happen with good data.
@@ -292,8 +297,6 @@ export default class GraphNode {
         let minPerpendicularAngle = Number.MAX_VALUE;
         let nextEdge: INextTangentEdge | undefined = undefined;
 
-        const visitedTgGroups: ITangencyGroup[] = [ tanGroups[0] ];
-
         const refAngle = normalizeAngle(this.getPerpendicular(currentEdge, Math.PI));
 
         this._tangencyGroups.forEach(tg => {
@@ -328,7 +331,9 @@ export default class GraphNode {
                     }
     
                     return;
-                })
+                });
+
+                return nextEdge;
             }
 
             console.log("TANGENCY MECHANISM");
