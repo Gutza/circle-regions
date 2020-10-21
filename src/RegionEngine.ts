@@ -11,6 +11,7 @@ export class RegionEngine {
     private _edges: GraphEdge[] = [];
     private _circles: Circle[] = [];
     private _regions: ICircleRegions = {
+        stale: true,
         circles: [],
         contours: [],
         regions: [],
@@ -337,8 +338,11 @@ export class RegionEngine {
 
     public get regions(): ICircleRegions {
         if (!this._dirtyRegions) {
+            this._regions.stale = true;
             return this._regions;
         }
+
+        this._regions.stale = false;
 
         //  (1/5)
         this._removeDirtyNodesVertices();

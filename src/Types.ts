@@ -64,6 +64,7 @@ export interface IGraphCycle {
 }
 
 export interface ICircleRegions {
+    stale: boolean;
     circles: Circle[];
     contours: IArcPolygon[];
     regions: IArcPolygon[];
