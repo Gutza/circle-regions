@@ -1,6 +1,5 @@
-library/
+.vscode
 circle-regions.Bundle.js
-index.ts
+circle-regions*.tgz
 test/
-tsconfig.json
 README.md
