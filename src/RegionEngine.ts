@@ -6,6 +6,9 @@ import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, onMoveEvent, onResize
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
+/**
+ * The main engine for computing regions resulted from intersecting circles.
+ */
 export class RegionEngine {
     private _nodes: GraphNode[] = [];
     private _edges: GraphEdge[] = [];
@@ -18,24 +21,37 @@ export class RegionEngine {
     };
     private _dirtyRegions: boolean = false;
 
-    public addCircle = (circle: Circle) => {
+    /**
+     * Add a circle to the engine.
+     * Computationally cheap, unless there are many circles AND @see guaranteedNew is false.
+     * @param circle The circle to add.
+     * @param guaranteedNew Set to true if there is an external mechanism which ensures this is geometrically distinct from every other circle already added.
+     */
+    public addCircle = (circle: Circle, guaranteedNew: boolean = false) => {
         this._dirtyRegions = true;
 
         if (this._circles.includes(circle)) {
-            console.warn("Circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
+            console.warn(`Circle with center (${circle.center.x}, ${circle.center.y}), radius ${circle.radius} and ID ${circle.id} already exists.`);
             return;
         }
 
-        if (this._circles.some(gc => gc.equals(circle))) {
-            console.warn("Another circle with x="+circle.center.x+", y="+circle.center.y+", r="+circle.radius+" already exists.");
+        if (!guaranteedNew && this._circles.some(gc => gc.equals(circle))) {
+            console.warn(`Another circle with center (${circle.center.x}, ${circle.center.y}) and radius ${circle.radius} already exists."`);
             return;
         }
+
         circle.isDirty = true;
         circle.on(onMoveEvent, this.onCircleEvent);
         circle.on(onResizeEvent, this.onCircleEvent);
         this._circles.push(circle);
     }
 
+    // TODO: Make sure this really is computationally cheap -- right now it isn't.
+    /**
+     * Remove an existing circle from the engine.
+     * Guaranteed computationally cheap.
+     * @param circle The circle to remove.
+     */
     public removeCircle = (circle: Circle) => {
         circle.removeListener(onMoveEvent, this.onCircleEvent);
         circle.removeListener(onResizeEvent, this.onCircleEvent);
@@ -43,7 +59,7 @@ export class RegionEngine {
         this._dirtyRegions = true;
     }
 
-    public addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
+    private _addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
         let sameCoordinates = this._nodes.filter(n =>
             round(n.coordinates.x) === round(intersectionPoint.x) &&
             round(n.coordinates.y) === round(intersectionPoint.y)
@@ -67,7 +83,7 @@ export class RegionEngine {
         return newNode;
     }
 
-    public onCircleEvent = (circle: Circle) => {
+    public onCircleEvent = () => {
         this._dirtyRegions = true;
     }
 
@@ -336,6 +352,12 @@ export class RegionEngine {
         });
     }
 
+    /**
+     * Retrieve the current regions. This is the beef.
+     * The engine caches everything it can, and only computes what it must.
+     * This method is the cheapest of all, if nothing changed since the last time it was called,
+     * or the most expensive of all, if everything changed.
+     */
     public get regions(): ICircleRegions {
         if (!this._dirtyRegions) {
             this._regions.stale = true;
@@ -363,6 +385,9 @@ export class RegionEngine {
         return this._regions;
     }
 
+    /**
+     * Retrieve the current set of circles registered by the engine.
+     */
     public get circles(): Circle[] {
         return this._circles;
     }
@@ -406,7 +431,7 @@ export class RegionEngine {
                 x: x,
                 y: y,
             };
-            this.addNode(circle1, circle2, tangentPoint, "outerTangent");
+            this._addNode(circle1, circle2, tangentPoint, "outerTangent");
             return;
         }
     
@@ -415,7 +440,7 @@ export class RegionEngine {
                 x: x,
                 y: y,
             };
-            this.addNode(circle1, circle2, tangentPoint, "innerTangent");
+            this._addNode(circle1, circle2, tangentPoint, "innerTangent");
             return;
         }
     
@@ -427,12 +452,12 @@ export class RegionEngine {
             x: x+rx,
             y: y-ry,
         };
-        this.addNode(circle1, circle2, point1, "lens");
+        this._addNode(circle1, circle2, point1, "lens");
     
         const point2: IPoint = {
             x: x-rx,
             y: y+ry,
         }
-        this.addNode(circle1, circle2, point2, "lens");
+        this._addNode(circle1, circle2, point2, "lens");
     } 
 }
