@@ -52,7 +52,14 @@ export interface ITangencyElement {
 export type ITangencyGroup = ITangencyElement[];
 
 export enum ETraversalDirection {
+    /**
+     * Trigonometric direction.
+     */
     forward,
+
+    /**
+     * Clockwise direction, and also reverse the nodes when traversing.
+     */
     backward
 };
 
@@ -69,7 +76,11 @@ export interface IBoundingBox {
 export const onMoveEvent: symbol = Symbol('move');
 export const onResizeEvent: symbol = Symbol('resize');
 
-// No need to export
+/**
+ * Oriented edges must always be traversed in the indicated direction;
+ * in addition, if the direction is backwards, the nodes at the end of
+ * the edge must also be reversed before traversing.
+ */
 interface IOrientedEdge {
     edge: GraphEdge;
     direction: ETraversalDirection;
