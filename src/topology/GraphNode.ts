@@ -1,4 +1,4 @@
-import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, ETangencyParity, TTangencyType, ETraversalDirection } from "../Types";
+import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, ETangencyParity, ETangencyType, ETraversalDirection } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
@@ -83,27 +83,27 @@ export default class GraphNode {
         }
     }
 
-    public otherParity(knownParity: ETangencyParity, tangencyType: TTangencyType): ETangencyParity {
+    public otherParity(knownParity: ETangencyParity, tangencyType: ETangencyType): ETangencyParity {
         if (knownParity === ETangencyParity.chaos) {
             throw new Error("The known parity can't be chaos!");
         }
 
         if (knownParity === ETangencyParity.yin) {
-            if (tangencyType == "innerTangent") {
+            if (tangencyType === ETangencyType.innerTangent) {
                 return ETangencyParity.yin;
             } else {
                 return ETangencyParity.yang;
             }
         }
 
-        if (tangencyType == "innerTangent") {
+        if (tangencyType === ETangencyType.innerTangent) {
             return ETangencyParity.yang;
         } else {
             return ETangencyParity.yin;
         }
     }
 
-    private _addTangentCircle(newCircle: Circle, existingCircle: Circle, tangencyType: TTangencyType, existingGroup: ITangencyGroup): void {
+    private _addTangentCircle(newCircle: Circle, existingCircle: Circle, tangencyType: ETangencyType, existingGroup: ITangencyGroup): void {
         const tgExistingElements = existingGroup.filter(tgElem => tgElem.circle === existingCircle);
         if (tgExistingElements.length !== 1) {
             throw new Error("Existing tangency element count is " + tgExistingElements.length);
@@ -140,10 +140,10 @@ export default class GraphNode {
             parity1: ETangencyParity,
             parity2: ETangencyParity;
 
-        if (intersectionType == "innerTangent") {
+        if (intersectionType === ETangencyType.innerTangent) {
             parity1 = ETangencyParity.yin;
             parity2 = ETangencyParity.yin;
-        } else if (intersectionType == "outerTangent") {
+        } else if (intersectionType === ETangencyType.outerTangent) {
             parity1 = ETangencyParity.yin;
             parity2 = ETangencyParity.yang;
         } else {

@@ -4,7 +4,7 @@ import CircleVertex from "./geometry/CircleVertex";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection } from "./Types";
+import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType } from "./Types";
 
 export class InternalEngine {
     protected _nodes: GraphNode[] = [];
@@ -367,7 +367,7 @@ export class InternalEngine {
                 x: x,
                 y: y,
             };
-            this._addNode(circle1, circle2, tangentPoint, "outerTangent");
+            this._addNode(circle1, circle2, tangentPoint, ETangencyType.outerTangent);
             return;
         }
     
@@ -376,7 +376,7 @@ export class InternalEngine {
                 x: x,
                 y: y,
             };
-            this._addNode(circle1, circle2, tangentPoint, "innerTangent");
+            this._addNode(circle1, circle2, tangentPoint, ETangencyType.innerTangent);
             return;
         }
     
