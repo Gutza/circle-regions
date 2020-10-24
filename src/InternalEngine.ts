@@ -4,7 +4,7 @@ import CircleVertex from "./geometry/CircleVertex";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, TIntersectionType, TTraversalDirection } from "./Types";
+import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection } from "./Types";
 
 export class InternalEngine {
     protected _nodes: GraphNode[] = [];
@@ -67,11 +67,11 @@ export class InternalEngine {
         return newNode;
     }
 
-    protected _extractGraphCycle(startEdge: GraphEdge, direction: TTraversalDirection): IGraphCycle | null {
+    protected _extractGraphCycle(startEdge: GraphEdge, direction: ETraversalDirection): IGraphCycle | null {
         const cycle: IGraphCycle = {
             oEdges: [],
         }
-        const startEdgeEndNode = direction == "forward" ? startEdge.node2 : startEdge.node1;
+        const startEdgeEndNode = direction === ETraversalDirection.forward ? startEdge.node2 : startEdge.node1;
 
         let currentEdgeEndNode = startEdgeEndNode;
         let currentEdge: GraphEdge | undefined = startEdge;
@@ -82,7 +82,7 @@ export class InternalEngine {
                 edge: currentEdge,
                 direction: currentEdgeDirection,
             });
-            if (currentEdgeDirection == "forward") {
+            if (currentEdgeDirection === ETraversalDirection.forward) {
                 if (currentEdge.InnerCycle) {
                     throw new Error("Inner cycle already set for "+currentEdge.id+"!");
                 }
@@ -102,7 +102,7 @@ export class InternalEngine {
                     throw new Error("Unexpected condition: undefined edge after region was started!");
                 }
 
-                if (direction == "forward") {
+                if (direction === ETraversalDirection.forward) {
                     startEdge.InnerCycle = null;
                 } else {
                     startEdge.OuterCycle = null;
@@ -277,13 +277,13 @@ export class InternalEngine {
 
         this._edges.forEach(edge => {
             if (edge.InnerCycle === undefined) {
-                const cycle = this._extractGraphCycle(edge, "forward");
+                const cycle = this._extractGraphCycle(edge, ETraversalDirection.forward);
                 if (cycle !== null) {
                     cycles.push(cycle);
                 }
             }
             if (edge.OuterCycle === undefined) {
-                const cycle = this._extractGraphCycle(edge, "backward");
+                const cycle = this._extractGraphCycle(edge, ETraversalDirection.backward);
                 if (cycle !== null) {
                     cycles.push(cycle);
                 }
@@ -301,7 +301,7 @@ export class InternalEngine {
             const arcs: CircleArc[] = [];
             let isContour = true;
             cycle.oEdges.forEach(oEdge => {
-                isContour = isContour && oEdge.direction == "backward";
+                isContour = isContour && oEdge.direction === ETraversalDirection.backward;
                 const startNode = oEdge.edge.node1;
                 const endNode = oEdge.edge.node2;
                 const startVertex = oEdge.edge.circle.getVertexByNode(startNode);
@@ -317,7 +317,7 @@ export class InternalEngine {
                     endAngle,
                     startNode.coordinates,
                     endNode.coordinates,
-                    oEdge.direction == "backward",
+                    oEdge.direction === ETraversalDirection.backward,
                 ));
             });
             if (isContour) {

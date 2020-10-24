@@ -38,11 +38,14 @@ export interface ITangencyElement {
 }
 export type ITangencyGroup = ITangencyElement[];
 
-export type TTraversalDirection = "forward" | "backward";
+export enum ETraversalDirection {
+    forward,
+    backward
+};
 
 export interface IGraphEnd {
     node: GraphNode;
-    direction: TTraversalDirection;
+    direction: ETraversalDirection;
 }
 
 export interface IBoundingBox {
@@ -56,7 +59,7 @@ export const onResizeEvent: symbol = Symbol('resize');
 // No need to export
 interface IOrientedEdge {
     edge: GraphEdge;
-    direction: TTraversalDirection;
+    direction: ETraversalDirection;
 }
 
 export interface IGraphCycle {

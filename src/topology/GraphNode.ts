@@ -1,4 +1,4 @@
-import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType, TTraversalDirection } from "../Types";
+import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType, ETraversalDirection } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
@@ -191,25 +191,26 @@ export default class GraphNode {
         return this._tangencyGroups;
     }
 
-    public getOtherEnd = (tanEdge: INextTangentEdge, direction: TTraversalDirection): IGraphEnd => {
+    public getOtherEnd = (tanEdge: INextTangentEdge, direction: ETraversalDirection): IGraphEnd => {
         if (tanEdge.edge.node1 === tanEdge.edge.node2) {
-            const otherDirection: TTraversalDirection = direction === "backward" ? "forward" : "backward";
-            const newDirection: TTraversalDirection = tanEdge.sameSide ? otherDirection : direction;
+            const oldDirection: ETraversalDirection = direction === ETraversalDirection.backward ? ETraversalDirection.forward : ETraversalDirection.backward;
+            const newDirection: ETraversalDirection = tanEdge.sameSide ? oldDirection : direction;
             return {
                 node: tanEdge.edge.node1,
                 direction: newDirection,
             };
         }
+
         return this === tanEdge.edge.node1 ? {
             node: tanEdge.edge.node2,
-            direction: "forward",
+            direction: ETraversalDirection.forward,
         } : {
             node: tanEdge.edge.node1,
-            direction: "backward",
+            direction: ETraversalDirection.backward,
         };
     }
 
-    private _getNextTangentEdge = (currentEdge: GraphEdge, currentDirection: TTraversalDirection, edgeTanGroup: ITangencyGroup, edgeTanElem: ITangencyElement): INextTangentEdge | undefined => {
+    private _getNextTangentEdge = (currentEdge: GraphEdge, currentDirection: ETraversalDirection, edgeTanGroup: ITangencyGroup, edgeTanElem: ITangencyElement): INextTangentEdge | undefined => {
         /**
          * All circles in a tangency group share the same incidence angle, and
          * elements with the same parity are less divergent than elements with opposite parities.
@@ -222,7 +223,7 @@ export default class GraphNode {
         if (sameSideNeighbors.length > 0) {
             let winningTangencyElement: ITangencyElement | undefined = undefined;
             let getSameEdgeEnd: Function;
-            if (currentDirection == "forward") {
+            if (currentDirection === ETraversalDirection.forward) {
                 winningTangencyElement = sameSideNeighbors.find(winningEdge => winningEdge.circle.radius < currentEdge.circle.radius);
                 getSameEdgeEnd = (edge: GraphEdge): GraphNode => edge.node2;
             } else {
@@ -248,7 +249,7 @@ export default class GraphNode {
         // No luck on the same side; look for an outer region by picking the largest
         // circle on the opposite side -- but only if we're traversing backwards
         // (when we traverse forwards we're looking for inner regions)
-        if (currentDirection === "forward") {
+        if (currentDirection === ETraversalDirection.forward) {
             return undefined;
         }
         const oppositeParity: TTangencyParity = edgeTanElem.parity === "yin" ? "yang" : "yin";
@@ -274,7 +275,7 @@ export default class GraphNode {
         };
     }
 
-    public getNextEdge = (currentEdge: GraphEdge, currentDirection: TTraversalDirection): INextTangentEdge | undefined => {
+    public getNextEdge = (currentEdge: GraphEdge, currentDirection: ETraversalDirection): INextTangentEdge | undefined => {
         const tanGroups = this._tangencyGroups.filter(tg => tg.some(tge => tge.circle === currentEdge.circle));
         if (tanGroups.length !== 1) {
             throw new Error("Edge circle found in " + tanGroups.length + " tangency groups!");
