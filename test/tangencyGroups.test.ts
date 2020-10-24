@@ -2,6 +2,7 @@ import assert = require('assert');
 import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
+import { ETangencyParity } from '../src/Types';
 
 console.log("=== Two tangent circles ===");
 const engine = new RegionEngine();
@@ -48,8 +49,8 @@ describe("Tangency groups for two circles A-B", () => {
 
     engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.filter(tgElement => tgElement.parity === "yin").length;
-            yangCount += tanGroup.filter(tgElement => tgElement.parity === "yang").length;
+            yinCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yin).length;
+            yangCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yang).length;
         });
     });
 
@@ -72,8 +73,8 @@ describe("Tangency groups for three circles AA-B", () => {
     let yangCount = 0;
     engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.filter(tgElement => tgElement.parity === "yin").length;
-            yangCount += tanGroup.filter(tgElement => tgElement.parity === "yang").length;
+            yinCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yin).length;
+            yangCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yang).length;
         });
     });
 
@@ -111,8 +112,8 @@ describe("Tangency groups for four circles AA-BB", () => {
     let yangCount = 0;
     engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.filter(tgElement => tgElement.parity === "yin").length;
-            yangCount += tanGroup.filter(tgElement => tgElement.parity === "yang").length;
+            yinCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yin).length;
+            yangCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yang).length;
         });
     });
 

@@ -1,4 +1,4 @@
-import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, TTangencyParity, TTangencyType, ETraversalDirection } from "../Types";
+import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, ETangencyParity, TTangencyType, ETraversalDirection } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
@@ -45,7 +45,7 @@ export default class GraphNode {
                 let circle = tanGroupsCircle1.length == 0 ? circle1 : circle2;
                 const tanGroup: ITangencyGroup = [ {
                     circle: circle,
-                    parity: "chaos",
+                    parity: ETangencyParity.chaos,
                 } ]
                 this._tangencyGroups.push(tanGroup);
             }
@@ -71,35 +71,35 @@ export default class GraphNode {
             throw new Error("Existing tangency element count is " + tgElem1.length + " [2]");
         }
 
-        if (tgElem1[0].parity == "chaos" || tgElem2[0].parity == "chaos") {
-            if (tgElem1[0].parity == "chaos" && tgElem2[0].parity == "chaos") {
-                tgElem1[0].parity = "yin";
+        if (tgElem1[0].parity === ETangencyParity.chaos || tgElem2[0].parity === ETangencyParity.chaos) {
+            if (tgElem1[0].parity === ETangencyParity.chaos && tgElem2[0].parity === ETangencyParity.chaos) {
+                tgElem1[0].parity = ETangencyParity.yin;
             }
 
-            let knownElement = tgElem1[0].parity == "chaos" ? tgElem2[0] : tgElem1[0];
-            let chaoticElement = tgElem1[0].parity == "chaos" ? tgElem1[0] : tgElem2[0];
+            let knownElement = tgElem1[0].parity === ETangencyParity.chaos ? tgElem2[0] : tgElem1[0];
+            let chaoticElement = tgElem1[0].parity === ETangencyParity.chaos ? tgElem1[0] : tgElem2[0];
             chaoticElement.parity = this.otherParity(knownElement.parity, intersectionType);
             return;
         }
     }
 
-    public otherParity(knownParity: TTangencyParity, tangencyType: TTangencyType): TTangencyParity {
-        if (knownParity == "chaos") {
+    public otherParity(knownParity: ETangencyParity, tangencyType: TTangencyType): ETangencyParity {
+        if (knownParity === ETangencyParity.chaos) {
             throw new Error("The known parity can't be chaos!");
         }
 
-        if (knownParity == "yin") {
+        if (knownParity === ETangencyParity.yin) {
             if (tangencyType == "innerTangent") {
-                return "yin";
+                return ETangencyParity.yin;
             } else {
-                return "yang";
+                return ETangencyParity.yang;
             }
         }
 
         if (tangencyType == "innerTangent") {
-            return "yang";
+            return ETangencyParity.yang;
         } else {
-            return "yin";
+            return ETangencyParity.yin;
         }
     }
 
@@ -109,8 +109,8 @@ export default class GraphNode {
             throw new Error("Existing tangency element count is " + tgExistingElements.length);
         }
         const tgElem = tgExistingElements[0];
-        if (tgElem.parity == "chaos") {
-            tgElem.parity = "yin";
+        if (tgElem.parity === ETangencyParity.chaos) {
+            tgElem.parity = ETangencyParity.yin;
         }
 
         existingGroup.push({
@@ -124,27 +124,28 @@ export default class GraphNode {
         if (intersectionType == "lens") {
             const tanGroup1: ITangencyGroup = [ {
                 circle: circle1,
-                parity: "chaos",
+                parity: ETangencyParity.chaos,
             } ]
             this._tangencyGroups.push(tanGroup1);
 
             const tanGroup2: ITangencyGroup = [ {
                 circle: circle2,
-                parity: "chaos",
+                parity: ETangencyParity.chaos,
             } ]
             this._tangencyGroups.push(tanGroup2);
             return;
         }
         
         let
-            parity1: TTangencyParity,
-            parity2: TTangencyParity;
+            parity1: ETangencyParity,
+            parity2: ETangencyParity;
 
         if (intersectionType == "innerTangent") {
-            parity1 = parity2 = "yin";
+            parity1 = ETangencyParity.yin;
+            parity2 = ETangencyParity.yin;
         } else if (intersectionType == "outerTangent") {
-            parity1 = "yin";
-            parity2 = "yang";
+            parity1 = ETangencyParity.yin;
+            parity2 = ETangencyParity.yang;
         } else {
             throw new Error("Unknown intersection type: " + intersectionType);
         }
@@ -252,7 +253,7 @@ export default class GraphNode {
         if (currentDirection === ETraversalDirection.forward) {
             return undefined;
         }
-        const oppositeParity: TTangencyParity = edgeTanElem.parity === "yin" ? "yang" : "yin";
+        const oppositeParity: ETangencyParity = edgeTanElem.parity === ETangencyParity.yin ? ETangencyParity.yang : ETangencyParity.yin;
 
         // Descending order
         const oppositeSideNeighbors = edgeTanGroup.
@@ -286,7 +287,7 @@ export default class GraphNode {
             throw new Error("Edge circle found in " + tgElems.length + " tangency elements!");
         }
 
-        if (tgElems[0].parity !== "chaos") {
+        if (tgElems[0].parity !== ETangencyParity.chaos) {
             const nextTangentEdge = this._getNextTangentEdge(currentEdge, currentDirection, tanGroups[0], tgElems[0]);
             if (nextTangentEdge !== undefined) {
                 console.log("Tangent edge", currentEdge.id, "/", currentDirection, "->", nextTangentEdge.edge.id);
@@ -307,7 +308,7 @@ export default class GraphNode {
                 return;
             }
 
-            if (tg.every(tge => tge.parity === "chaos")) {
+            if (tg.every(tge => tge.parity === ETangencyParity.chaos)) {
                 if (tg.length !== 1) {
                     throw new Error("Tangency group with " + tg.length + " elements, all of which are chaos!");
                 }
@@ -339,11 +340,11 @@ export default class GraphNode {
 
             console.log("TANGENCY MECHANISM");
             let candidates: Circle[] = [];
-            const smallestYinCircles = tg.filter(tge => tge.parity === "yin").sort((a, b) => a.circle.radius - b.circle.radius);
+            const smallestYinCircles = tg.filter(tge => tge.parity === ETangencyParity.yin).sort((a, b) => a.circle.radius - b.circle.radius);
             if (smallestYinCircles.length > 0) {
                 candidates.push(smallestYinCircles[0].circle);
             }
-            const smallestYangCircles = tg.filter(tge => tge.parity === "yang").sort((a, b) => a.circle.radius - b.circle.radius);
+            const smallestYangCircles = tg.filter(tge => tge.parity === ETangencyParity.yang).sort((a, b) => a.circle.radius - b.circle.radius);
             if (smallestYangCircles.length > 0) {
                 candidates.push(smallestYangCircles[0].circle);
             }

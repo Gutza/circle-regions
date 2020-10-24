@@ -31,10 +31,15 @@ export interface IVertex {
     intersection: ICircleIntersectionPoint;
 }
 
-export type TTangencyParity = "yin" | "yang" | "chaos";
+export enum ETangencyParity {
+    yin,
+    yang,
+    chaos
+};
+
 export interface ITangencyElement {
     circle: Circle;
-    parity: TTangencyParity;
+    parity: ETangencyParity;
 }
 export type ITangencyGroup = ITangencyElement[];
 
