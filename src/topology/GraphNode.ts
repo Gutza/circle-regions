@@ -1,4 +1,4 @@
-import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, ETangencyParity, ETangencyType, ETraversalDirection } from "../Types";
+import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, ETangencyParity, ETangencyType, ETraversalDirection, EIntersectionType } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
@@ -40,7 +40,7 @@ export default class GraphNode {
             throw new Error("Unexpected condition: a circle is present in multiple tangency groups! [2]");
         }
 
-        if (intersectionType == "lens") {
+        if (intersectionType === EIntersectionType.lens) {
             if (tanGroups.length == 1) {
                 let circle = tanGroupsCircle1.length == 0 ? circle1 : circle2;
                 const tanGroup: ITangencyGroup = [ {
@@ -121,7 +121,7 @@ export default class GraphNode {
 
     private _addNewCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType): void {
         // Easy case: just create new tangency group(s)
-        if (intersectionType == "lens") {
+        if (intersectionType === EIntersectionType.lens) {
             const tanGroup1: ITangencyGroup = [ {
                 circle: circle1,
                 parity: ETangencyParity.chaos,

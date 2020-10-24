@@ -22,7 +22,11 @@ export enum ETangencyType {
     outerTangent
 };
 
-export type TIntersectionType = "lens" | ETangencyType;
+export enum EIntersectionType {
+    lens
+};
+
+export type TIntersectionType = EIntersectionType | ETangencyType;
 
 export interface ICircleIntersectionPoint {
     point: IPoint,
