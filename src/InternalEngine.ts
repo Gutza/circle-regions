@@ -301,7 +301,8 @@ export class InternalEngine {
             const arcs: CircleArc[] = [];
             let isContour = true;
             cycle.oEdges.forEach(oEdge => {
-                isContour = isContour && oEdge.direction === ETraversalDirection.backward;
+                const isClockwise = oEdge.direction === ETraversalDirection.backward;
+                isContour = isContour && isClockwise;
                 const startNode = oEdge.edge.node1;
                 const endNode = oEdge.edge.node2;
                 const startVertex = oEdge.edge.circle.getVertexByNode(startNode);
@@ -309,15 +310,14 @@ export class InternalEngine {
                 if (startVertex === undefined || endVertex === undefined) {
                     throw new Error("Failed finding vertex");
                 }
-                const startAngle = startVertex.angle;
-                const endAngle = endVertex.angle;
+
                 arcs.push(new CircleArc(
                     oEdge.edge.circle,
-                    startAngle,
-                    endAngle,
+                    isClockwise ? endVertex.angle : startVertex.angle,
+                    isClockwise ? startVertex.angle : endVertex.angle,
                     startNode.coordinates,
                     endNode.coordinates,
-                    oEdge.direction === ETraversalDirection.backward,
+                    isClockwise,
                 ));
             });
             if (isContour) {

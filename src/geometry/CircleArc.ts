@@ -18,6 +18,12 @@ export default class CircleArc {
         this._isClockwise = isClockwise;
     }
 
+    /**
+     * If false, the arc begins at startAngle and continues
+     * in trigonometric direction to endAngle.
+     * If true, the arc begins at startAngle and continues
+     * in clockwise direction to endAngle.
+     */
     public get isClockwise(): boolean {
         return this._isClockwise;
     }
@@ -26,10 +32,18 @@ export default class CircleArc {
         return this._circle;
     }
 
+    /**
+     * The start angle of this arc on the circle, in the
+     * proper order for traversing the region.
+     */
     public get startAngle(): number {
         return this._startAngle;
     }
 
+    /**
+     * The end angle of this arc on the circle, in the
+     * proper order for traversing the region.
+     */
     public get endAngle(): number {
         return this._endAngle;
     }
