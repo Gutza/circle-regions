@@ -1,5 +1,6 @@
 import { IPoint } from "../Types";
 import { Circle } from "./Circle";
+import { TWO_PI } from "./utils/angles";
 
 export default class CircleArc {
     private _circle: Circle;
@@ -8,6 +9,7 @@ export default class CircleArc {
     private _startPoint: IPoint;
     private _endPoint: IPoint;
     private _isClockwise: boolean;
+    private _unitLength: number | undefined;
 
     constructor(circle: Circle, startAngle: number, endAngle: number, startPoint: IPoint, endPoint: IPoint, isClockwise: boolean) {
         this._circle = circle;
@@ -58,6 +60,19 @@ export default class CircleArc {
 
     public get endPoint(): IPoint {
         return this._endPoint;
+    }
+
+    /**
+     * The fraction of the length of the circle represented by this arc.
+     * Computed lazily; cached.
+     */
+    public get unitLength(): number {
+        if (this._unitLength !== undefined) {
+            return this._unitLength;
+        }
+
+        this._unitLength = Math.abs(this.endAngle - this.startAngle) / TWO_PI;
+        return this._unitLength;
     }
 
 }

@@ -329,8 +329,8 @@ export class InternalEngine {
                     oEdge.edge.circle,
                     finalAngles[0],
                     finalAngles[1],
-                    startNode.coordinates,
-                    endNode.coordinates,
+                    isClockwise ? endNode.coordinates : startNode.coordinates,
+                    isClockwise ? startNode.coordinates : endNode.coordinates,
                     isClockwise,
                 ));
             });
