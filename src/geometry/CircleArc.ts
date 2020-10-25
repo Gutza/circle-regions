@@ -10,6 +10,8 @@ export default class CircleArc {
     private _endPoint: IPoint;
     private _isClockwise: boolean;
     private _unitLength: number | undefined;
+    private _midAngle: number | undefined;
+    private _midPoint: IPoint | undefined;
 
     constructor(circle: Circle, startAngle: number, endAngle: number, startPoint: IPoint, endPoint: IPoint, isClockwise: boolean) {
         this._circle = circle;
@@ -75,4 +77,28 @@ export default class CircleArc {
         return this._unitLength;
     }
 
+    public get midAngle(): number {
+        if (this._midAngle !== undefined) {
+            return this._midAngle;
+        }
+
+        this._midAngle = (this._startAngle + this._endAngle) / 2;
+        return this._midAngle;
+    }
+
+    public get midPoint(): IPoint {
+        if (this._midPoint !== undefined) {
+            return this._midPoint;
+        }
+
+        this._midPoint = {
+            x: 0,
+            y: 0,
+        };
+
+        this._midPoint.x = this._circle.center.x + this._circle.radius * Math.cos(this.midAngle);
+        this._midPoint.y = this._circle.center.x + this._circle.radius * Math.sin(this.midAngle);
+
+        return this._midPoint;
+    }
 }
