@@ -46,7 +46,7 @@ export class ArcPolygon implements IDrawable {
             regionPerimeter2 += dax * dax + day * day;
         }
 
-        this._contourType = centerPerimeter2 > regionPerimeter2 ? TContourType.outer : TContourType.inner;
+        this._contourType = centerPerimeter2 > regionPerimeter2 ? TContourType.inner : TContourType.outer;
         return this._contourType;
     }
 }
