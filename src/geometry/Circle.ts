@@ -1,4 +1,4 @@
-import { IBoundingBox, IRegion, onMoveEvent, onResizeEvent } from "../Types";
+import { IBoundingBox, IDrawable, IRegion, onMoveEvent, onResizeEvent } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { EventEmitter } from "events";
@@ -8,7 +8,7 @@ import { Point } from "./Point";
 /**
  * The main circle class.
  */
-export class Circle extends EventEmitter implements IRegion {
+export class Circle extends EventEmitter implements IRegion, IDrawable {
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
 
@@ -42,6 +42,8 @@ export class Circle extends EventEmitter implements IRegion {
     private _bbox?: IBoundingBox;
 
     public isDirty: boolean = false; // it gets set to true when added to a RegionEngine
+
+    public shape: object | undefined;
 
     /**
      * Instantiate a new circle entity.

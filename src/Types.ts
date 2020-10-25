@@ -17,6 +17,16 @@ export interface IRegion {
     area: number;
 }
 
+/**
+ * IDrawable objects guarantee storing a public reference to
+ * any object you're using to represent them graphically.
+ * This reference is never touched by the engine, and you
+ * can store whatever you want inside (or just leave it empty).
+ */
+export interface IDrawable {
+    shape: object | undefined;
+}
+
 export enum ETangencyType {
     innerTangent,
     outerTangent
@@ -100,7 +110,7 @@ export interface ICircleRegions {
     regions: IArcPolygon[];
 }
 
-export interface IArcPolygon {
+export interface IArcPolygon extends IDrawable {
     arcs: CircleArc[];
 }
 

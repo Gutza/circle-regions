@@ -358,7 +358,10 @@ export class RegionEngineBL extends EventEmitter {
                     isClockwise,
                 ));
             });
-            const region: IArcPolygon = {arcs: arcs};
+            const region: IArcPolygon = {
+                shape: undefined,
+                arcs: arcs
+            };
             if (isContour) {
                 this._regions.contours.push(region);
             } else {
