@@ -1,6 +1,5 @@
 import { ArcPolygon } from "./geometry/ArcPolygon";
 import { Circle } from "./geometry/Circle";
-import CircleArc from "./geometry/CircleArc";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
@@ -138,4 +137,9 @@ export interface INextTangentEdge {
 export enum TRegionType {
     contour,
     region,
+}
+
+export enum TContourType {
+    outer,
+    inner,
 }

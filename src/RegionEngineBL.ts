@@ -364,6 +364,7 @@ export class RegionEngineBL {
                     isClockwise,
                 ));
             });
+
             const region = new ArcPolygon(arcs, isContour ? TRegionType.contour : TRegionType.region);
             this._regions.regions.push(region);
             this.emit(EDrawableEventType.onAddEvent, region);
