@@ -31,9 +31,9 @@ export class ArcPolygon implements IDrawable {
             centerPerimeter2 = 0,
             regionPerimeter2 = 0;
 
-        for (let arcIndex = 0; arcIndex < this._arcs.length-1;) {
+        for (let arcIndex = 0; arcIndex < this._arcs.length;) {
             const currArc = this._arcs[arcIndex];
-            const nextArc = this._arcs[++arcIndex];
+            const nextArc = this._arcs[++arcIndex] || this._arcs[0];
 
             const dcx = currArc.circle.center.x - nextArc.circle.center.x;
             const dcy = currArc.circle.center.y - nextArc.circle.center.y;
@@ -44,7 +44,7 @@ export class ArcPolygon implements IDrawable {
             regionPerimeter2 += dax * dax + day * day;
         }
 
-        this._contourType = centerPerimeter2 < regionPerimeter2 ? TContourType.outer : TContourType.inner;
+        this._contourType = centerPerimeter2 > regionPerimeter2 ? TContourType.outer : TContourType.inner;
         return this._contourType;
     }
 }
