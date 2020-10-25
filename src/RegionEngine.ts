@@ -27,8 +27,8 @@ export class RegionEngine extends RegionEngineBL {
         }
 
         circle.isDirty = true;
-        circle.on(onMoveEvent, this._onCircleEvent);
-        circle.on(onResizeEvent, this._onCircleEvent);
+        circle.on(onMoveEvent, this.onCircleEvent);
+        circle.on(onResizeEvent, this.onCircleEvent);
         this._circles.push(circle);
     }
 
@@ -40,8 +40,8 @@ export class RegionEngine extends RegionEngineBL {
      * @param circle The circle to remove.
      */
     public removeCircle = (circle: Circle) => {
-        circle.removeListener(onMoveEvent, this._onCircleEvent);
-        circle.removeListener(onResizeEvent, this._onCircleEvent);
+        circle.removeListener(onMoveEvent, this.onCircleEvent);
+        circle.removeListener(onResizeEvent, this.onCircleEvent);
         this._circles = this._circles.filter(c => c !== circle);
         this._dirtyRegions = true;
     }
@@ -58,7 +58,7 @@ export class RegionEngine extends RegionEngineBL {
             return this._regions;
         }
 
-        this._recomputeRegions();
+        this.recomputeRegions();
 
         return this._regions;
     }

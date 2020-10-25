@@ -1,3 +1,4 @@
+import { ArcPolygon } from "./geometry/ArcPolygon";
 import { Circle } from "./geometry/Circle";
 import CircleArc from "./geometry/CircleArc";
 import GraphEdge from "./topology/GraphEdge";
@@ -18,13 +19,38 @@ export interface IRegion {
 }
 
 /**
- * IDrawable objects guarantee storing a public reference to
- * any object you're using to represent them graphically.
- * This reference is never touched by the engine, and you
- * can store whatever you want inside (or just leave it empty).
+ * IDrawable objects guarantee provisioning a couple of public,
+ * externally handled generic entities which can be used to store
+ * references to helper objects.
  */
 export interface IDrawable {
+    /**
+     * Reference to a generic shape entity.
+     * 
+     * This is never touched by
+     * the circles engine, you can store whatever you want inside
+     * (or just leave it empty if you don't need it).
+     */
     shape: object | undefined;
+
+    /**
+     * Reference to a generic type of ID.
+     * 
+     * This is never touched by
+     * the circles engine, you can store whatever you want inside
+     * (or just leave it empty if you don't need it).
+     */
+    id: any;
+}
+
+export const onMoveEvent: symbol = Symbol('move');
+export const onResizeEvent: symbol = Symbol('resize');
+
+export const onDeleteEvent: symbol = Symbol('delete');
+export const onAddEvent: symbol = Symbol('add');
+
+export interface FOnDrawableEvent {
+    (eventType: typeof onAddEvent | typeof onDeleteEvent, entity: Circle | ArcPolygon): void;
 }
 
 export enum ETangencyType {
@@ -83,12 +109,6 @@ export interface IBoundingBox {
     maxPoint: IPoint;
 }
 
-export const onMoveEvent: symbol = Symbol('move');
-export const onResizeEvent: symbol = Symbol('resize');
-
-export const onDeleteEvent: symbol = Symbol('delete');
-export const onAddEvent: symbol = Symbol('add');
-
 /**
  * Oriented edges must always be traversed in the indicated direction;
  * in addition, if the direction is backwards, the nodes at the end of
@@ -105,16 +125,15 @@ export interface IGraphCycle {
 
 export interface ICircleRegions {
     stale: boolean;
-    circles: Circle[];
-    contours: IArcPolygon[];
-    regions: IArcPolygon[];
-}
-
-export interface IArcPolygon extends IDrawable {
-    arcs: CircleArc[];
+    regions: (ArcPolygon | Circle)[];
 }
 
 export interface INextTangentEdge {
     edge: GraphEdge;
     sameSide: boolean;
+}
+
+export enum TRegionType {
+    contour,
+    region,
 }

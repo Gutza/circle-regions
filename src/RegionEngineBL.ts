@@ -1,55 +1,51 @@
-import { EventEmitter } from "events";
 import { Circle } from ".";
+import { ArcPolygon } from "./geometry/ArcPolygon";
 import CircleArc from "./geometry/CircleArc";
 import CircleVertex from "./geometry/CircleVertex";
 import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, onDeleteEvent, onAddEvent } from "./Types";
+import { ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, onDeleteEvent, onAddEvent, FOnDrawableEvent, TRegionType } from "./Types";
 
-export class RegionEngineBL extends EventEmitter {
+export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
     protected _edges: GraphEdge[] = [];
     protected _circles: Circle[] = [];
     protected _regions: ICircleRegions = {
         stale: true,
-        circles: [],
-        contours: [],
         regions: [],
     };
     protected _dirtyRegions: boolean = false;
-    
-    constructor() {
-        super();
-    }
 
-    protected _recomputeRegions = () => {
+    public onRegionChange: FOnDrawableEvent[] = [];
+
+    protected recomputeRegions = () => {
         this._regions.stale = false;
 
         //  (1/5)
-        this._removeDirtyNodesVertices();
+        this.removeDirtyNodesVertices();
         
         // (2/5)
-        this._computeIntersections();
+        this.computeIntersections();
 
         // (3/5)
-        this._rebuildDirtyEdges();
+        this.rebuildDirtyEdges();
 
         // (4/5)
-        const cycles = this._extractGraphCycles();
+        const cycles = this.extractGraphCycles();
 
         // (5/5)
-        this._refreshRegions(cycles);
+        this.refreshRegions(cycles);
 
         this._dirtyRegions = false;
     }
 
-    protected _onCircleEvent = () => {
+    protected onCircleEvent = () => {
         this._dirtyRegions = true;
     }
 
-    protected _addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
+    protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
         let sameCoordinates = this._nodes.filter(n =>
             round(n.coordinates.x) === round(intersectionPoint.x) &&
             round(n.coordinates.y) === round(intersectionPoint.y)
@@ -73,7 +69,7 @@ export class RegionEngineBL extends EventEmitter {
         return newNode;
     }
 
-    protected _extractGraphCycle(startEdge: GraphEdge, direction: ETraversalDirection): IGraphCycle | null {
+    protected extractGraphCycle(startEdge: GraphEdge, direction: ETraversalDirection): IGraphCycle | null {
         const cycle: IGraphCycle = {
             oEdges: [],
         }
@@ -133,18 +129,23 @@ export class RegionEngineBL extends EventEmitter {
         }
     }
     
-    protected _removeDirtyRegions = (dirtyCircles: Circle[], regions: IArcPolygon[]): IArcPolygon[] => {
-        return regions.filter(region => {
+    protected removeDirtyRegions = (dirtyCircles: Circle[]): void => {
+        this._regions.regions = this._regions.regions.filter(region => {
+            if (region instanceof Circle) {
+                return true;
+            }
+
             if (region.arcs.every(arc => !dirtyCircles.includes(arc.circle))) {
                 return true;
             }
+
             this.emit(onDeleteEvent, region);
             return false;
         });
     };
 
     // (1/5)
-    protected _removeDirtyNodesVertices = (): void => {
+    protected removeDirtyNodesVertices = (): void => {
         this._nodes.forEach(node => node.touched = false);
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
 
@@ -197,7 +198,7 @@ export class RegionEngineBL extends EventEmitter {
      * (1) The notion of a circle being dirty means different things before and after this step;
      * (2) The list of dirty circles must be recomputed after this operation (do not cache it across this step).
      */
-    protected _computeIntersections = () => {
+    protected computeIntersections = () => {
         // TODO: Implement sweep line x 2
         for (let i = 0; i < this._circles.length-1; i++) {
             const c1 = this._circles[i];
@@ -211,17 +212,16 @@ export class RegionEngineBL extends EventEmitter {
                     continue;
                 }
                 
-                this._intersectCircles(c1, c2);
+                this.intersectCircles(c1, c2);
             }
         }
     }
 
     // (3/5)
-    protected _rebuildDirtyEdges = () => {
+    protected rebuildDirtyEdges = () => {
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
 
-        this._regions.contours = this._removeDirtyRegions(dirtyCircles, this._regions.contours);
-        this._regions.regions = this._removeDirtyRegions(dirtyCircles, this._regions.regions);
+        this.removeDirtyRegions(dirtyCircles);
         
         const dirtyEdges: GraphEdge[] = [];
         this._edges = this._edges.filter(edge => {
@@ -284,18 +284,18 @@ export class RegionEngineBL extends EventEmitter {
     }
 
     // (4/5)
-    protected _extractGraphCycles = (): IGraphCycle[] => {
+    protected extractGraphCycles = (): IGraphCycle[] => {
         const cycles: IGraphCycle[] = [];
 
         this._edges.forEach(edge => {
             if (edge.InnerCycle === undefined) {
-                const cycle = this._extractGraphCycle(edge, ETraversalDirection.forward);
+                const cycle = this.extractGraphCycle(edge, ETraversalDirection.forward);
                 if (cycle !== null) {
                     cycles.push(cycle);
                 }
             }
             if (edge.OuterCycle === undefined) {
-                const cycle = this._extractGraphCycle(edge, ETraversalDirection.backward);
+                const cycle = this.extractGraphCycle(edge, ETraversalDirection.backward);
                 if (cycle !== null) {
                     cycles.push(cycle);
                 }
@@ -306,19 +306,25 @@ export class RegionEngineBL extends EventEmitter {
     }
 
     // (5/5)
-    protected _refreshRegions = (cycles: IGraphCycle[]): void => {
-        this._regions.circles.filter(circle => {
+    protected refreshRegions = (cycles: IGraphCycle[]): void => {
+        this._regions.regions = this._regions.regions.filter(circle => {
+            if (circle instanceof ArcPolygon) {
+                return true;
+            }
+
             if (circle.vertices.length === 0) {
                 return true;
             }
+
             this.emit(onDeleteEvent, circle);
             return false;
         });
+
         this._circles.forEach(circle => {
-            if (circle.vertices.length !== 0 || this._regions.circles.includes(circle)) {
+            if (circle.vertices.length !== 0 || this._regions.regions.includes(circle)) {
                 return;
             }
-            this._regions.circles.push(circle);
+            this._regions.regions.push(circle);
             this.emit(onAddEvent, circle);
         });
 
@@ -358,20 +364,13 @@ export class RegionEngineBL extends EventEmitter {
                     isClockwise,
                 ));
             });
-            const region: IArcPolygon = {
-                shape: undefined,
-                arcs: arcs
-            };
-            if (isContour) {
-                this._regions.contours.push(region);
-            } else {
-                this._regions.regions.push(region);
-            }
+            const region = new ArcPolygon(arcs, isContour ? TRegionType.contour : TRegionType.region);
+            this._regions.regions.push(region);
             this.emit(onAddEvent, region);
         });
     }
 
-    protected _intersectCircles = (circle1: Circle, circle2: Circle): void => {
+    protected intersectCircles = (circle1: Circle, circle2: Circle): void => {
         if (circle1 === circle2) {
             console.warn("Don't intersect a circle with itself!");
             return;
@@ -410,7 +409,7 @@ export class RegionEngineBL extends EventEmitter {
                 x: x,
                 y: y,
             };
-            this._addNode(circle1, circle2, tangentPoint, ETangencyType.outerTangent);
+            this.addNode(circle1, circle2, tangentPoint, ETangencyType.outerTangent);
             return;
         }
     
@@ -419,7 +418,7 @@ export class RegionEngineBL extends EventEmitter {
                 x: x,
                 y: y,
             };
-            this._addNode(circle1, circle2, tangentPoint, ETangencyType.innerTangent);
+            this.addNode(circle1, circle2, tangentPoint, ETangencyType.innerTangent);
             return;
         }
     
@@ -431,12 +430,16 @@ export class RegionEngineBL extends EventEmitter {
             x: x+rx,
             y: y-ry,
         };
-        this._addNode(circle1, circle2, point1, EIntersectionType.lens);
+        this.addNode(circle1, circle2, point1, EIntersectionType.lens);
     
         const point2: IPoint = {
             x: x-rx,
             y: y+ry,
         }
-        this._addNode(circle1, circle2, point2, EIntersectionType.lens);
-    } 
+        this.addNode(circle1, circle2, point2, EIntersectionType.lens);
+    }
+
+    protected emit: FOnDrawableEvent = (evType, entity) => {
+        this.onRegionChange.forEach(callback => callback(evType, entity));
+    }
 }
