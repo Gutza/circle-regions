@@ -35,10 +35,12 @@ export class ArcPolygon implements IDrawable {
             const currArc = this._arcs[arcIndex];
             const nextArc = this._arcs[++arcIndex] || this._arcs[0];
 
+            console.log("C", currArc.circle.center, "»", nextArc.circle.center);
             const dcx = currArc.circle.center.x - nextArc.circle.center.x;
             const dcy = currArc.circle.center.y - nextArc.circle.center.y;
             centerPerimeter2 += dcx * dcx + dcy * dcy;
 
+            console.log("A", currArc.startPoint, "»", nextArc.startPoint);
             const dax = currArc.startPoint.x - nextArc.startPoint.x;
             const day = currArc.startPoint.y - nextArc.startPoint.y;
             regionPerimeter2 += dax * dax + day * day;
