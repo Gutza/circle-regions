@@ -34,7 +34,9 @@ export default class CircleArc {
 
     /**
      * The start angle of this arc on the circle, in the
-     * proper order for traversing the region.
+     * proper order for traversing the region. The two angles
+     * are denormalized in such a way that you can always traverse
+     * algebrically from startAngle to endAngle.
      */
     public get startAngle(): number {
         return this._startAngle;
@@ -42,7 +44,9 @@ export default class CircleArc {
 
     /**
      * The end angle of this arc on the circle, in the
-     * proper order for traversing the region.
+     * proper order for traversing the region. The two angles
+     * are denormalized in such a way that you can always traverse
+     * algebrically from startAngle to endAngle.
      */
     public get endAngle(): number {
         return this._endAngle;

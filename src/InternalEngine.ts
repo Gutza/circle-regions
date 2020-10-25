@@ -1,6 +1,7 @@
 import { Circle } from ".";
 import CircleArc from "./geometry/CircleArc";
 import CircleVertex from "./geometry/CircleVertex";
+import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
@@ -311,10 +312,23 @@ export class InternalEngine {
                     throw new Error("Failed finding vertex");
                 }
 
-                arcs.push(new CircleArc(
-                    oEdge.edge.circle,
+                const finalAngles = [
                     isClockwise ? endVertex.angle : startVertex.angle,
                     isClockwise ? startVertex.angle : endVertex.angle,
+                ];
+                const firstSmaller = finalAngles[0] < finalAngles[1];
+                if (firstSmaller === isClockwise) {
+                    if (firstSmaller) {
+                        finalAngles[1] -= TWO_PI;
+                    } else {
+                        finalAngles[0] -= TWO_PI;
+                    }
+                }
+
+                arcs.push(new CircleArc(
+                    oEdge.edge.circle,
+                    finalAngles[0],
+                    finalAngles[1],
                     startNode.coordinates,
                     endNode.coordinates,
                     isClockwise,
