@@ -40,7 +40,7 @@ export class ArcPolygon implements IDrawable {
             const dcy = currArc.circle.center.y - nextArc.circle.center.y;
             centerPerimeter2 += dcx * dcx + dcy * dcy;
 
-            console.log("A", currArc.startPoint, "»", nextArc.startPoint);
+            console.log("A", currArc.midPoint, "»", nextArc.midPoint);
             const dax = currArc.midPoint.x - nextArc.midPoint.x;
             const day = currArc.midPoint.y - nextArc.midPoint.y;
             regionPerimeter2 += dax * dax + day * day;

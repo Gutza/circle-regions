@@ -97,7 +97,7 @@ export default class CircleArc {
         };
 
         this._midPoint.x = this._circle.center.x + this._circle.radius * Math.cos(this.midAngle);
-        this._midPoint.y = this._circle.center.x + this._circle.radius * Math.sin(this.midAngle);
+        this._midPoint.y = this._circle.center.y + this._circle.radius * Math.sin(this.midAngle);
 
         return this._midPoint;
     }
