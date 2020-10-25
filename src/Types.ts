@@ -46,11 +46,13 @@ export interface IDrawable {
 export const onMoveEvent: symbol = Symbol('move');
 export const onResizeEvent: symbol = Symbol('resize');
 
-export const onDeleteEvent: symbol = Symbol('delete');
-export const onAddEvent: symbol = Symbol('add');
+export enum EDrawableEventType {
+    onDeleteEvent,
+    onAddEvent,
+}
 
 export interface FOnDrawableEvent {
-    (eventType: typeof onAddEvent | typeof onDeleteEvent, entity: Circle | ArcPolygon): void;
+    (eventType: EDrawableEventType, entity: Circle | ArcPolygon): void;
 }
 
 export enum ETangencyType {

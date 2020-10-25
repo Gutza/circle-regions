@@ -6,7 +6,7 @@ import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, onDeleteEvent, onAddEvent, FOnDrawableEvent, TRegionType } from "./Types";
+import { ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, TRegionType, EDrawableEventType } from "./Types";
 
 export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
@@ -139,7 +139,7 @@ export class RegionEngineBL {
                 return true;
             }
 
-            this.emit(onDeleteEvent, region);
+            this.emit(EDrawableEventType.onDeleteEvent, region);
             return false;
         });
     };
@@ -316,7 +316,7 @@ export class RegionEngineBL {
                 return true;
             }
 
-            this.emit(onDeleteEvent, circle);
+            this.emit(EDrawableEventType.onDeleteEvent, circle);
             return false;
         });
 
@@ -325,7 +325,7 @@ export class RegionEngineBL {
                 return;
             }
             this._regions.regions.push(circle);
-            this.emit(onAddEvent, circle);
+            this.emit(EDrawableEventType.onAddEvent, circle);
         });
 
         cycles.forEach(cycle => {
@@ -366,7 +366,7 @@ export class RegionEngineBL {
             });
             const region = new ArcPolygon(arcs, isContour ? TRegionType.contour : TRegionType.region);
             this._regions.regions.push(region);
-            this.emit(onAddEvent, region);
+            this.emit(EDrawableEventType.onAddEvent, region);
         });
     }
 
