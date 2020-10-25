@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import { Circle } from ".";
 import CircleArc from "./geometry/CircleArc";
 import CircleVertex from "./geometry/CircleVertex";
@@ -5,9 +6,9 @@ import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType } from "./Types";
+import { IArcPolygon, ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, onDeleteEvent, onAddEvent } from "./Types";
 
-export class InternalEngine {
+export class RegionEngineBL extends EventEmitter {
     protected _nodes: GraphNode[] = [];
     protected _edges: GraphEdge[] = [];
     protected _circles: Circle[] = [];
@@ -19,6 +20,10 @@ export class InternalEngine {
     };
     protected _dirtyRegions: boolean = false;
     
+    constructor() {
+        super();
+    }
+
     protected _recomputeRegions = () => {
         this._regions.stale = false;
 
@@ -128,9 +133,15 @@ export class InternalEngine {
         }
     }
     
-    protected _removeDirtyRegions = (dirtyCircles: Circle[], regions: IArcPolygon[]): IArcPolygon[] => (
-        regions.filter(region => region.arcs.every(arc => !dirtyCircles.includes(arc.circle)))
-    );
+    protected _removeDirtyRegions = (dirtyCircles: Circle[], regions: IArcPolygon[]): IArcPolygon[] => {
+        return regions.filter(region => {
+            if (region.arcs.every(arc => !dirtyCircles.includes(arc.circle))) {
+                return true;
+            }
+            this.emit(onDeleteEvent, region);
+            return false;
+        });
+    };
 
     // (1/5)
     protected _removeDirtyNodesVertices = (): void => {
@@ -296,7 +307,20 @@ export class InternalEngine {
 
     // (5/5)
     protected _refreshRegions = (cycles: IGraphCycle[]): void => {
-        this._regions.circles = this._circles.filter(circle => circle.vertices.length == 0);
+        this._regions.circles.filter(circle => {
+            if (circle.vertices.length === 0) {
+                return true;
+            }
+            this.emit(onDeleteEvent, circle);
+            return false;
+        });
+        this._circles.forEach(circle => {
+            if (circle.vertices.length !== 0 || this._regions.circles.includes(circle)) {
+                return;
+            }
+            this._regions.circles.push(circle);
+            this.emit(onAddEvent, circle);
+        });
 
         cycles.forEach(cycle => {
             const arcs: CircleArc[] = [];
@@ -334,11 +358,13 @@ export class InternalEngine {
                     isClockwise,
                 ));
             });
+            const region: IArcPolygon = {arcs: arcs};
             if (isContour) {
-                this._regions.contours.push({arcs: arcs});
+                this._regions.contours.push(region);
             } else {
-                this._regions.regions.push({arcs: arcs});
+                this._regions.regions.push(region);
             }
+            this.emit(onAddEvent, region);
         });
     }
 

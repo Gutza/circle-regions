@@ -76,6 +76,9 @@ export interface IBoundingBox {
 export const onMoveEvent: symbol = Symbol('move');
 export const onResizeEvent: symbol = Symbol('resize');
 
+export const onDeleteEvent: symbol = Symbol('delete');
+export const onAddEvent: symbol = Symbol('add');
+
 /**
  * Oriented edges must always be traversed in the indicated direction;
  * in addition, if the direction is backwards, the nodes at the end of

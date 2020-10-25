@@ -1,12 +1,12 @@
 import { Circle } from "./geometry/Circle";
 import { ICircleRegions, onMoveEvent, onResizeEvent } from "./Types";
 import GraphNode from "./topology/GraphNode";
-import { InternalEngine } from "./InternalEngine";
+import { RegionEngineBL } from "./RegionEngineBL";
 
 /**
  * The main engine for computing regions resulted from intersecting circles.
  */
-export class RegionEngine extends InternalEngine {
+export class RegionEngine extends RegionEngineBL {
     /**
      * Add a circle to the engine.
      * Computationally cheap, unless there are many circles AND @see guaranteedNew is false.
