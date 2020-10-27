@@ -1,5 +1,6 @@
 import { IDrawable, TContourType, TRegionType } from "../Types";
 import CircleArc from "./CircleArc";
+import { TWO_PI } from "./utils/angles";
 
 export class ArcPolygon implements IDrawable {
     public shape: object | undefined;
@@ -28,29 +29,39 @@ export class ArcPolygon implements IDrawable {
         }
 
         let
-            centerPerimeter2 = 0,
             intAngDiff = 0,
-            regionPerimeter2 = 0;
 
         for (let arcIndex = 0; arcIndex < this._arcs.length;) {
             const currArc = this._arcs[arcIndex];
             const nextArc = this._arcs[++arcIndex] || this._arcs[0];
 
-            console.log("C", currArc.circle.center, "»", nextArc.circle.center);
-            const dcx = currArc.circle.center.x - nextArc.circle.center.x;
-            const dcy = currArc.circle.center.y - nextArc.circle.center.y;
-            centerPerimeter2 += dcx * dcx + dcy * dcy;
+            /*
+            console.log(
+                this.toDeg(currArc.startAngle),
+                this.toDeg(currArc.midAngle),
+                this.toDeg(currArc.endAngle),
+                "»»»",
+                this.toDeg(nextArc.startAngle),
+                this.toDeg(nextArc.midAngle),
+                this.toDeg(nextArc.endAngle)
+            );
 
-            console.log("A", currArc.midPoint, "»", nextArc.midPoint);
-            const dax = currArc.midPoint.x - nextArc.midPoint.x;
-            const day = currArc.midPoint.y - nextArc.midPoint.y;
-            regionPerimeter2 += dax * dax + day * day;
+            const angDiff = nextArc.startAngle - currArc.startAngle;
+            //console.log("angDiff", angDiff);
+            intAngDiff += angDiff;
+            */
 
-            intAngDiff += currArc.endAngle - currArc.startAngle;
+            const midArc1 = currArc.midAngle;
+            const midArc2 = nextArc.midAngle - (currArc.midAngle > nextArc.midAngle ? TWO_PI : 0);
+            intAngDiff += midArc2 - midArc1;
         }
 
-        console.log("intAngDiff", intAngDiff);
-        this._contourType = centerPerimeter2 > regionPerimeter2 ? TContourType.inner : TContourType.outer;
+        console.log("intAngDiff", this.toDeg(intAngDiff));
+        this._contourType = intAngDiff < -7 ? TContourType.outer : TContourType.inner;
         return this._contourType;
+    }
+
+    private toDeg(rad: number): string {
+        return Math.round(rad * 180 / Math.PI).toString();
     }
 }

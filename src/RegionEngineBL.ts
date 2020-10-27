@@ -97,7 +97,6 @@ export class RegionEngineBL {
             }
 
             const nextEdge = currentEdgeEndNode.getNextEdge(currentEdge, currentEdgeDirection);
-            console.log(currentEdge.id, "-->", nextEdge?.edge.id);
 
             if (nextEdge === undefined) {
                 if (currentEdgeEndNode !== startEdgeEndNode) {
@@ -119,11 +118,6 @@ export class RegionEngineBL {
             currentEdgeDirection = oEnd.direction;
 
              if (currentEdge === startEdge) {
-                console.log("Found cycle:");
-                cycle.oEdges.forEach(oEdge => {
-                    console.log(oEdge.edge.id,"/", oEdge.direction);
-                });
-                console.log("Finished cycle");
                 return cycle;
             }
         }

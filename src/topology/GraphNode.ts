@@ -239,7 +239,6 @@ export default class GraphNode {
                     throw new Error("Inner tangent edge found " + winningEdges.length + " times!");
                 }
 
-                console.log("Winning inner");
                 return {
                     edge: winningEdges[0],
                     sameSide: true,
@@ -269,7 +268,6 @@ export default class GraphNode {
             throw new Error("Outer tangent edge found " + winningEdges.length + " times!");
         }
 
-        console.log("Winning outer");
         return {
             edge: winningEdges[0],
             sameSide: false,
@@ -290,10 +288,8 @@ export default class GraphNode {
         if (tgElems[0].parity !== ETangencyParity.chaos) {
             const nextTangentEdge = this._getNextTangentEdge(currentEdge, currentDirection, tanGroups[0], tgElems[0]);
             if (nextTangentEdge !== undefined) {
-                console.log("Tangent edge", currentEdge.id, "/", currentDirection, "->", nextTangentEdge.edge.id);
                 return nextTangentEdge;
             }
-            console.log("Tangent edge", currentEdge.id, "/", currentDirection,"is a dead end");
         }
 
         let minPerpendicularAngle = Number.MAX_VALUE;
@@ -328,17 +324,12 @@ export default class GraphNode {
                         sameSide: true,
                     };
     
-                    if (0 == round(minPerpendicularAngle)) {
-                        console.log("Zero angle", currentEdge.circle.id, tgEdge.circle.id);
-                    }
-    
                     return;
                 });
 
                 return nextEdge;
             }
 
-            console.log("TANGENCY MECHANISM");
             let candidates: Circle[] = [];
             const smallestYinCircles = tg.filter(tge => tge.parity === ETangencyParity.yin).sort((a, b) => a.circle.radius - b.circle.radius);
             if (smallestYinCircles.length > 0) {
