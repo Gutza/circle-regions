@@ -88,6 +88,9 @@ export interface ITangencyElement {
 }
 export type ITangencyGroup = ITangencyElement[];
 
+/**
+ * Traversal direction for oriented edges.
+ */
 export enum ETraversalDirection {
     /**
      * Trigonometric direction.
@@ -95,7 +98,7 @@ export enum ETraversalDirection {
     forward = "forward",
 
     /**
-     * Clockwise direction, and also reverse the nodes when traversing.
+     * Clockwise direction; reverse the nodes when traversing.
      */
     backward = "backward",
 };
@@ -134,13 +137,8 @@ export interface INextTangentEdge {
     sameSide: boolean;
 }
 
-export enum TRegionType {
-    contour = "contour",
+export enum ERegionType {
+    innerContour = "innerContour",
+    outerContour = "outerContour",
     region = "region",
-}
-
-export enum TContourType {
-    outer = "outer",
-    inner = "inner",
-    notContour = "notContour",
 }

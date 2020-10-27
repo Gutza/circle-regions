@@ -9,7 +9,7 @@ export default class CircleArc {
     private _startPoint: IPoint;
     private _endPoint: IPoint;
     private _isClockwise: boolean;
-    private _unitLength: number | undefined;
+    private _fractionalLength: number | undefined;
     private _midAngle: number | undefined;
     private _midPoint: IPoint | undefined;
 
@@ -68,13 +68,13 @@ export default class CircleArc {
      * The fraction of the length of the circle represented by this arc.
      * Computed lazily; cached.
      */
-    public get unitLength(): number {
-        if (this._unitLength !== undefined) {
-            return this._unitLength;
+    public get fractionalLength(): number {
+        if (this._fractionalLength !== undefined) {
+            return this._fractionalLength;
         }
 
-        this._unitLength = Math.abs(this.endAngle - this.startAngle) / TWO_PI;
-        return this._unitLength;
+        this._fractionalLength = Math.abs(this.endAngle - this.startAngle) / TWO_PI;
+        return this._fractionalLength;
     }
 
     public get midAngle(): number {

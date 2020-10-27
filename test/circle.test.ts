@@ -3,7 +3,7 @@ import assert = require('assert');
 import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
-import { TRegionType } from '../src/Types';
+import { ERegionType } from '../src/Types';
 
 const engine = new RegionEngine();
 /*
@@ -60,12 +60,11 @@ engine.regions.regions.forEach(region => {
         return;
     }
 
-    if (region.regionType === TRegionType.region) {
-        //console.log("Regular region");
+    if (region.regionType === ERegionType.region) {
         return;
     }
 
-    console.log("Contour type", region.contourType);
+    console.log("Contour type", region.regionType);
 })
 
 /*

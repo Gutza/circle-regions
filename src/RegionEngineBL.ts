@@ -6,7 +6,7 @@ import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, TRegionType, EDrawableEventType } from "./Types";
+import { ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, ERegionType, EDrawableEventType } from "./Types";
 
 export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
@@ -325,7 +325,13 @@ export class RegionEngineBL {
         cycles.forEach(cycle => {
             const arcs: CircleArc[] = [];
             let isContour = true;
+            let topmostEdge = cycle.oEdges[0].edge;
+            let topmostCenter: number = Number.MIN_VALUE;
             cycle.oEdges.forEach(oEdge => {
+                if (topmostEdge === undefined || oEdge.edge.circle.center.y > topmostEdge.circle.center.y) {
+                    topmostEdge = oEdge.edge;
+                    topmostCenter = topmostEdge.circle.center.y;
+                }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
                 isContour = isContour && isClockwise;
                 const startNode = oEdge.edge.node1;
@@ -359,7 +365,12 @@ export class RegionEngineBL {
                 ));
             });
 
-            const region = new ArcPolygon(arcs, isContour ? TRegionType.contour : TRegionType.region);
+            let regionType = ERegionType.region;
+            if (isContour) {
+                // We don't need oriented edges, because we know all edges are clockwise for contours
+                regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
+            }
+            const region = new ArcPolygon(arcs, regionType);
             this._regions.regions.push(region);
             this.emit(EDrawableEventType.onAddEvent, region);
         });
