@@ -6,23 +6,18 @@ import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { ICircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, ERegionType, EDrawableEventType } from "./Types";
+import { TCircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, ERegionType, EDrawableEventType } from "./Types";
 
 export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
     protected _edges: GraphEdge[] = [];
     protected _circles: Circle[] = [];
-    protected _regions: ICircleRegions = {
-        stale: true,
-        regions: [],
-    };
+    protected _regions: TCircleRegions = [];
     protected _dirtyRegions: boolean = false;
 
     public onRegionChange: FOnDrawableEvent[] = [];
 
     protected recomputeRegions = () => {
-        this._regions.stale = false;
-
         //  (1/5)
         this.removeDirtyNodesVertices();
         
@@ -124,7 +119,7 @@ export class RegionEngineBL {
     }
     
     protected removeDirtyRegions = (dirtyCircles: Circle[]): void => {
-        this._regions.regions = this._regions.regions.filter(region => {
+        this._regions = this._regions.filter(region => {
             if (region instanceof Circle) {
                 return true;
             }
@@ -301,7 +296,7 @@ export class RegionEngineBL {
 
     // (5/5)
     protected refreshRegions = (cycles: IGraphCycle[]): void => {
-        this._regions.regions = this._regions.regions.filter(circle => {
+        this._regions = this._regions.filter(circle => {
             if (circle instanceof ArcPolygon) {
                 return true;
             }
@@ -315,10 +310,10 @@ export class RegionEngineBL {
         });
 
         this._circles.forEach(circle => {
-            if (circle.vertices.length !== 0 || this._regions.regions.includes(circle)) {
+            if (circle.vertices.length !== 0 || this._regions.includes(circle)) {
                 return;
             }
-            this._regions.regions.push(circle);
+            this._regions.push(circle);
             this.emit(EDrawableEventType.onAddEvent, circle);
         });
 
@@ -371,7 +366,7 @@ export class RegionEngineBL {
                 regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
             }
             const region = new ArcPolygon(arcs, regionType);
-            this._regions.regions.push(region);
+            this._regions.push(region);
             this.emit(EDrawableEventType.onAddEvent, region);
         });
     }

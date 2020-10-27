@@ -1,5 +1,5 @@
 import { Circle } from "./geometry/Circle";
-import { ICircleRegions, onMoveEvent, onResizeEvent } from "./Types";
+import { TCircleRegions, onMoveEvent, onResizeEvent } from "./Types";
 import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
 
@@ -47,14 +47,20 @@ export class RegionEngine extends RegionEngineBL {
     }
 
     /**
+     * Check if the regions are unchanged. Requires no computation.
+     */
+    public get stale(): boolean {
+        return !this._dirtyRegions;
+    }
+
+    /**
      * Retrieve the current regions. This is the beef.
      * The engine caches everything it can, and only computes what it must.
      * This method is the cheapest of all, if nothing changed since the last time it was called,
      * or the most expensive of all, if everything changed.
      */
-    public get regions(): ICircleRegions {
+    public get regions(): TCircleRegions {
         if (!this._dirtyRegions) {
-            this._regions.stale = true;
             return this._regions;
         }
 

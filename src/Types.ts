@@ -127,10 +127,7 @@ export interface IGraphCycle {
     oEdges: IOrientedEdge[];
 }
 
-export interface ICircleRegions {
-    stale: boolean;
-    regions: (ArcPolygon | Circle)[];
-}
+export type TCircleRegions = (ArcPolygon | Circle)[];
 
 export interface INextTangentEdge {
     edge: GraphEdge;

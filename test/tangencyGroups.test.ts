@@ -11,7 +11,8 @@ engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));
 describe("Tangency groups for two circles A-B", () => {
     dumpGroups("Two", engine);
 
-    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
+    assert.strictEqual(engine.stale, false, "Adding a circle should not result in stale regions");
+    engine.regions;
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
@@ -44,7 +45,8 @@ engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
 describe("Tangency groups for three circles AA-B", () => {
     dumpGroups("Three", engine);
 
-    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
+    assert.strictEqual(engine.stale, false, "Adding a circle should not result in stale regions");
+    engine.regions;
 
     let yinCount = 0;
     let yangCount = 0;
@@ -74,7 +76,8 @@ engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
 describe("Tangency groups for four circles AA-BB", () => {
     dumpGroups("Four", engine);
 
-    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
+    assert.strictEqual(engine.stale, false, "Adding a circle should not result in stale regions");
+    engine.regions;
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
@@ -108,7 +111,8 @@ engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
 describe("Tangency groups for five circles AA-BB + C", () => {
     dumpGroups("Five", engine);
 
-    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
+    assert.strictEqual(engine.stale, false, "Adding a circle should not result in stale regions");
+    engine.regions;
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
