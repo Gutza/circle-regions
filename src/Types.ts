@@ -1,5 +1,6 @@
 import { ArcPolygon } from "./geometry/ArcPolygon";
 import { Circle } from "./geometry/Circle";
+import { PureGeometry } from "./geometry/PureGeometry";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
@@ -42,8 +43,14 @@ export interface IDrawable {
     id: any;
 }
 
-export const onMoveEvent: symbol = Symbol('move');
-export const onResizeEvent: symbol = Symbol('resize');
+export enum EGeometryEventType {
+    onMoveEvent = "move",
+    onResizeEvent = "resize",
+}
+
+export interface FOnGeometryEvent {
+    (eventType: EGeometryEventType, entity: PureGeometry): void;
+}
 
 export enum EDrawableEventType {
     onDeleteEvent = "onDelete",

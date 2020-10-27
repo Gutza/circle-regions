@@ -1,5 +1,5 @@
 import { Circle } from "./geometry/Circle";
-import { TCircleRegions, onMoveEvent, onResizeEvent } from "./Types";
+import { TCircleRegions } from "./Types";
 import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
 
@@ -27,8 +27,7 @@ export class RegionEngine extends RegionEngineBL {
         }
 
         circle.isDirty = true;
-        circle.on(onMoveEvent, this.onCircleEvent);
-        circle.on(onResizeEvent, this.onCircleEvent);
+        circle.onGeometryEvent = this.onCircleEvent;
         this._circles.push(circle);
     }
 
@@ -40,8 +39,7 @@ export class RegionEngine extends RegionEngineBL {
      * @param circle The circle to remove.
      */
     public removeCircle = (circle: Circle) => {
-        circle.removeListener(onMoveEvent, this.onCircleEvent);
-        circle.removeListener(onResizeEvent, this.onCircleEvent);
+        circle.onGeometryEvent = undefined;
         this._circles = this._circles.filter(c => c !== circle);
         this._staleRegions = false;
     }

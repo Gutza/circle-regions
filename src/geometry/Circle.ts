@@ -1,14 +1,14 @@
-import { IBoundingBox, IDrawable, IRegion, onMoveEvent, onResizeEvent } from "../Types";
+import { EGeometryEventType, FOnGeometryEvent, IBoundingBox, IDrawable, IRegion } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
-import { EventEmitter } from "events";
 import { round } from "./utils/numbers";
 import { Point } from "./Point";
+import { PureGeometry } from "./PureGeometry";
 
 /**
  * The main circle class.
  */
-export class Circle extends EventEmitter implements IRegion, IDrawable {
+export class Circle extends PureGeometry implements IRegion, IDrawable {
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
 
@@ -50,17 +50,16 @@ export class Circle extends EventEmitter implements IRegion, IDrawable {
      */
     constructor(center: Point, radius: number, id?: any) {
         super();
-
         this._center = center;
-        this._center.on(onMoveEvent, this.onCenterMove);
+        this._center.onGeometryEvent = this.onCenterMove;
         this._radius = radius;
         this.id = id;
     }
 
-    public onCenterMove = (center: Point) => {
+    public onCenterMove = (evtype: EGeometryEventType, center: PureGeometry) => {
         this._resetCommonGeometryCaches();
         this.isDirty = true;
-        this.emit(onMoveEvent, this);
+        this.emit(EGeometryEventType.onMoveEvent);
     }
 
     public addVertex(vertex: CircleVertex) {
@@ -128,11 +127,11 @@ export class Circle extends EventEmitter implements IRegion, IDrawable {
      * Move this circle.
      */
     set center(center: Point) {
-        this._center.removeListener(onMoveEvent, this.onCenterMove);
+        this._center.onGeometryEvent = undefined;
         this._center = center;
-        this._center.on(onMoveEvent, this.onCenterMove);
+        this._center.onGeometryEvent = this.onCenterMove;
         this._resetCommonGeometryCaches();
-        this.emit(onMoveEvent, this);
+        this.emit(EGeometryEventType.onMoveEvent);
     }
 
     /**
@@ -142,7 +141,7 @@ export class Circle extends EventEmitter implements IRegion, IDrawable {
         this._area = undefined;
         this._radius = radius;
         this._resetCommonGeometryCaches();
-        this.emit(onResizeEvent, this);
+        this.emit(EGeometryEventType.onResizeEvent);
     }
 
     private _resetCommonGeometryCaches = () => {
@@ -189,5 +188,4 @@ export class Circle extends EventEmitter implements IRegion, IDrawable {
         round(this.center.y) == round(that.center.y) &&
         round(this.radius) == round(that.radius)
     );
-
 }

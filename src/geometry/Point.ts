@@ -1,7 +1,7 @@
-import { EventEmitter } from "events";
-import { IPoint, onMoveEvent } from "../Types";
+import { EGeometryEventType, IPoint } from "../Types";
+import { PureGeometry } from "./PureGeometry";
 
-export class Point extends EventEmitter implements IPoint {
+export class Point extends PureGeometry implements IPoint {
     private _x: number;
     private _y: number;
 
@@ -21,11 +21,15 @@ export class Point extends EventEmitter implements IPoint {
 
     public set x(x: number) {
         this._x = x;
-        this.emit(onMoveEvent, this);
+        this.emit(EGeometryEventType.onMoveEvent);
     }
 
     public set y(y: number) {
         this._y = y;
-        this.emit(onMoveEvent, this);
+        this.emit(EGeometryEventType.onMoveEvent);
+    }
+
+    private _emit = (evtype: EGeometryEventType) => {
+        this.onGeometryEvent && this.onGeometryEvent(evtype, this);
     }
 }

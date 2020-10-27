@@ -15,7 +15,7 @@ export class RegionEngineBL {
     protected _regions: TCircleRegions = [];
     protected _staleRegions: boolean = true;
 
-    public onRegionChange: FOnDrawableEvent[] = [];
+    public onRegionChange: FOnDrawableEvent | undefined;
 
     protected recomputeRegions = () => {
         //  (1/5)
@@ -441,6 +441,6 @@ export class RegionEngineBL {
     }
 
     protected emit: FOnDrawableEvent = (evType, entity) => {
-        this.onRegionChange.forEach(callback => callback(evType, entity));
+        this.onRegionChange && this.onRegionChange(evType, entity);
     }
 }
