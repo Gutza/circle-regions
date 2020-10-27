@@ -1,71 +1,77 @@
 import assert = require('assert');
+import { ArcPolygon } from '../src/geometry/ArcPolygon';
 
 import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
 import { ERegionType } from '../src/Types';
 
-const engine = new RegionEngine();
-/*
-graph.addCircle(new Circle({x: -1, y: +0}, 2, "negC"));
-graph.addCircle(new Circle({x: +1, y: +0}, 2, "posC"));
-graph.addCircle(new Circle({x: +0, y: +1}, 2, "topC"));
-graph.addCircle(new Circle({x: +0, y: -1}, 2, "btmC"));
-*/
+describe("Four overlapping axis-centered circles", () => {
+    const engine = new RegionEngine();
+    engine.addCircle(new Circle(new Point(-1, +0), 2, "left"));
+    engine.addCircle(new Circle(new Point(+1, +0), 2, "right"));
+    engine.addCircle(new Circle(new Point(+0, +1), 2, "top"));
+    engine.addCircle(new Circle(new Point(+0, -1), 2, "bottom"));
+    assert.strictEqual(engine.regions.stale, false, "Regions should not be stale");
+    it("Basic region count and discrimination", () => {
+        assert.strictEqual(14, engine.regions.regions.length, "There should be 14 regions in total");
+        assert.strictEqual(0, engine.regions.regions.filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.regions.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+    });
+});
 
-/*
-engine.addCircle(new Circle(new Point(+0.00, +3.28), 2, "topC"));
-engine.addCircle(new Circle(new Point(-1.78, +0.00), 2, "btlC"));
-engine.addCircle(new Circle(new Point(+1.78, +0.00), 2, "btrC"));
-*/
+describe("Canonical interior contour", () => {
+    const engine = new RegionEngine();
+    engine.addCircle(new Circle(new Point(+0.00, +3.28), 2, "top"));
+    engine.addCircle(new Circle(new Point(-1.78, +0.00), 2, "bottom left"));
+    engine.addCircle(new Circle(new Point(+1.78, +0.00), 2, "bottom right"));
+    assert.strictEqual(engine.regions.stale, false, "Regions should not be stale");
+    it("Basic inner/outer contour discrimination", () => {
+        assert.strictEqual(8, engine.regions.regions.length, "There should be 8 regions in total");
+        assert.strictEqual(0, engine.regions.regions.filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.regions.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+        assert.strictEqual(1, engine.regions.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.innerContour).length, "There should be a single inner contour");
+    });
+});
 
-engine.addCircle(new Circle(new Point(432, 84),  50 ));
-engine.addCircle(new Circle(new Point(354, 117), 50)); 
-engine.addCircle(new Circle(new Point(297, 191), 50)); 
-engine.addCircle(new Circle(new Point(260, 256), 50)); 
-engine.addCircle(new Circle(new Point(253, 344), 50)); 
-engine.addCircle(new Circle(new Point(251, 435), 50)); 
-engine.addCircle(new Circle(new Point(272, 529), 50)); 
-engine.addCircle(new Circle(new Point(348, 601), 50)); 
-engine.addCircle(new Circle(new Point(280, 591), 50)); 
-engine.addCircle(new Circle(new Point(432, 623), 50)); 
-engine.addCircle(new Circle(new Point(512, 636), 50)); 
-engine.addCircle(new Circle(new Point(588, 635), 50)); 
-engine.addCircle(new Circle(new Point(642, 551), 50)); 
-engine.addCircle(new Circle(new Point(661, 454), 50)); 
-engine.addCircle(new Circle(new Point(662, 365), 50)); 
-engine.addCircle(new Circle(new Point(655, 277), 50)); 
-engine.addCircle(new Circle(new Point(620, 197), 50)); 
-engine.addCircle(new Circle(new Point(567, 137), 50)); 
-engine.addCircle(new Circle(new Point(502, 104), 50)); 
-engine.addCircle(new Circle(new Point(337, 347), 50));
-// What difference does this make?
-engine.addCircle(new Circle(new Point(571, 364), 50));
-// How about these?
-engine.addCircle(new Circle(new Point(432, 532), 50));
-engine.addCircle(new Circle(new Point(441, 435), 50));
-// And these?
-engine.addCircle(new Circle(new Point(373, 232), 50));
-engine.addCircle(new Circle(new Point(510, 212), 50));
-engine.addCircle(new Circle(new Point(568, 503), 50));
-try {
-    engine.regions;
-} catch(err) {
-    console.warn("Error in circle.tests!", err);
-}
-
-engine.regions.regions.forEach(region => {
-    if (region instanceof Circle) {
-        //console.log("Circle region");
-        return;
-    }
-
-    if (region.regionType === ERegionType.region) {
-        return;
-    }
-
-    console.log("Contour type", region.regionType);
+describe("Crazy interior contour", () => {
+    const engine = new RegionEngine();
+    engine.addCircle(new Circle(new Point(432, 84), 50));
+    engine.addCircle(new Circle(new Point(354, 117), 50)); 
+    engine.addCircle(new Circle(new Point(297, 191), 50)); 
+    engine.addCircle(new Circle(new Point(260, 256), 50)); 
+    engine.addCircle(new Circle(new Point(253, 344), 50)); 
+    engine.addCircle(new Circle(new Point(251, 435), 50)); 
+    engine.addCircle(new Circle(new Point(272, 529), 50)); 
+    engine.addCircle(new Circle(new Point(348, 601), 50)); 
+    engine.addCircle(new Circle(new Point(280, 591), 50)); 
+    engine.addCircle(new Circle(new Point(432, 623), 50)); 
+    engine.addCircle(new Circle(new Point(512, 636), 50)); 
+    engine.addCircle(new Circle(new Point(588, 635), 50)); 
+    engine.addCircle(new Circle(new Point(642, 551), 50)); 
+    engine.addCircle(new Circle(new Point(661, 454), 50)); 
+    engine.addCircle(new Circle(new Point(662, 365), 50)); 
+    engine.addCircle(new Circle(new Point(655, 277), 50)); 
+    engine.addCircle(new Circle(new Point(620, 197), 50)); 
+    engine.addCircle(new Circle(new Point(567, 137), 50)); 
+    engine.addCircle(new Circle(new Point(502, 104), 50)); 
+    engine.addCircle(new Circle(new Point(337, 347), 50));
+    engine.addCircle(new Circle(new Point(571, 364), 50));
+    engine.addCircle(new Circle(new Point(432, 532), 50));
+    engine.addCircle(new Circle(new Point(441, 435), 50));
+    engine.addCircle(new Circle(new Point(373, 232), 50));
+    engine.addCircle(new Circle(new Point(510, 212), 50));
+    engine.addCircle(new Circle(new Point(568, 503), 50));
+    assert.strictEqual(engine.regions.stale, false, "Regions should not be stale");
+    it("Static inner/outer contour discrimination", () => {
+        assert.strictEqual(54, engine.regions.regions.length, "There should be 54 regions in total"); // Yes, I actually counted them
+        assert.strictEqual(0, engine.regions.regions.filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.regions.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+        assert.strictEqual(1, engine.regions.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.innerContour).length, "There should be a single inner contour");
+    });
 })
+
+
 
 /*
 import assert = require('assert');

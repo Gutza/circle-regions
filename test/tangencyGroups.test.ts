@@ -4,38 +4,15 @@ import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
 import { ETangencyParity } from '../src/Types';
 
-console.log("=== Two tangent circles ===");
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));
 engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));
-//   Comment this block to get "Error: Inner tangent edge found 2 times!" during "=== Four tangent circles ===" -- probably a caching issue
-// Uncomment this block to get "Error: Region right already set!"         during "=== Four tangent circles + chaotic circle ===" -- probably a real tangency computation issue
-/*
-console.log("=== Three tangent circles ===");
-engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
-console.log("=== Four tangent circles ===");
-engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
-console.log("=== Four tangent circles + chaotic circle ===");
-engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
-engine.regions;
-*/
-// /block
-
-// TEMPORARY DEBUGGING
-console.log("=== Three tangent circles ===");
-engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
-engine.regions;
-
-console.log("=== Four tangent circles ===");
-engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
-engine.regions;
-
-console.log("=== Four tangent circles + chaotic circle ===");
-engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
-engine.regions;
 
 describe("Tangency groups for two circles A-B", () => {
     dumpGroups("Two", engine);
+
+    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
+
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
         node.tangencyGroups.forEach(() => tanGroupCount++);
@@ -62,12 +39,12 @@ describe("Tangency groups for two circles A-B", () => {
     });
 });
 
-console.log("=== Three tangent circles ===");
 engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
-engine.regions;
 
 describe("Tangency groups for three circles AA-B", () => {
     dumpGroups("Three", engine);
+
+    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
 
     let yinCount = 0;
     let yangCount = 0;
@@ -92,12 +69,12 @@ describe("Tangency groups for three circles AA-B", () => {
     });
 });
 
-console.log("=== Four tangent circles ===");
 engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
-engine.regions;
 
 describe("Tangency groups for four circles AA-BB", () => {
     dumpGroups("Four", engine);
+
+    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
@@ -126,12 +103,12 @@ describe("Tangency groups for four circles AA-BB", () => {
     });
 });
 
-console.log("=== Four tangent circles + chaotic circle ===");
 engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
-engine.regions;
 
 describe("Tangency groups for five circles AA-BB + C", () => {
     dumpGroups("Five", engine);
+
+    assert.strictEqual(engine.regions.stale, false, "Adding a circle should not result in stale regions");
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
