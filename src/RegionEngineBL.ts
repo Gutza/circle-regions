@@ -13,7 +13,7 @@ export class RegionEngineBL {
     protected _edges: GraphEdge[] = [];
     protected _circles: Circle[] = [];
     protected _regions: TCircleRegions = [];
-    protected _dirtyRegions: boolean = false;
+    protected _staleRegions: boolean = true;
 
     public onRegionChange: FOnDrawableEvent[] = [];
 
@@ -33,11 +33,11 @@ export class RegionEngineBL {
         // (5/5)
         this.refreshRegions(cycles);
 
-        this._dirtyRegions = false;
+        this._staleRegions = true;
     }
 
     protected onCircleEvent = () => {
-        this._dirtyRegions = true;
+        this._staleRegions = false;
     }
 
     protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {

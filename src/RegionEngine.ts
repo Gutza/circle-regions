@@ -14,7 +14,7 @@ export class RegionEngine extends RegionEngineBL {
      * @param guaranteedNew Set to true if there is an external mechanism which ensures this is geometrically distinct from every other circle already added.
      */
     public addCircle = (circle: Circle, guaranteedNew: boolean = false) => {
-        this._dirtyRegions = true;
+        this._staleRegions = false;
 
         if (this._circles.includes(circle)) {
             console.warn(`Circle with center (${circle.center.x}, ${circle.center.y}), radius ${circle.radius} and ID ${circle.id} already exists.`);
@@ -43,14 +43,14 @@ export class RegionEngine extends RegionEngineBL {
         circle.removeListener(onMoveEvent, this.onCircleEvent);
         circle.removeListener(onResizeEvent, this.onCircleEvent);
         this._circles = this._circles.filter(c => c !== circle);
-        this._dirtyRegions = true;
+        this._staleRegions = false;
     }
 
     /**
      * Check if the regions are unchanged. Requires no computation.
      */
     public get stale(): boolean {
-        return !this._dirtyRegions;
+        return this._staleRegions;
     }
 
     /**
@@ -60,7 +60,7 @@ export class RegionEngine extends RegionEngineBL {
      * or the most expensive of all, if everything changed.
      */
     public get regions(): TCircleRegions {
-        if (!this._dirtyRegions) {
+        if (this._staleRegions) {
             return this._regions;
         }
 
