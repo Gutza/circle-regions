@@ -55,12 +55,12 @@ export interface FOnDrawableEvent {
 }
 
 export enum ETangencyType {
-    innerTangent,
-    outerTangent
+    innerTangent = "inner",
+    outerTangent = "outer"
 };
 
 export enum EIntersectionType {
-    lens
+    lens = "lens"
 };
 
 export type TIntersectionType = EIntersectionType | ETangencyType;

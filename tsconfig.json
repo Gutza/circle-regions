@@ -5,6 +5,7 @@
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
+    "sourceMap": true,
     "lib": ["es6", "dom"]
   },
   "include": [
