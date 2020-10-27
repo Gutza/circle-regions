@@ -28,39 +28,25 @@ export class ArcPolygon implements IDrawable {
             return this._contourType;
         }
 
+        if (this.regionType !== TRegionType.contour) {
+            this._contourType = TContourType.notContour;
+            return this._contourType;
+        }
+
         let intAngDiff = 0;
 
         for (let arcIndex = 0; arcIndex < this._arcs.length;) {
+            // Do NOT break early, this is only guaranteed to resolve
+            // properly after traversing all arcs in the contour!
             const currArc = this._arcs[arcIndex];
             const nextArc = this._arcs[++arcIndex] || this._arcs[0];
 
-            /*
-            console.log(
-                this.toDeg(currArc.startAngle),
-                this.toDeg(currArc.midAngle),
-                this.toDeg(currArc.endAngle),
-                "»»»",
-                this.toDeg(nextArc.startAngle),
-                this.toDeg(nextArc.midAngle),
-                this.toDeg(nextArc.endAngle)
-            );
-
-            const angDiff = nextArc.startAngle - currArc.startAngle;
-            //console.log("angDiff", angDiff);
-            intAngDiff += angDiff;
-            */
-
-            const midArc1 = currArc.midAngle;
-            const midArc2 = nextArc.midAngle - (currArc.midAngle > nextArc.midAngle ? TWO_PI : 0);
+            const midArc1 = currArc.startAngle;
+            const midArc2 = nextArc.startAngle - (currArc.startAngle > nextArc.startAngle ? TWO_PI : 0);
             intAngDiff += midArc2 - midArc1;
         }
-
-        console.log("intAngDiff", this.toDeg(intAngDiff));
-        this._contourType = intAngDiff < -7 ? TContourType.outer : TContourType.inner;
+        
+        this._contourType = intAngDiff < -6.2832 ? TContourType.outer : TContourType.inner;
         return this._contourType;
-    }
-
-    private toDeg(rad: number): string {
-        return Math.round(rad * 180 / Math.PI).toString();
     }
 }

@@ -46,8 +46,8 @@ export const onMoveEvent: symbol = Symbol('move');
 export const onResizeEvent: symbol = Symbol('resize');
 
 export enum EDrawableEventType {
-    onDeleteEvent,
-    onAddEvent,
+    onDeleteEvent = "onDelete",
+    onAddEvent = "onAdd",
 }
 
 export interface FOnDrawableEvent {
@@ -77,9 +77,9 @@ export interface IVertex {
 }
 
 export enum ETangencyParity {
-    yin,
-    yang,
-    chaos
+    yin = "yin",
+    yang = "yang",
+    chaos = "chaos",
 };
 
 export interface ITangencyElement {
@@ -92,12 +92,12 @@ export enum ETraversalDirection {
     /**
      * Trigonometric direction.
      */
-    forward,
+    forward = "forward",
 
     /**
      * Clockwise direction, and also reverse the nodes when traversing.
      */
-    backward
+    backward = "backward",
 };
 
 export interface IGraphEnd {
@@ -135,11 +135,12 @@ export interface INextTangentEdge {
 }
 
 export enum TRegionType {
-    contour,
-    region,
+    contour = "contour",
+    region = "region",
 }
 
 export enum TContourType {
-    outer,
-    inner,
+    outer = "outer",
+    inner = "inner",
+    notContour = "notContour",
 }
