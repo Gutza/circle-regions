@@ -28,8 +28,7 @@ export class ArcPolygon implements IDrawable {
             return this._contourType;
         }
 
-        let
-            intAngDiff = 0,
+        let intAngDiff = 0;
 
         for (let arcIndex = 0; arcIndex < this._arcs.length;) {
             const currArc = this._arcs[arcIndex];
