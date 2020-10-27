@@ -33,6 +33,12 @@ export class ArcPolygon implements IDrawable {
             return this._contourType;
         }
 
+        // There can't be an inner contour defined by less than three circles.
+        if (this._arcs.length < 3) {
+            this._contourType = TContourType.outer;
+            return this._contourType;
+        }
+
         let intAngDiff = 0;
 
         for (let arcIndex = 0; arcIndex < this._arcs.length;) {
