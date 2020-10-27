@@ -39,7 +39,11 @@ export class ArcPolygon implements IDrawable {
             return this._contourType;
         }
 
-        let intAngDiff = 0;
+        let intAngDiff = {
+            "start": 0,
+            "mid": 0,
+            "end": 0,
+        }, fracTot = 0;
 
         for (let arcIndex = 0; arcIndex < this._arcs.length;) {
             // Do NOT break early, this is only guaranteed to resolve
@@ -47,12 +51,29 @@ export class ArcPolygon implements IDrawable {
             const currArc = this._arcs[arcIndex];
             const nextArc = this._arcs[++arcIndex] || this._arcs[0];
 
-            const midArc1 = currArc.startAngle;
-            const midArc2 = nextArc.startAngle - (currArc.startAngle > nextArc.startAngle ? TWO_PI : 0);
-            intAngDiff += midArc2 - midArc1;
+            const sArc1 = currArc.startAngle;
+            const sArc2 = nextArc.startAngle - (currArc.startAngle > nextArc.startAngle ? TWO_PI : 0);
+            intAngDiff.start += sArc2 - sArc1;
+
+            const eArc1 = currArc.endAngle;
+            const eArc2 = nextArc.endAngle - (currArc.endAngle > nextArc.endAngle ? TWO_PI : 0);
+            intAngDiff.end += eArc2 - eArc1;
+
+            const mArc1 = currArc.midAngle;
+            const mArc2 = nextArc.midAngle - (currArc.midAngle > nextArc.midAngle ? TWO_PI : 0);
+            intAngDiff.mid += mArc2 - mArc1;
+
+            fracTot += currArc.unitLength;
         }
         
-        this._contourType = intAngDiff < -6.2832 ? TContourType.outer : TContourType.inner;
+        console.log(
+            "intAngDiff start", Math.round(intAngDiff.start/Math.PI*180),
+            "mid", Math.round(intAngDiff.mid/Math.PI*180),
+            "end", Math.round(intAngDiff.end/Math.PI*180),
+            "fracTot", fracTot
+        );
+        //this._contourType = intAngDiff < -6.2832 ? TContourType.outer : TContourType.inner;
+        this._contourType = TContourType.outer;
         return this._contourType;
     }
 }
