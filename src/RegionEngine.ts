@@ -27,7 +27,7 @@ export class RegionEngine extends RegionEngineBL {
         }
 
         circle.isDirty = true;
-        circle.onGeometryEvent = this.onCircleEvent;
+        circle.onGeometryEvent = () => this.onCircleChangeEvent(circle);
         this._circles.push(circle);
     }
 

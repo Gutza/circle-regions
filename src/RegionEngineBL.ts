@@ -6,7 +6,7 @@ import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { TCircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, ERegionType, EDrawableEventType } from "./Types";
+import { TCircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, ERegionType, EDrawableEventType, FOnGeometryEvent } from "./Types";
 
 export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
@@ -36,8 +36,9 @@ export class RegionEngineBL {
         this._staleRegions = true;
     }
 
-    protected onCircleEvent = () => {
+    protected onCircleChangeEvent = (circle: Circle) => {
         this._staleRegions = false;
+        this.emit(EDrawableEventType.onRedrawEvent, circle);
     }
 
     protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {

@@ -55,10 +55,13 @@ export interface FOnGeometryEvent {
 export enum EDrawableEventType {
     onDeleteEvent = "onDelete",
     onAddEvent = "onAdd",
+    onRedrawEvent = "onRedraw",
 }
 
+export type TDrawableGeometry = Circle | ArcPolygon;
+
 export interface FOnDrawableEvent {
-    (eventType: EDrawableEventType, entity: Circle | ArcPolygon): void;
+    (eventType: EDrawableEventType, entity: TDrawableGeometry): void;
 }
 
 export enum ETangencyType {
