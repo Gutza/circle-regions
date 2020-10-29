@@ -148,6 +148,8 @@ export class RegionEngineBL {
             circle.parents = circle.children.filter(parent => !dirtyCircles.includes(parent));
         });
 
+        // TODO: Streamline this, we're traversing the same array three times in a row!
+
         // Affected nodes are all nodes which include dirty circles.
         const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => dirtyCircles.includes(tge.circle))));
 
@@ -171,24 +173,20 @@ export class RegionEngineBL {
 
     /**
      * (2/5)
-     * This is an important milestone in the process.
-     * 
-     * _computeIntersections() sets parents and children, and creates nodes by
+     * This sets parents and children among circles, and creates nodes by
      * intersecting dirty circles with all other circles. When an intersection
      * is found between a dirty circle and a clean circle, the clean circle
      * gets contaminated -- its vertices need re-sorting, its edges deleted and re-created,
-     * and all adjacent regions need to be deleted and re-computed.
+     * and all adjacent regions need to be revisited.
      * 
      * As such, dirty child/parent, vertex and node cleanup must be performed before computing the
      * intersections, while edge and region cleanup must be done after computing them.
      * 
-     * This also means the set of dirty circles potentially increases in size during
-     * this step, therefore:
+     * This means the set of dirty circles could increase during this step, so:
      * (1) The notion of a circle being dirty means different things before and after this step;
      * (2) The list of dirty circles must be recomputed after this operation (do not cache it across this step).
      */
     protected computeIntersections = () => {
-        // TODO: Implement sweep line x 2
         for (let i = 0; i < this._circles.length-1; i++) {
             const c1 = this._circles[i];
             for (let j = i+1; j < this._circles.length; j++) {

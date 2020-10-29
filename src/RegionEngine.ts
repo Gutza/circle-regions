@@ -47,7 +47,7 @@ export class RegionEngine extends RegionEngineBL {
     /**
      * Check if the regions are unchanged. Requires no computation.
      */
-    public get stale(): boolean {
+    public get isStale(): boolean {
         return this._staleRegions;
     }
 
