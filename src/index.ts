@@ -1,27 +1,23 @@
 /*
- TODO: Benchmarks
+ TODO/L: Benchmarks
 
- TODO: Proper library exports
+ TODO/L: Coverall
 
- TODO: Coverall
+ TODO/M: Dump circles on exceptions, so people can easily send bug reports
 
- TODO: Dump circles on exceptions, so people can easily send bug reports
+ TODO/L: Rotating cardioid test
 
- TODO: Areas
+ TODO/M: Region "centroid" (largest inscribed circle)
 
- TODO: Perimeters; also ensure consistent naming scheme
+ TODO/M: Region persistence (optional; based on parents and neighbors)
 
- TODO: Check for all TODOs
+ TODO/M: Region change events (depends on region persistence)
 
- TODO: Rotating cardioid test
+ TODO/L: Circles as inner/outer contours (tangent circles)
 
- TODO: Region "centroid" (largest inscribed circle)
+ TODO/H: Documentation
 
- TODO: Consolidate a sane event/callback approach for all entities
-
- TODO: sort out the lock file per
- 1. https://stackoverflow.com/questions/44552348/should-i-commit-yarn-lock-and-package-lock-json-files/44904494
- 2. https://classic.yarnpkg.com/blog/2018/06/04/yarn-import-package-lock/
+ TODO/XH: Investigate documentation labels (lazy, cached, computationally cheap, etc)
  */
 
 export { Circle } from "./geometry/Circle";
