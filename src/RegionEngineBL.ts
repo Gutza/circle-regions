@@ -6,8 +6,23 @@ import { TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
-import { TCircleRegions, IGraphCycle, IPoint, TIntersectionType, ETraversalDirection, ETangencyType, EIntersectionType, FOnDrawableEvent, ERegionType, EDrawableEventType, FOnGeometryEvent } from "./Types";
 
+import {
+    TCircleRegions,
+    IGraphCycle,
+    IPoint,
+    TIntersectionType,
+    ETraversalDirection,
+    ETangencyType,
+    EIntersectionType,
+    FOnDrawableEvent,
+    ERegionType,
+    EDrawableEventType
+} from "./Types";
+
+/**
+ * The internal business logic of the region engine.
+ */
 export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
     protected _edges: GraphEdge[] = [];
@@ -36,9 +51,9 @@ export class RegionEngineBL {
         this._staleRegions = true;
     }
 
-    protected onCircleChangeEvent = (circle: Circle) => {
+    protected onCircleChange = (circle: Circle) => {
         this._staleRegions = false;
-        this.emit(EDrawableEventType.onRedrawEvent, circle);
+        this.emit(EDrawableEventType.redraw, circle);
     }
 
     protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
@@ -129,7 +144,7 @@ export class RegionEngineBL {
                 return true;
             }
 
-            this.emit(EDrawableEventType.onDeleteEvent, region);
+            this.emit(EDrawableEventType.delete, region);
             return false;
         });
     };
@@ -304,7 +319,7 @@ export class RegionEngineBL {
                 return true;
             }
 
-            this.emit(EDrawableEventType.onDeleteEvent, circle);
+            this.emit(EDrawableEventType.delete, circle);
             return false;
         });
 
@@ -313,7 +328,7 @@ export class RegionEngineBL {
                 return;
             }
             this._regions.push(circle);
-            this.emit(EDrawableEventType.onAddEvent, circle);
+            this.emit(EDrawableEventType.add, circle);
         });
 
         cycles.forEach(cycle => {
@@ -366,7 +381,7 @@ export class RegionEngineBL {
             }
             const region = new ArcPolygon(arcs, regionType);
             this._regions.push(region);
-            this.emit(EDrawableEventType.onAddEvent, region);
+            this.emit(EDrawableEventType.add, region);
         });
     }
 

@@ -1,10 +1,12 @@
 import { EGeometryEventType, FOnGeometryEvent } from "../Types";
 
+/**
+ * A very slim event emitter base class.
+ */
 export class PureGeometry {
-    public onGeometryEvent: FOnGeometryEvent | undefined;
+    public onGeometryChange: FOnGeometryEvent | undefined;
 
     protected emit = (evtype: EGeometryEventType) => {
-        this.onGeometryEvent && this.onGeometryEvent(evtype, this);
+        this.onGeometryChange && this.onGeometryChange(evtype, this);
     }
-
 }

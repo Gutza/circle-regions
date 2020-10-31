@@ -51,15 +51,15 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     constructor(center: Point, radius: number, id?: any) {
         super();
         this._center = center;
-        this._center.onGeometryEvent = this.onCenterMove;
+        this._center.onGeometryChange = this.onCenterMove;
         this._radius = radius;
         this.id = id;
     }
 
-    public onCenterMove = (evtype: EGeometryEventType, center: PureGeometry) => {
+    public onCenterMove = () => {
         this._resetCommonGeometryCaches();
         this.isDirty = true;
-        this.emit(EGeometryEventType.onMoveEvent);
+        this.emit(EGeometryEventType.move);
     }
 
     public addVertex(vertex: CircleVertex) {
@@ -127,11 +127,11 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
      * Move this circle.
      */
     set center(center: Point) {
-        this._center.onGeometryEvent = undefined;
+        this._center.onGeometryChange = undefined;
         this._center = center;
-        this._center.onGeometryEvent = this.onCenterMove;
+        this._center.onGeometryChange = this.onCenterMove;
         this._resetCommonGeometryCaches();
-        this.emit(EGeometryEventType.onMoveEvent);
+        this.emit(EGeometryEventType.move);
     }
 
     /**
@@ -141,7 +141,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._area = undefined;
         this._radius = radius;
         this._resetCommonGeometryCaches();
-        this.emit(EGeometryEventType.onResizeEvent);
+        this.emit(EGeometryEventType.resize);
     }
 
     private _resetCommonGeometryCaches = () => {

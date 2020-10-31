@@ -44,8 +44,8 @@ export interface IDrawable {
 }
 
 export enum EGeometryEventType {
-    onMoveEvent = "move",
-    onResizeEvent = "resize",
+    move = "move",
+    resize = "resize",
 }
 
 export interface FOnGeometryEvent {
@@ -53,9 +53,9 @@ export interface FOnGeometryEvent {
 }
 
 export enum EDrawableEventType {
-    onDeleteEvent = "onDelete",
-    onAddEvent = "onAdd",
-    onRedrawEvent = "onRedraw",
+    delete = "delete",
+    add = "add",
+    redraw = "redraw",
 }
 
 export type TDrawableGeometry = Circle | ArcPolygon;
