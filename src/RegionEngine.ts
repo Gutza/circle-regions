@@ -68,14 +68,14 @@ export class RegionEngine extends RegionEngineBL {
             throw({
                 Message: "An error occurred while processing the regions. Please submit a bug report including all information in this message.",
                 InnerException: e,
-                CircleDump: this.circles.map(circle => {
+                CircleDump: JSON.stringify(this.circles.map(circle => {
                     return [
                         circle.id,
                         circle.radius,
                         circle.center.x,
                         circle.center.y,
                     ];
-                })
+                })),
             });
         }
 
