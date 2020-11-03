@@ -325,7 +325,7 @@ export class RegionEngineBL {
 
         this._circles.forEach(circle => {
             if (circle.vertices.length !== 0 || this._regions.includes(circle)) {
-                circle.isDisplayed = false;
+                circle.isDisplayed = circle.vertices.length !== 0;
                 return;
             }
             circle.isDisplayed = true;
