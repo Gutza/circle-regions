@@ -325,8 +325,10 @@ export class RegionEngineBL {
 
         this._circles.forEach(circle => {
             if (circle.vertices.length !== 0 || this._regions.includes(circle)) {
+                circle.isDisplayed = false;
                 return;
             }
+            circle.isDisplayed = true;
             this._regions.push(circle);
             this.emit(EDrawableEventType.add, circle);
         });
@@ -335,11 +337,9 @@ export class RegionEngineBL {
             const arcs: CircleArc[] = [];
             let isContour = true;
             let topmostEdge = cycle.oEdges[0].edge;
-            let topmostCenter: number = Number.MIN_VALUE;
             cycle.oEdges.forEach(oEdge => {
                 if (topmostEdge === undefined || oEdge.edge.circle.center.y > topmostEdge.circle.center.y) {
                     topmostEdge = oEdge.edge;
-                    topmostCenter = topmostEdge.circle.center.y;
                 }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
                 isContour = isContour && isClockwise;

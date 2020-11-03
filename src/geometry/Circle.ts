@@ -12,6 +12,11 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
 
+    /**
+     * Boolean indicating whether this circle should ever be displayed as such (or whether it's split into arcs which make up region boundaries).
+     */
+    public isDisplayed = false;
+
     public id: any;
 
     /**
