@@ -324,11 +324,10 @@ export class RegionEngineBL {
         });
 
         this._circles.forEach(circle => {
+            circle.isDisplayed = circle.vertices.length === 0;
             if (circle.vertices.length !== 0 || this._regions.includes(circle)) {
-                circle.isDisplayed = circle.vertices.length !== 0;
                 return;
             }
-            circle.isDisplayed = true;
             this._regions.push(circle);
             this.emit(EDrawableEventType.add, circle);
         });
