@@ -62,7 +62,22 @@ export class RegionEngine extends RegionEngineBL {
             return this._regions;
         }
 
-        this.recomputeRegions();
+        try {
+            this.recomputeRegions();
+        } catch(e) {
+            throw({
+                Message: "An error occurred while processing the regions. Please submit a bug report including all information in this message.",
+                InnerException: e,
+                CircleDump: this.circles.map(circle => {
+                    return [
+                        circle.id,
+                        circle.radius,
+                        circle.center.x,
+                        circle.center.y,
+                    ];
+                })
+            });
+        }
 
         return this._regions;
     }
