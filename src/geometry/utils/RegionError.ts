@@ -18,10 +18,9 @@ export class RegionError extends Error {
     public get circleDump(): string {
         return JSON.stringify(this._circles.map(circle => {
             return [
-                circle.id,
-                circle.radius,
                 circle.center.x,
                 circle.center.y,
+                circle.radius,
             ];
         }));
     }

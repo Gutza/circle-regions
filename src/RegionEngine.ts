@@ -26,19 +26,17 @@ export class RegionEngine extends RegionEngineBL {
     public addCircle = (circle: Circle, guaranteedNew: boolean = false) => {
         this._staleRegions = false;
 
-        if (this._circles.includes(circle)) {
-            console.warn(`Circle with center (${circle.center.x}, ${circle.center.y}), radius ${circle.radius} and ID ${circle.id} already exists.`);
-            return;
-        }
-
-        if (!guaranteedNew && this._circles.some(gc => gc.equals(circle))) {
+        if (!guaranteedNew && this._circles.some(existingCircle => existingCircle.equals(circle))) {
             console.warn(`Another circle with center (${circle.center.x}, ${circle.center.y}) and radius ${circle.radius} already exists."`);
             return;
         }
 
-        circle.isDirty = true;
-        circle.onGeometryChange = () => this.onCircleChange(circle);
-        this._circles.push(circle);
+        const newCircle = new Circle(circle.center, circle.radius, circle.id);
+        newCircle.isDirty = true;
+        newCircle.onGeometryChange = () => this.onCircleChange(newCircle);
+
+        // We always want to create new circles, in order to remove their vertex and edge caches
+        this._circles.push(newCircle);
     };
 
     // TODO: Make sure this really is computationally cheap -- right now it isn't.
@@ -83,18 +81,21 @@ export class RegionEngine extends RegionEngineBL {
                     undefined
                 );
             }
-            
-            if (DebugEngine.checkStatic(this.circles)) {
+
+            const canonicalCircles = DebugEngine.checkStatic(this.circles);
+
+            if (canonicalCircles.length > 0) {
                 throw new RegionError(
-                    "A reproducible error has occurred while processing the regions. Please submit a bug report including all information in this message.",
+                    "A statically reproducible error has occurred while processing the regions. Please submit a bug report including all information in this message.",
                     e as Error,
-                    this.circles,
+                    canonicalCircles,
                     true
                 );
             }
 
+            // TODO: Attempt dynamic reproducing, as well
             throw new RegionError(
-                "An unreproducible error has occurred while processing the regions.",
+                "A statically unreproducible error has occurred while processing the regions.",
                 e as Error,
                 this.circles,
                 false
