@@ -149,3 +149,9 @@ export enum ERegionType {
     outerContour = "outerContour",
     region = "region",
 }
+
+export enum ERegionDebugMode {
+    none = "none",
+    static = "static",
+    dynamic = "dynamic"
+}

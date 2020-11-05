@@ -17,7 +17,8 @@ import {
     EIntersectionType,
     FOnDrawableEvent,
     ERegionType,
-    EDrawableEventType
+    EDrawableEventType,
+    ERegionDebugMode
 } from "./Types";
 
 /**
@@ -29,8 +30,13 @@ export class RegionEngineBL {
     protected _circles: Circle[] = [];
     protected _regions: TCircleRegions = [];
     protected _staleRegions: boolean = true;
+    protected _debugMode: ERegionDebugMode;
 
     public onRegionChange: FOnDrawableEvent | undefined;
+
+    constructor(debugMode: ERegionDebugMode) {
+        this._debugMode = debugMode;
+    }
 
     protected recomputeRegions = () => {
         //  (1/5)

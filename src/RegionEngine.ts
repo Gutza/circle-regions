@@ -1,12 +1,22 @@
 import { Circle } from "./geometry/Circle";
-import { TCircleRegions } from "./Types";
+import { ERegionDebugMode, TCircleRegions } from "./Types";
 import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
+import { DebugEngine } from "./DebugEngine";
+import { RegionError } from "./geometry/utils/RegionError";
 
 /**
  * The main engine for computing regions resulted from intersecting circles.
  */
 export class RegionEngine extends RegionEngineBL {
+    /**
+     * Instantiate a new region engine.
+     * 
+     * @param debugMode The debug mode. For most cases, static should be fine.
+     */
+    constructor(debugMode: ERegionDebugMode = ERegionDebugMode.static) {
+        super(debugMode);
+    }
     /**
      * Add a circle to the engine.
      * Computationally cheap, unless there are many circles AND @see guaranteedNew is false.
@@ -65,18 +75,30 @@ export class RegionEngine extends RegionEngineBL {
         try {
             this.recomputeRegions();
         } catch(e) {
-            throw({
-                Message: "An error occurred while processing the regions. Please submit a bug report including all information in this message.",
-                InnerException: e,
-                CircleDump: JSON.stringify(this.circles.map(circle => {
-                    return [
-                        circle.id,
-                        circle.radius,
-                        circle.center.x,
-                        circle.center.y,
-                    ];
-                })),
-            });
+            if (this._debugMode === ERegionDebugMode.none) {
+                throw new RegionError(
+                    "An error has occurred while processing the regions. You're running in debugMode=none, so no static/dynamic tests have been performed.",
+                    e as Error,
+                    this.circles,
+                    undefined
+                );
+            }
+            
+            if (DebugEngine.checkStatic(this.circles)) {
+                throw new RegionError(
+                    "A reproducible error has occurred while processing the regions. Please submit a bug report including all information in this message.",
+                    e as Error,
+                    this.circles,
+                    true
+                );
+            }
+
+            throw new RegionError(
+                "An unreproducible error has occurred while processing the regions.",
+                e as Error,
+                this.circles,
+                false
+            );
         }
 
         return this._regions;
