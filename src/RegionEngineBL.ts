@@ -69,7 +69,7 @@ export class RegionEngineBL {
         );
 
         if (sameCoordinates.length > 1) {
-            throw new Error("Unexpected condition: multiple nodes with the same coordinates!");
+            throw new Error("Multiple nodes with the same coordinates!");
         }
 
         circle1.isDirty = true;
@@ -117,7 +117,7 @@ export class RegionEngineBL {
 
             if (nextEdge === undefined) {
                 if (currentEdgeEndNode !== startEdgeEndNode) {
-                    throw new Error("Unexpected condition: undefined edge after region was started!");
+                    throw new Error("Undefined edge after region was started!");
                 }
 
                 if (direction === ETraversalDirection.forward) {

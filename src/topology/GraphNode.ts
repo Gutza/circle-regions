@@ -23,7 +23,7 @@ export default class GraphNode {
         let tanGroups = this._tangencyGroups.filter(tanGroup => tanGroup.some(tgElement => tgElement.circle === circle1 || tgElement.circle === circle2));
         if (tanGroups.length > 2) {
             // Easiest case: just die. This should never happen with good data.
-            throw new Error("Unexpected condition: more than two existing tangency groups matching for a new circle pair!");
+            throw new Error("More than two existing tangency groups matching for a new circle pair!");
         }
 
         if (tanGroups.length == 0) {
@@ -32,12 +32,12 @@ export default class GraphNode {
 
         let tanGroupsCircle1 = tanGroups.filter(tanGroup => tanGroup.some(tgElement => tgElement.circle === circle1));
         if (tanGroupsCircle1.length > 1) {
-            throw new Error("Unexpected condition: a circle is present in multiple tangency groups! [1]");
+            throw new Error("A circle is present in multiple tangency groups! [circle 1]");
         }
 
         let tanGroupsCircle2 = tanGroups.filter(tanGroup => tanGroup.some(tgElement => tgElement.circle === circle2));
         if (tanGroupsCircle2.length > 1) {
-            throw new Error("Unexpected condition: a circle is present in multiple tangency groups! [2]");
+            throw new Error("A circle is present in multiple tangency groups! [circle 2]");
         }
 
         if (intersectionType === EIntersectionType.lens) {
@@ -299,8 +299,9 @@ export default class GraphNode {
 
         this._tangencyGroups.forEach(tg => {
             if (tg === tanGroups[0]) {
-                // This either only contains the current edge's circle (if chaos),
-                // or it was already processed in _getNextTangentEdge() (if real tangency group)
+                // Typically, this either only contains the current edge's circle (if chaos),
+                // or it was already processed in _getNextTangentEdge() (if real tangency group).
+                // However, there is one last exceptional case; see the final if() after this forEach().
                 return;
             }
 
@@ -384,6 +385,28 @@ export default class GraphNode {
                     return;
                 });
         });
+
+        // One last fallback before giving up: we're allowed to continue to the next edge
+        // on the same circle, past the tangency point with another circle, if and only if
+        // the current region is on the interior of this circle (i.e. forward),
+        // AND there exists a different interior edge which belongs to this circle.
+        if (
+            nextEdge === undefined &&
+            currentDirection === ETraversalDirection.forward &&
+            currentEdge.circle.vertices.length > 1
+        ) {
+            // There's a reasonable expectation these are exceptional cases, so it's probably
+            // not worth caching the next edge on the same circle after every vertex;
+            // instead, we're going to extract it from the data we already have.
+            const nextRawEdge = currentEdge.node2.edges.find(edge => edge.circle === currentEdge.circle && edge !== currentEdge);
+            if (nextRawEdge === undefined) {
+                throw new Error("Multiple vertex circle with a single edge");
+            }
+            return {
+                edge: nextRawEdge,
+                sameSide: true
+            };
+        }
         
         return nextEdge;
     }
@@ -397,5 +420,9 @@ export default class GraphNode {
         }
 
         return normalizeAngle(thisVertex.angle + (this === edge.node1 ? -1 : 1) * Math.PI / 2 - refAngle);
+    }
+
+    public get edges(): GraphEdge[] {
+        return this._edges;
     }
 }
