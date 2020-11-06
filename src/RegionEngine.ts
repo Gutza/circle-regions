@@ -95,7 +95,7 @@ export class RegionEngine extends RegionEngineBL {
 
             // TODO: Attempt dynamic reproducing, as well
             throw new RegionError(
-                "A statically unreproducible error has occurred while processing the regions.",
+                "A statically unreproducible error has occurred while processing the regions: " + e.message,
                 e as Error,
                 this.circles,
                 false
