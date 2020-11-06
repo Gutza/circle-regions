@@ -1,5 +1,5 @@
 import { Circle } from "./geometry/Circle";
-import { ERegionDebugMode, TCircleRegions } from "./Types";
+import { EDrawableEventType, ERegionDebugMode, TCircleRegions } from "./Types";
 import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
 import { DebugEngine } from "./DebugEngine";
@@ -24,7 +24,11 @@ export class RegionEngine extends RegionEngineBL {
     public clear = () => {
         this._nodes = [];
         this._edges = [];
+        
+        this._circles.forEach(circle => this.emit(EDrawableEventType.delete, circle));
         this._circles = [];
+        
+        this._regions.forEach(region => this.emit(EDrawableEventType.delete, region));
         this._regions = [];
         this._staleRegions = true;
     }
