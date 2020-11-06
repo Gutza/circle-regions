@@ -17,6 +17,18 @@ export class RegionEngine extends RegionEngineBL {
     constructor(debugMode: ERegionDebugMode = ERegionDebugMode.static) {
         super(debugMode);
     }
+
+    /**
+     * Reset this region engine to pristine status.
+     */
+    public clear = () => {
+        this._nodes = [];
+        this._edges = [];
+        this._circles = [];
+        this._regions = [];
+        this._staleRegions = true;
+    }
+
     /**
      * Add a circle to the engine.
      * Computationally cheap, unless there are many circles AND @see guaranteedNew is false.
