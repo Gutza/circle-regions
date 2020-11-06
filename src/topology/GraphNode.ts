@@ -2,15 +2,15 @@ import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, 
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
-import { round } from "../geometry/utils/numbers";
+import { Point } from "..";
 
 export default class GraphNode {
     public touched: boolean = true;
     private _tangencyGroups: ITangencyGroup[];
-    private _coordinates: IPoint;
+    private _coordinates: Point;
     private _edges: GraphEdge[] = [];
 
-    constructor(coordinates: IPoint) {
+    constructor(coordinates: Point) {
         this._coordinates = coordinates;
         this._tangencyGroups = [];
     }
@@ -167,7 +167,7 @@ export default class GraphNode {
         this._edges.push(edge);
     }
 
-    public get coordinates(): IPoint {
+    public get coordinates(): Point {
         return this._coordinates;
     }
 

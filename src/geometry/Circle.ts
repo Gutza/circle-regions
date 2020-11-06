@@ -12,6 +12,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
     private _roundedBbox?: IBoundingBox;
+    private _roundedRadius?: number;
 
     /**
      * Boolean indicating whether this circle should ever be displayed as such (or whether it's split into arcs which make up region boundaries).
@@ -223,8 +224,16 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     );
 
     public equals = (that: Circle): boolean => (
-        round(this.center.x) == round(that.center.x) &&
-        round(this.center.y) == round(that.center.y) &&
-        round(this.radius) == round(that.radius)
+        this.center.roundedPoint.x == that.center.roundedPoint.x &&
+        this.center.roundedPoint.y == that.center.roundedPoint.y &&
+        this.roundedRadius == that.roundedRadius
     );
+
+    public get roundedRadius(): number {
+        if (this._roundedRadius !== undefined) {
+            return this._roundedRadius;
+        }
+
+        return this._roundedRadius = round(this._radius);
+    }
 }

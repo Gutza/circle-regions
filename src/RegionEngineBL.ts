@@ -1,4 +1,4 @@
-import { Circle } from ".";
+import { Circle, Point } from ".";
 import { ArcPolygon } from "./geometry/ArcPolygon";
 import CircleArc from "./geometry/CircleArc";
 import CircleVertex from "./geometry/CircleVertex";
@@ -10,7 +10,6 @@ import GraphNode from "./topology/GraphNode";
 import {
     TCircleRegions,
     IGraphCycle,
-    IPoint,
     TIntersectionType,
     ETraversalDirection,
     ETangencyType,
@@ -62,10 +61,10 @@ export class RegionEngineBL {
         this.emit(EDrawableEventType.redraw, circle);
     }
 
-    protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: IPoint, intersectionType: TIntersectionType): GraphNode => {
+    protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): GraphNode => {
         let sameCoordinates = this._nodes.filter(n =>
-            round(n.coordinates.x) === round(intersectionPoint.x) &&
-            round(n.coordinates.y) === round(intersectionPoint.y)
+            n.coordinates.roundedPoint.x === intersectionPoint.roundedPoint.x &&
+            n.coordinates.roundedPoint.y === intersectionPoint.roundedPoint.y
         );
 
         if (sameCoordinates.length > 1) {
@@ -343,7 +342,7 @@ export class RegionEngineBL {
             let isContour = true;
             let topmostEdge = cycle.oEdges[0].edge;
             cycle.oEdges.forEach(oEdge => {
-                if (topmostEdge === undefined || oEdge.edge.circle.center.y > topmostEdge.circle.center.y) {
+                if (oEdge.edge.circle.center.y > topmostEdge.circle.center.y) {
                     topmostEdge = oEdge.edge;
                 }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
@@ -403,17 +402,18 @@ export class RegionEngineBL {
     
         // Math.sqrt(a**2 + b**2) is more precise than Math.hypot(a, b)
         const centerDist = Math.sqrt((circle1.center.x - circle2.center.x) ** 2 + (circle1.center.y - circle2.center.y) ** 2);
-        if (round(centerDist) > round(circle1.radius + circle2.radius)) {
+        const roundedCenterDist = round(centerDist);
+        if (roundedCenterDist > round(circle1.radius + circle2.radius)) {
             return;
         }
     
-        if (round(circle1.radius) > round(centerDist + circle2.radius)) {
+        if (circle1.roundedRadius > round(centerDist + circle2.radius)) {
             circle1.children.push(circle2);
             circle2.parents.push(circle1);
             return;
         }
     
-        if (round(circle2.radius) > round(centerDist + circle1.radius)) {
+        if (circle2.roundedRadius > round(centerDist + circle1.radius)) {
             circle2.children.push(circle1);
             circle1.parents.push(circle2);
             return;
@@ -424,21 +424,13 @@ export class RegionEngineBL {
         const x = circle1.center.x + a * (circle2.center.x - circle1.center.x) / centerDist;
         const y = circle1.center.y + a * (circle2.center.y - circle1.center.y) / centerDist;
     
-        if (round(circle1.radius + circle2.radius) == round(centerDist)) {
-            const tangentPoint: IPoint = {
-                x: x,
-                y: y,
-            };
-            this.addNode(circle1, circle2, tangentPoint, ETangencyType.outerTangent);
+        if (round(circle1.radius + circle2.radius) == roundedCenterDist) {
+            this.addNode(circle1, circle2, new Point(x, y), ETangencyType.outerTangent);
             return;
         }
     
-        if (round(Math.abs(circle1.radius - circle2.radius)) == round(centerDist)) {
-            const tangentPoint: IPoint = {
-                x: x,
-                y: y,
-            };
-            this.addNode(circle1, circle2, tangentPoint, ETangencyType.innerTangent);
+        if (round(Math.abs(circle1.radius - circle2.radius)) == roundedCenterDist) {
+            this.addNode(circle1, circle2, new Point(x, y), ETangencyType.innerTangent);
             return;
         }
     
@@ -446,17 +438,8 @@ export class RegionEngineBL {
         const rx = -(circle2.center.y - circle1.center.y) * hDistRatio;
         const ry = -(circle2.center.x - circle1.center.x) * hDistRatio;
     
-        const point1: IPoint = {
-            x: x+rx,
-            y: y-ry,
-        };
-        this.addNode(circle1, circle2, point1, EIntersectionType.lens);
-    
-        const point2: IPoint = {
-            x: x-rx,
-            y: y+ry,
-        }
-        this.addNode(circle1, circle2, point2, EIntersectionType.lens);
+        this.addNode(circle1, circle2, new Point(x + rx, y + ry), EIntersectionType.lens);
+        this.addNode(circle1, circle2, new Point(x - rx, y + ry), EIntersectionType.lens);
     }
 
     protected emit: FOnDrawableEvent = (evType, entity) => {
