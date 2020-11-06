@@ -438,7 +438,7 @@ export class RegionEngineBL {
         const rx = -(circle2.center.y - circle1.center.y) * hDistRatio;
         const ry = -(circle2.center.x - circle1.center.x) * hDistRatio;
     
-        this.addNode(circle1, circle2, new Point(x + rx, y + ry), EIntersectionType.lens);
+        this.addNode(circle1, circle2, new Point(x + rx, y - ry), EIntersectionType.lens);
         this.addNode(circle1, circle2, new Point(x - rx, y + ry), EIntersectionType.lens);
     }
 
