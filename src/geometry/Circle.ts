@@ -11,6 +11,7 @@ import { PureGeometry } from "./PureGeometry";
 export class Circle extends PureGeometry implements IRegion, IDrawable {
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
+    private _roundedBbox?: IBoundingBox;
 
     /**
      * Boolean indicating whether this circle should ever be displayed as such (or whether it's split into arcs which make up region boundaries).
@@ -151,6 +152,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
     private _resetCommonGeometryCaches = () => {
         this._bbox = undefined;
+        this._roundedBbox = undefined;
         this._vertices = [];
         this.isDirty = true;
     }
@@ -183,6 +185,38 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         };
     }
 
+    public get roundedBoundingBox(): IBoundingBox {
+        if (this._roundedBbox !== undefined) {
+            return this._roundedBbox;
+        }
+
+        return this._roundedBbox = {
+            minPoint: Point.computeRoundedPoint(this.boundingBox.minPoint),
+            maxPoint: Point.computeRoundedPoint(this.boundingBox.maxPoint),
+        };
+    }
+
+    // Using Point instead of IPoint in order to force programmers to use Point's caching mechanism
+    public isPointInside = (point: Point, exact: boolean = false): boolean => {
+        if (!exact) {
+            return (
+                point.x > this.boundingBox.minPoint.x &&
+                point.x < this.boundingBox.maxPoint.x &&
+                point.y > this.boundingBox.minPoint.y &&
+                point.y < this.boundingBox.maxPoint.y
+            );
+        }
+
+        const rPoint = point.roundedPoint;
+        return (
+            rPoint.x >= this.roundedBoundingBox.minPoint.x &&
+            rPoint.x <= this.roundedBoundingBox.maxPoint.x &&
+            rPoint.y >= this.roundedBoundingBox.minPoint.y &&
+            rPoint.y <= this.roundedBoundingBox.maxPoint.y
+        );
+    }
+
+    // TODO: This is not particularly conductive to lazy evaluation, it can be done more efficiently
     public boundingBoxOverlap = (that: Circle): boolean => (
         Math.sign(this.boundingBox.minPoint.x - that.boundingBox.maxPoint.x) * Math.sign(this.boundingBox.maxPoint.x - that.boundingBox.minPoint.x) < 0.5 &&
         Math.sign(this.boundingBox.minPoint.y - that.boundingBox.maxPoint.y) * Math.sign(this.boundingBox.maxPoint.y - that.boundingBox.minPoint.y) < 0.5

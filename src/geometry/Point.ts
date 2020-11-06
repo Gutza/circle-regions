@@ -1,5 +1,6 @@
 import { EGeometryEventType, IPoint } from "../Types";
 import { PureGeometry } from "./PureGeometry";
+import { round } from "./utils/numbers";
 
 /**
  * A very basic 2D point class which emits
@@ -8,6 +9,7 @@ import { PureGeometry } from "./PureGeometry";
 export class Point extends PureGeometry implements IPoint {
     private _x: number;
     private _y: number;
+    private _roundedPoint?: Point;
 
     /**
      * Create a new point.
@@ -48,5 +50,20 @@ export class Point extends PureGeometry implements IPoint {
     public set y(y: number) {
         this._y = y;
         this.emit(EGeometryEventType.move);
+    }
+
+    /**
+     * Retrieve a point with rounded coordinates.
+     * 
+     */
+    public get roundedPoint(): Point {
+        if (this._roundedPoint !== undefined) {
+            return this._roundedPoint;
+        }
+        return this._roundedPoint = Point.computeRoundedPoint(this);
+    }
+
+    public static computeRoundedPoint = (point: IPoint): Point => {
+        return new Point(round(point.x), round(point.y));
     }
 }
