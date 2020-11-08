@@ -244,18 +244,16 @@ export class RegionEngineBL {
         });
 
         dirtyCircles.forEach(dirtyCircle => {
-            const nodes = this._nodes.filter(node => node.tangencyGroups.some(tg => tg.some(tge => tge.circle == dirtyCircle)));
-            nodes.forEach(node => {
-                // This is safe: circle.addVertex() refuses to re-add existing vertices,
-                // and new vertices pointing to a node contained in an existing vertex.
+            this._nodes.forEach(node => {
+                if (!node.tangencyGroups.some(tg => tg.some(tge => tge.circle == dirtyCircle))) {
+                    return;
+                }
                 dirtyCircle.addVertex(new CircleVertex(node, dirtyCircle));
             });
-        });
 
-        dirtyCircles.forEach(circle => {
-            for (let i = 0; i < circle.vertices.length; i++) {
+            for (let i = 0; i < dirtyCircle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c." + circle.internalId + "/e." + i);
+                const newEdge = new GraphEdge(dirtyCircle, dirtyCircle.vertices[i].node, dirtyCircle.vertices[i+1] ? dirtyCircle.vertices[i+1].node : dirtyCircle.vertices[0].node, "c." + dirtyCircle.internalId + "/e." + i);
 
                 const oldEdge = this._edges.get(newEdge.id);
                 if (oldEdge !== undefined) {
@@ -270,7 +268,7 @@ export class RegionEngineBL {
                     newEdge.node2.addEdge(newEdge);
                 }
             }
-            circle.isDirty = false;
+            dirtyCircle.isDirty = false;
         });
     }
 
