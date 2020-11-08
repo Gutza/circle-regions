@@ -269,18 +269,14 @@ export class RegionEngineBL {
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
                 const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c." + circle.id + "/e." + i);
-                let inhibitNewEdge: boolean = false;
-                this._edges.forEach(edge => {
-                    if (!edge.equals(newEdge)) {
-                        return;
-                    }
 
-                    edge.InnerCycle = undefined;
-                    edge.OuterCycle = undefined;
-                });
-                if (inhibitNewEdge) {
+                const oldEdge = this._edges.find(edge => edge.equals(newEdge));
+                if (oldEdge !== undefined) {
+                    oldEdge.InnerCycle = undefined;
+                    oldEdge.OuterCycle = undefined;
                     continue;
                 }
+
                 this._edges.push(newEdge);
                 newEdge.node1.addEdge(newEdge);
                 if (newEdge.node1 !== newEdge.node2) {
