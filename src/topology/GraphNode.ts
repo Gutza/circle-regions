@@ -307,9 +307,11 @@ export default class GraphNode {
                 }
 
                 // Easy case: just a regular intersection
-                const tgEdges = this._edges.filter(edge => tg.elements.has(edge.circle.internalId));
-
-                tgEdges.forEach(tgEdge => {
+                this._edges.forEach(tgEdge => {
+                    if (!tg.elements.has(tgEdge.circle.internalId)) {
+                        return;
+                    }
+                    
                     const perpendicularAngle = this.getPerpendicular(tgEdge, refAngle);
                     if (perpendicularAngle > minPerpendicularAngle) {
                         return;
@@ -320,8 +322,6 @@ export default class GraphNode {
                         edge: tgEdge,
                         sameSide: true,
                     };
-    
-                    return;
                 });
 
                 return nextEdge;
