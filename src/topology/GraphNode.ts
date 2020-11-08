@@ -1,18 +1,18 @@
-import { IGraphEnd, INextTangentEdge, IPoint, ITangencyElement, ITangencyGroup, TIntersectionType, ETangencyParity, ETangencyType, ETraversalDirection, EIntersectionType } from "../Types";
+import { IGraphEnd, INextTangentEdge, TIntersectionType, ETangencyParity, ETangencyType, ETraversalDirection, EIntersectionType } from "../Types";
 import { Circle } from "../geometry/Circle";
 import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
 import { Point } from "..";
+import { TangencyElement, TangencyGroup, TanGroupCollection } from "./TanGroupCollection";
 
 export default class GraphNode {
     public touched: boolean = true;
-    private _tangencyGroups: ITangencyGroup[];
+    private _tangencyCollection: TanGroupCollection = new TanGroupCollection();
     private _coordinates: Point;
     private _edges: GraphEdge[] = [];
 
     constructor(coordinates: Point) {
         this._coordinates = coordinates;
-        this._tangencyGroups = [];
     }
 
     public addCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType) {
@@ -20,64 +20,61 @@ export default class GraphNode {
             this._edges = [];
             this.touched = true;
         }
-        let tanGroups = this._tangencyGroups.filter(tanGroup => tanGroup.some(tgElement => tgElement.circle === circle1 || tgElement.circle === circle2));
-        if (tanGroups.length > 2) {
-            // Easiest case: just die. This should never happen with good data.
-            throw new Error("More than two existing tangency groups matching for a new circle pair!");
-        }
 
-        if (tanGroups.length == 0) {
+        const tanGroup1 = this._tangencyCollection.getGroupByCircle(circle1);
+        const tanGroup2 = this._tangencyCollection.getGroupByCircle(circle2);
+        
+        if (tanGroup1 === undefined && tanGroup2 === undefined) {
             return this._addNewCirclePair(circle1, circle2, intersectionType);
         }
 
-        let tanGroupsCircle1 = tanGroups.filter(tanGroup => tanGroup.some(tgElement => tgElement.circle === circle1));
-        if (tanGroupsCircle1.length > 1) {
-            throw new Error("A circle is present in multiple tangency groups! [circle 1]");
-        }
-
-        let tanGroupsCircle2 = tanGroups.filter(tanGroup => tanGroup.some(tgElement => tgElement.circle === circle2));
-        if (tanGroupsCircle2.length > 1) {
-            throw new Error("A circle is present in multiple tangency groups! [circle 2]");
-        }
+        // From now on, at least one tangency group is already defined.
 
         if (intersectionType === EIntersectionType.lens) {
-            if (tanGroups.length == 1) {
-                let circle = tanGroupsCircle1.length == 0 ? circle1 : circle2;
-                const tanGroup: ITangencyGroup = [ {
-                    circle: circle,
-                    parity: ETangencyParity.chaos,
-                } ]
-                this._tangencyGroups.push(tanGroup);
+            if (tanGroup1 === undefined) {
+                this._tangencyCollection.addSimpleGroup(circle1);
             }
+            if (tanGroup2 === undefined) {
+                this._tangencyCollection.addSimpleGroup(circle2);
+            }
+            // If both are defined, just do nothing -- both are already defined.
             return;
         }
 
-        if (tanGroupsCircle1.length == 0) {
-            return this._addTangentCircle(circle1, circle2, intersectionType, tanGroupsCircle2[0]);
+        if (tanGroup1 === undefined) {
+            // Although the TS parser doesn't get this, if tanGroup1 is not defined, tanGroup2 must be (see above)
+            return this._addTangentCircle(circle1, circle2, intersectionType, tanGroup2 as TangencyGroup);
         }
 
-        if (tanGroupsCircle2.length == 0) {
-            return this._addTangentCircle(circle2, circle1, intersectionType, tanGroupsCircle1[0]);
+        if (tanGroup2 === undefined) {
+            // No need to cast this time.
+            return this._addTangentCircle(circle2, circle1, intersectionType, tanGroup1);
         }
 
-        // Both circles are already here, but we might still need to retrofit the parities.
-        const tgElem1 = tanGroupsCircle1[0].filter(tgElem => tgElem.circle === circle1);
-        if (tgElem1.length !== 1) {
-            throw new Error("Existing tangency element count is " + tgElem1.length + " [1]");
+        // Both circles are already present in tangency groups, but we might still need to retrofit their parities.
+        const tgElem1 = tanGroup1.elements.get(circle1.internalId);
+        if (tgElem1 === undefined) {
+            throw new Error("Failed finding element in group!");
         }
 
-        const tgElem2 = tanGroupsCircle1[0].filter(tgElem => tgElem.circle === circle2);
-        if (tgElem2.length !== 1) {
-            throw new Error("Existing tangency element count is " + tgElem1.length + " [2]");
+        const tgElem2 = tanGroup2.elements.get(circle2.internalId);
+        if (tgElem2 === undefined) {
+            throw new Error("Failed finding element in group!");
         }
 
-        if (tgElem1[0].parity === ETangencyParity.chaos || tgElem2[0].parity === ETangencyParity.chaos) {
-            if (tgElem1[0].parity === ETangencyParity.chaos && tgElem2[0].parity === ETangencyParity.chaos) {
-                tgElem1[0].parity = ETangencyParity.yin;
+        if (tgElem1.parity === ETangencyParity.chaos || tgElem2.parity === ETangencyParity.chaos) {
+            // Start by assuming this, and only change assumptions if needed
+            let knownElement = tgElem1;
+            let chaoticElement = tgElem2;
+
+            if (tgElem1.parity === ETangencyParity.chaos && tgElem2.parity === ETangencyParity.chaos) {
+                // If both are chaotic, just assign one, respecting the assumption above
+                tgElem1.parity = ETangencyParity.yin;
+            } else if (tgElem1.parity === ETangencyParity.chaos) {
+                knownElement = tgElem2;
+                chaoticElement = tgElem1;
             }
 
-            let knownElement = tgElem1[0].parity === ETangencyParity.chaos ? tgElem2[0] : tgElem1[0];
-            let chaoticElement = tgElem1[0].parity === ETangencyParity.chaos ? tgElem1[0] : tgElem2[0];
             chaoticElement.parity = this.otherParity(knownElement.parity, intersectionType);
             return;
         }
@@ -103,36 +100,23 @@ export default class GraphNode {
         }
     }
 
-    private _addTangentCircle(newCircle: Circle, existingCircle: Circle, tangencyType: ETangencyType, existingGroup: ITangencyGroup): void {
-        const tgExistingElements = existingGroup.filter(tgElem => tgElem.circle === existingCircle);
-        if (tgExistingElements.length !== 1) {
-            throw new Error("Existing tangency element count is " + tgExistingElements.length);
+    private _addTangentCircle(newCircle: Circle, existingCircle: Circle, tangencyType: ETangencyType, existingGroup: TangencyGroup): void {
+        const tgElem = existingGroup.elements.get(existingCircle.internalId);
+        if (tgElem === undefined) {
+            throw new Error("Failed finding element in group!");
         }
-        const tgElem = tgExistingElements[0];
         if (tgElem.parity === ETangencyParity.chaos) {
             tgElem.parity = ETangencyParity.yin;
         }
 
-        existingGroup.push({
-            circle: newCircle,
-            parity: this.otherParity(tgElem.parity, tangencyType),
-        });
+        existingGroup.addElement(newCircle, this.otherParity(tgElem.parity, tangencyType));
     }
 
     private _addNewCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType): void {
         // Easy case: just create new tangency group(s)
         if (intersectionType === EIntersectionType.lens) {
-            const tanGroup1: ITangencyGroup = [ {
-                circle: circle1,
-                parity: ETangencyParity.chaos,
-            } ]
-            this._tangencyGroups.push(tanGroup1);
-
-            const tanGroup2: ITangencyGroup = [ {
-                circle: circle2,
-                parity: ETangencyParity.chaos,
-            } ]
-            this._tangencyGroups.push(tanGroup2);
+            this._tangencyCollection.addSimpleGroup(circle1);
+            this._tangencyCollection.addSimpleGroup(circle2);
             return;
         }
         
@@ -150,14 +134,10 @@ export default class GraphNode {
             throw new Error("Unknown intersection type: " + intersectionType);
         }
 
-        const tanGroup: ITangencyGroup = [ {
-            circle: circle1,
-            parity: parity1,
-        }, {
-            circle: circle2,
-            parity: parity2,
-        }];
-        this._tangencyGroups.push(tanGroup);        
+        const tanGroup = new TangencyGroup();
+        tanGroup.addElement(circle1, parity1);
+        tanGroup.addElement(circle2, parity2);
+        this._tangencyCollection.tangencyGroups.push(tanGroup);        
     }
 
     public addEdge = (edge: GraphEdge): void => {
@@ -173,23 +153,19 @@ export default class GraphNode {
 
     public removeCircles(circles: Circle[]): boolean {
         // First, remove the elements which contain the given circles from all tangency groups
-        for (let i = 0; i < this._tangencyGroups.length; i++) {
-            this._tangencyGroups[i] = this._tangencyGroups[i].filter(tgElement => !circles.includes(tgElement.circle));
-        }
+        circles.forEach(circle => this._tangencyCollection.removeCircle(circle));
 
         // Next, remove the empty tangency groups
-        let prevLen = this._tangencyGroups.length;
-        this._tangencyGroups = this._tangencyGroups.filter(tanGroup => tanGroup.length > 0);
         this._edges = this._edges.filter(edge => !circles.includes(edge.circle));
-        return prevLen != this.tangencyGroups.length;
+        return this._tangencyCollection.removeEmptyGroups();
     }
 
     public isValid(): boolean {
-        return 1 < this._tangencyGroups.reduce<number>((prevCount, tanGroup): number => prevCount + tanGroup.length, 0);
+        return 1 < this._tangencyCollection.tangencyGroups.reduce<number>((prevCount, tanGroup): number => prevCount + tanGroup.elements.size, 0);
     }
 
-    public get tangencyGroups(): ITangencyGroup[] {
-        return this._tangencyGroups;
+    public get tangencyCollection(): TanGroupCollection {
+        return this._tangencyCollection;
     }
 
     public getOtherEnd = (tanEdge: INextTangentEdge, direction: ETraversalDirection): IGraphEnd => {
@@ -211,18 +187,25 @@ export default class GraphNode {
         };
     }
 
-    private _getNextTangentEdge = (currentEdge: GraphEdge, currentDirection: ETraversalDirection, edgeTanGroup: ITangencyGroup, edgeTanElem: ITangencyElement): INextTangentEdge | undefined => {
+    private _getNextTangentEdge = (currentEdge: GraphEdge, currentDirection: ETraversalDirection, edgeTanGroup: TangencyGroup, edgeTanElem: TangencyElement): INextTangentEdge | undefined => {
         /**
          * All circles in a tangency group share the same incidence angle, and
          * elements with the same parity are less divergent than elements with opposite parities.
          */
         // Descending order
-        const sameSideNeighbors = edgeTanGroup.
-            filter(tge => tge !== edgeTanElem && tge.parity === edgeTanElem.parity).
-            sort((a, b) => b.circle.radius - a.circle.radius);
+        // This could be optimized by inserting into a BST from the start;
+        // see for instance https://github.com/gwtw/js-avl-tree/blob/master/src/avl-tree.js
+        const unsortedSameSideNeighbors: TangencyElement[] = [];
+        edgeTanGroup.elements.forEach((tanElem, circleId) => {
+            if (tanElem === edgeTanElem || tanElem.parity !== edgeTanElem.parity) {
+                return;
+            }
+            unsortedSameSideNeighbors.push(tanElem);
+        });
+        const sameSideNeighbors = unsortedSameSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
         
         if (sameSideNeighbors.length > 0) {
-            let winningTangencyElement: ITangencyElement | undefined = undefined;
+            let winningTangencyElement: TangencyElement | undefined = undefined;
             let getSameEdgeEnd: Function;
             if (currentDirection === ETraversalDirection.forward) {
                 winningTangencyElement = sameSideNeighbors.find(winningEdge => winningEdge.circle.radius < currentEdge.circle.radius);
@@ -255,9 +238,14 @@ export default class GraphNode {
         const oppositeParity: ETangencyParity = edgeTanElem.parity === ETangencyParity.yin ? ETangencyParity.yang : ETangencyParity.yin;
 
         // Descending order
-        const oppositeSideNeighbors = edgeTanGroup.
-            filter(tge => tge !== edgeTanElem && tge.parity === oppositeParity).
-            sort((a, b) => b.circle.radius - a.circle.radius);
+        const unsortedOppositeSideNeighbors: TangencyElement[] = [];
+        edgeTanGroup.elements.forEach((tanElem, circleId) => {
+            if (tanElem === edgeTanElem || tanElem.parity !== oppositeParity) {
+                return;
+            }
+            unsortedOppositeSideNeighbors.push(tanElem);
+        });
+        const oppositeSideNeighbors = unsortedOppositeSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
 
         if (oppositeSideNeighbors.length === 0) {
             return undefined;
@@ -275,18 +263,18 @@ export default class GraphNode {
     }
 
     public getNextEdge = (currentEdge: GraphEdge, currentDirection: ETraversalDirection): INextTangentEdge | undefined => {
-        const tanGroups = this._tangencyGroups.filter(tg => tg.some(tge => tge.circle === currentEdge.circle));
-        if (tanGroups.length !== 1) {
-            throw new Error("Edge circle found in " + tanGroups.length + " tangency groups!");
+        const tanGroup = this._tangencyCollection.getGroupByCircle(currentEdge.circle);
+        if (tanGroup === undefined) {
+            throw new Error("Edge circle not found in any tangency group!");
         }
 
-        const tgElems = tanGroups[0].filter(tge => tge.circle === currentEdge.circle);
-        if (tgElems.length !== 1) {
-            throw new Error("Edge circle found in " + tgElems.length + " tangency elements!");
+        const tgElem = tanGroup.elements.get(currentEdge.circle.internalId);
+        if (tgElem === undefined) {
+            throw new Error("Edge circle found in the tangency group!");
         }
 
-        if (tgElems[0].parity !== ETangencyParity.chaos) {
-            const nextTangentEdge = this._getNextTangentEdge(currentEdge, currentDirection, tanGroups[0], tgElems[0]);
+        if (tgElem.parity !== ETangencyParity.chaos) {
+            const nextTangentEdge = this._getNextTangentEdge(currentEdge, currentDirection, tanGroup, tgElem);
             if (nextTangentEdge !== undefined) {
                 return nextTangentEdge;
             }
@@ -297,21 +285,29 @@ export default class GraphNode {
 
         const refAngle = normalizeAngle(this.getPerpendicular(currentEdge, Math.PI));
 
-        this._tangencyGroups.forEach(tg => {
-            if (tg === tanGroups[0]) {
+        this._tangencyCollection.tangencyGroups.forEach(tg => {
+            if (tg === tanGroup) {
                 // Typically, this either only contains the current edge's circle (if chaos),
                 // or it was already processed in _getNextTangentEdge() (if real tangency group).
                 // However, there is one last exceptional case; see the final if() after this forEach().
                 return;
             }
 
-            if (tg.every(tge => tge.parity === ETangencyParity.chaos)) {
-                if (tg.length !== 1) {
-                    throw new Error("Tangency group with " + tg.length + " elements, all of which are chaos!");
+            let allChaotic = true;
+            for (const tgElem of tg.elements.values()) {
+                if (tgElem.parity === ETangencyParity.chaos) {
+                    continue;
+                }
+                allChaotic = false;
+                break;
+            }
+            if (allChaotic) {
+                if (tg.elements.size !== 1) {
+                    throw new Error("Tangency group with " + tg.elements.size + " elements, all of which are chaos!");
                 }
 
                 // Easy case: just a regular intersection
-                const tgEdges = this._edges.filter(edge => edge.circle === tg[0].circle);
+                const tgEdges = this._edges.filter(edge => tg.elements.has(edge.circle.internalId));
 
                 tgEdges.forEach(tgEdge => {
                     const perpendicularAngle = this.getPerpendicular(tgEdge, refAngle);
@@ -331,14 +327,27 @@ export default class GraphNode {
                 return nextEdge;
             }
 
+            // TODO: optimize with BST
             let candidates: Circle[] = [];
-            const smallestYinCircles = tg.filter(tge => tge.parity === ETangencyParity.yin).sort((a, b) => a.circle.radius - b.circle.radius);
+            const unsortedYinCircles: Circle[] = [];
+            const unsortedYangCircles: Circle[] = [];
+            tg.elements.forEach(tgElem => {
+                if (tgElem.parity === ETangencyParity.yin) {
+                    unsortedYinCircles.push(tgElem.circle);
+                    return;
+                }
+                if (tgElem.parity === ETangencyParity.yang) {
+                    unsortedYangCircles.push(tgElem.circle);
+                    return;
+                }
+            });
+            const smallestYinCircles = unsortedYinCircles.sort((a, b) => a.radius - b.radius);
             if (smallestYinCircles.length > 0) {
-                candidates.push(smallestYinCircles[0].circle);
+                candidates.push(smallestYinCircles[0]);
             }
-            const smallestYangCircles = tg.filter(tge => tge.parity === ETangencyParity.yang).sort((a, b) => a.circle.radius - b.circle.radius);
+            const smallestYangCircles = unsortedYangCircles.sort((a, b) => a.radius - b.radius);
             if (smallestYangCircles.length > 0) {
-                candidates.push(smallestYangCircles[0].circle);
+                candidates.push(smallestYangCircles[0]);
             }
 
             this._edges.
@@ -363,10 +372,10 @@ export default class GraphNode {
 
             candidates = [];
             if (smallestYinCircles.length > 0) {
-                candidates.push(smallestYinCircles[smallestYinCircles.length-1].circle);
+                candidates.push(smallestYinCircles[smallestYinCircles.length-1]);
             }
             if (smallestYangCircles.length > 0) {
-                candidates.push(smallestYangCircles[smallestYangCircles.length-1].circle);
+                candidates.push(smallestYangCircles[smallestYangCircles.length-1]);
             }
 
             this._edges.

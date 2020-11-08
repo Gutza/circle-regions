@@ -2,21 +2,42 @@ import assert = require('assert');
 import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
+import GraphNode from '../src/topology/GraphNode';
+import { TangencyGroup } from '../src/topology/TanGroupCollection';
 import { ETangencyParity } from '../src/Types';
 
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));
 engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));
 
-describe("Tangency groups for two circles A-B", () => {
-    dumpGroups("Two", engine);
+function getElementCountsByParity(node: GraphNode): {yin: number, yang: number} {
+    const result = {
+        yin: 0,
+        yang: 0,
+    }
+    node.tangencyCollection.tangencyGroups.forEach(tg => {
+        tg.elements.forEach(tge => {
+            if (tge.parity === ETangencyParity.yin) {
+                result.yin++;
+                return;
+            }
+            if (tge.parity === ETangencyParity.yang) {
+                result.yang++;
+                return;
+            }
+        });
+    });
 
+    return result;
+}
+
+describe("Tangency groups for two circles A-B", () => {
     assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
     engine.regions;
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
-        node.tangencyGroups.forEach(() => tanGroupCount++);
+        node.tangencyCollection.tangencyGroups.forEach(() => tanGroupCount++);
     });
     it("Two tangent circles A-B should contain a single tangency group", () => {
         assert.equal(tanGroupCount, 1);
@@ -26,10 +47,9 @@ describe("Tangency groups for two circles A-B", () => {
     let yangCount = 0;
 
     engine.nodes.forEach(node => {
-        node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yin).length;
-            yangCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yang).length;
-        });
+        const { yin, yang } = getElementCountsByParity(node);
+        yinCount += yin;
+        yangCount += yang;
     });
 
     it('Two tangent circles A-B should contain one yin', () => {
@@ -43,23 +63,20 @@ describe("Tangency groups for two circles A-B", () => {
 engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
 
 describe("Tangency groups for three circles AA-B", () => {
-    dumpGroups("Three", engine);
-
     assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
     engine.regions;
 
     let yinCount = 0;
     let yangCount = 0;
     engine.nodes.forEach(node => {
-        node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yin).length;
-            yangCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yang).length;
-        });
+        const { yin, yang } = getElementCountsByParity(node);
+        yinCount += yin;
+        yangCount += yang;
     });
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
-        node.tangencyGroups.forEach(() => tanGroupCount++);
+        tanGroupCount += node.tangencyCollection.tangencyGroups.length;
     });
 
     it("Three tangent circles AA-B should contain a single tangency group", () => {
@@ -74,15 +91,14 @@ describe("Tangency groups for three circles AA-B", () => {
 engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
 
 describe("Tangency groups for four circles AA-BB", () => {
-    dumpGroups("Four", engine);
-
     assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
     engine.regions;
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
-        node.tangencyGroups.forEach(() => tanGroupCount++);
+        tanGroupCount += node.tangencyCollection.tangencyGroups.length;
     });
+
 
     it("Four tangent circles AA-BB should contain a single tangency group", () => {
         assert.equal(tanGroupCount, 1);
@@ -91,10 +107,9 @@ describe("Tangency groups for four circles AA-BB", () => {
     let yinCount = 0;
     let yangCount = 0;
     engine.nodes.forEach(node => {
-        node.tangencyGroups.forEach(tanGroup => {
-            yinCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yin).length;
-            yangCount += tanGroup.filter(tgElement => tgElement.parity === ETangencyParity.yang).length;
-        });
+        const { yin, yang } = getElementCountsByParity(node);
+        yinCount += yin;
+        yangCount += yang;
     });
 
     it('Four tangent circles AA-BB should contain tangency groups with two yin', () => {
@@ -109,33 +124,15 @@ describe("Tangency groups for four circles AA-BB", () => {
 engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
 
 describe("Tangency groups for five circles AA-BB + C", () => {
-    dumpGroups("Five", engine);
-
     assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
     engine.regions;
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
-        node.tangencyGroups.forEach(() => tanGroupCount++);
+        tanGroupCount += node.tangencyCollection.tangencyGroups.length;
     });
 
     it("Five tangent circles AA-BB + C should contain ten tangency groups", () => {
         assert.equal(tanGroupCount, 10);
     });  
 });
-
-function dumpGroups(label: string, graph: RegionEngine, tanGroupNote?: string) {
-    return;
-    console.log("-- <"+label+"> --");
-    graph.nodes.forEach(node => {
-        console.log("» Node [" + node.coordinates.x + "," + node.coordinates.y + "] tanGroups", node.tangencyGroups, tanGroupNote || "");
-        node.tangencyGroups.forEach(tanGroup => {
-            console.log("»» Tangency group elements", tanGroup);
-            return;
-            tanGroup.forEach(tgElement => {
-                console.log("»»» Tangency group element", tgElement);
-            })
-        })
-    })
-    console.log("-- </"+label+"> --");
-}

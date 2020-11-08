@@ -168,7 +168,18 @@ export class RegionEngineBL {
         // TODO: Streamline this, we're traversing the same array three times in a row!
 
         // Affected nodes are all nodes which include dirty circles.
-        const affectedNodes = this._nodes.filter(node => node.tangencyGroups.some(tanGroup => tanGroup.some(tge => dirtyCircles.includes(tge.circle))));
+        const affectedNodes: GraphNode[] = [];
+        for (var nodeIndex = 0; nodeIndex < this._nodes.length; nodeIndex++) {
+            const tangencyCollection = this._nodes[nodeIndex].tangencyCollection;
+            for (var circleIndex = 0; circleIndex < dirtyCircles.length; circleIndex++) {
+                if (tangencyCollection.getGroupByCircle(dirtyCircles[circleIndex]) === undefined) {
+                    continue;
+                }
+
+                affectedNodes.push(this._nodes[nodeIndex]);
+                break;
+            }
+        }
 
         // Remove the dirty circles from all affected nodes.
         affectedNodes.forEach(node => node.removeCircles(dirtyCircles));
@@ -245,7 +256,7 @@ export class RegionEngineBL {
 
         dirtyCircles.forEach(dirtyCircle => {
             this._nodes.forEach(node => {
-                if (!node.tangencyGroups.some(tg => tg.some(tge => tge.circle == dirtyCircle))) {
+                if (node.tangencyCollection.getGroupByCircle(dirtyCircle) === undefined) {
                     return;
                 }
                 dirtyCircle.addVertex(new CircleVertex(node, dirtyCircle));

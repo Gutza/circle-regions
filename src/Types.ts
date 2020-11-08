@@ -92,12 +92,6 @@ export enum ETangencyParity {
     chaos = "chaos",
 };
 
-export interface ITangencyElement {
-    circle: Circle;
-    parity: ETangencyParity;
-}
-export type ITangencyGroup = ITangencyElement[];
-
 /**
  * Traversal direction for oriented edges.
  */
