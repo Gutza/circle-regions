@@ -257,11 +257,6 @@ export class RegionEngineBL {
         });
 
         dirtyCircles.forEach(circle => {
-            this._edges.forEach(edge => {
-                if (edge.circle === circle) {
-                    console.warn("Circle", circle.id, "still has edges in _computeLoops()!");
-                }
-            });
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
                 const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c." + circle.internalId + "/e." + i);
