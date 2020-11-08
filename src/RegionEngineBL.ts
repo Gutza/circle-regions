@@ -62,21 +62,17 @@ export class RegionEngineBL {
     }
 
     protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): GraphNode => {
-        let sameCoordinates = this._nodes.filter(n =>
+        circle1.isDirty = true;
+        circle2.isDirty = true;
+
+        let sameCoordinates = this._nodes.find(n =>
             n.coordinates.roundedPoint.x === intersectionPoint.roundedPoint.x &&
             n.coordinates.roundedPoint.y === intersectionPoint.roundedPoint.y
         );
 
-        if (sameCoordinates.length > 1) {
-            throw new Error("Multiple nodes with the same coordinates!");
-        }
-
-        circle1.isDirty = true;
-        circle2.isDirty = true;
-
-        if (sameCoordinates.length == 1) {
-            sameCoordinates[0].addCirclePair(circle1, circle2, intersectionType);
-            return sameCoordinates[0];
+        if (sameCoordinates !== undefined) {
+            sameCoordinates.addCirclePair(circle1, circle2, intersectionType);
+            return sameCoordinates;
         }
         
         const newNode = new GraphNode(intersectionPoint);
