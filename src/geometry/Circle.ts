@@ -1,9 +1,11 @@
-import { EGeometryEventType, FOnGeometryEvent, IBoundingBox, IDrawable, IRegion } from "../Types";
+import { EGeometryEventType, IBoundingBox, IDrawable, IRegion } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { round } from "./utils/numbers";
 import { Point } from "./Point";
 import { PureGeometry } from "./PureGeometry";
+
+let circleCounter = 0;
 
 /**
  * The main circle class.
@@ -20,6 +22,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     public isDisplayed = false;
 
     public id: any;
+    private _internalId: number;
 
     /**
      * This circle's "children" (i.e. other circles from the intersection set which are fully enclosed in this one).
@@ -61,6 +64,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._center.onGeometryChange = this.onCenterMove;
         this._radius = radius;
         this.id = id;
+        this._internalId = circleCounter++;
     }
 
     public onCenterMove = () => {
@@ -161,7 +165,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     /**
      * Retrieve this circle's area.
      */
-    get area(): number {
+    public get area(): number {
         if (this._area !== undefined) {
             return this._area;
         }
@@ -235,5 +239,9 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         }
 
         return this._roundedRadius = round(this._radius);
+    }
+
+    public get internalId(): number {
+        return this._internalId;
     }
 }
