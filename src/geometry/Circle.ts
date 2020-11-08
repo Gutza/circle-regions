@@ -94,20 +94,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     }
 
     public getVertexByNode(node: GraphNode): CircleVertex | undefined {
-        if (this._vertices === undefined) {
-            return undefined;
-        }
-
-        let vertices = this._vertices.filter(v => v.node === node);
-        if (vertices.length == 0) {
-            return undefined;
-        }
-
-        if (vertices.length > 1) {
-            throw new Error("Multiple vertices with the same node on the same circle!");
-        }
-
-        return vertices[0];
+        return this._vertices.find(v => v.node === node);
     }
 
     public get vertices(): CircleVertex[] {

@@ -264,15 +264,16 @@ export class RegionEngineBL {
 
             for (let i = 0; i < dirtyCircle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                const newEdge = new GraphEdge(dirtyCircle, dirtyCircle.vertices[i].node, dirtyCircle.vertices[i+1] ? dirtyCircle.vertices[i+1].node : dirtyCircle.vertices[0].node, "c." + dirtyCircle.internalId + "/e." + i);
+                const newEdgeId = "c." + dirtyCircle.internalId + "/e." + i;
 
-                const oldEdge = this._edges.get(newEdge.id);
+                const oldEdge = this._edges.get(newEdgeId);
                 if (oldEdge !== undefined) {
                     oldEdge.InnerCycle = undefined;
                     oldEdge.OuterCycle = undefined;
                     continue;
                 }
 
+                const newEdge = new GraphEdge(dirtyCircle, dirtyCircle.vertices[i].node, dirtyCircle.vertices[i+1] ? dirtyCircle.vertices[i+1].node : dirtyCircle.vertices[0].node, newEdgeId);
                 this._edges.set(newEdge.id, newEdge);
                 newEdge.node1.addEdge(newEdge);
                 if (newEdge.node1 !== newEdge.node2) {
