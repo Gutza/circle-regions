@@ -152,7 +152,6 @@ export class RegionEngineBL {
 
     // (1/5)
     protected removeDirtyNodesVertices = (): void => {
-        this._nodes.forEach(node => node.touched = false);
         let dirtyCircles = this._circles.filter(circle => circle.isDirty);
 
         this._circles.forEach(circle => {
@@ -165,23 +164,25 @@ export class RegionEngineBL {
             circle.parents = circle.children.filter(parent => !dirtyCircles.includes(parent));
         });
 
-        // Affected nodes are all nodes which include dirty circles.
         const remainingNodes: GraphNode[] = [];
         this._nodes.forEach(node => {
-            let cleanNode = true;
+            node.touched = false;
+            let isNodeClean = true;
             for (var circleIndex = 0; circleIndex < dirtyCircles.length; circleIndex++) {
                 if (node.tangencyCollection.getGroupByCircle(dirtyCircles[circleIndex]) === undefined) {
                     continue;
                 }
 
-                cleanNode = false;
+                isNodeClean = false;
                 node.removeCircles(dirtyCircles);
                 break;
             }
 
-            if (cleanNode) {
+            if (isNodeClean) {
                 remainingNodes.push(node);
             } else {
+                // Unfortunately we have to iterate over the circles again because we
+                // need a complete iteration above to determine if the node is clean.
                 this._circles.forEach(circle => {
                     circle.removeVertexByNode(node);
                 });
@@ -197,7 +198,7 @@ export class RegionEngineBL {
      * intersecting dirty circles with all other circles. When an intersection
      * is found between a dirty circle and a clean circle, the clean circle
      * gets contaminated -- its vertices need re-sorting, its edges deleted and re-created,
-     * and all adjacent regions need to be revisited.
+     * and all adjacent regions need to be revisited. Therefore it's marked as dirty in addNode().
      * 
      * As such, dirty child/parent, vertex and node cleanup must be performed before computing the
      * intersections, while edge and region cleanup must be done after computing them.
@@ -300,18 +301,26 @@ export class RegionEngineBL {
 
     // (5/5)
     protected refreshRegions = (cycles: IGraphCycle[]): void => {
-        this._regions = this._regions.filter(circle => {
-            if (circle instanceof ArcPolygon) {
-                return true;
+        const deleteIndices: number[] = [];
+        
+        // Deleting regions because they used to be stand-alone circles and now are
+        // not anymore stand-alone is statistically rare; we don't want to re-initialize
+        // the regions array unconditionally every time.
+        this._regions.forEach((region, index) => {
+            if (region instanceof ArcPolygon || region.vertices.length === 0) {
+                return;
             }
-
-            if (circle.vertices.length === 0) {
-                return true;
-            }
-
-            this.emit(EDrawableEventType.delete, circle);
-            return false;
+            deleteIndices.push(index);
         });
+        if (deleteIndices.length > 0) {
+            this._regions = this._regions.filter((region, index) => {
+                if (!deleteIndices.includes(index)) {
+                    return true;
+                }
+                this.emit(EDrawableEventType.delete, region);
+                return false;
+            });
+        }
 
         this._circles.forEach(circle => {
             circle.isDisplayed = circle.vertices.length === 0;
@@ -327,7 +336,7 @@ export class RegionEngineBL {
             let isContour = true;
             let topmostEdge = cycle.oEdges[0].edge;
             cycle.oEdges.forEach(oEdge => {
-                if (oEdge.edge.circle.center.y > topmostEdge.circle.center.y) {
+                if (oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
                     topmostEdge = oEdge.edge;
                 }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
@@ -365,7 +374,7 @@ export class RegionEngineBL {
 
             let regionType = ERegionType.region;
             if (isContour) {
-                // We don't need oriented edges, because we know all edges are clockwise for contours
+                // We don't need oriented edges: all edges in contours are clockwise
                 regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
             }
             const region = new ArcPolygon(arcs, regionType);
