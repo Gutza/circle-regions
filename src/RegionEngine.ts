@@ -23,7 +23,7 @@ export class RegionEngine extends RegionEngineBL {
      */
     public clear = () => {
         this._nodes = [];
-        this._edges = [];
+        this._edges = new Map();
         
         this._circles.forEach(circle => this.emit(EDrawableEventType.delete, circle));
         this._circles = [];

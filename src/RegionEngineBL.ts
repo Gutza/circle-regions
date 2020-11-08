@@ -25,7 +25,7 @@ import {
  */
 export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
-    protected _edges: GraphEdge[] = [];
+    protected _edges: Map<string, GraphEdge> = new Map();
     protected _circles: Circle[] = [];
     protected _regions: TCircleRegions = [];
     protected _staleRegions: boolean = true;
@@ -232,13 +232,13 @@ export class RegionEngineBL {
         this.removeDirtyRegions(dirtyCircles);
         
         const dirtyEdges: GraphEdge[] = [];
-        this._edges = this._edges.filter(edge => {
+        this._edges.forEach((edge, id) => {
             if (!dirtyCircles.includes(edge.circle)) {
-                return true;
+                return;
             }
 
             dirtyEdges.push(edge);
-            return false;
+            this._edges.delete(id);
         });
 
         this._edges.forEach(cleanEdge => {
@@ -268,16 +268,16 @@ export class RegionEngineBL {
             });
             for (let i = 0; i < circle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c." + circle.id + "/e." + i);
+                const newEdge = new GraphEdge(circle, circle.vertices[i].node, circle.vertices[i+1] ? circle.vertices[i+1].node : circle.vertices[0].node, "c." + circle.internalId + "/e." + i);
 
-                const oldEdge = this._edges.find(edge => edge.equals(newEdge));
+                const oldEdge = this._edges.get(newEdge.id);
                 if (oldEdge !== undefined) {
                     oldEdge.InnerCycle = undefined;
                     oldEdge.OuterCycle = undefined;
                     continue;
                 }
 
-                this._edges.push(newEdge);
+                this._edges.set(newEdge.id, newEdge);
                 newEdge.node1.addEdge(newEdge);
                 if (newEdge.node1 !== newEdge.node2) {
                     newEdge.node2.addEdge(newEdge);

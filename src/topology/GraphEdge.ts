@@ -7,12 +7,23 @@ export default class GraphEdge {
     private _node1: GraphNode;
     private _node2: GraphNode;
 
-    public id?: any;
+    public id: string;
 
+    /**
+     * The inner cycle this edge belongs to.
+     * Undefined means uncomputed; null means it was computed and
+     * there isn't any (e.g. a circle with a single outer tangency point).
+     */
     public InnerCycle: undefined | IGraphCycle | null = undefined;
+
+    /**
+     * The outer cycle this edge belongs to.
+     * Undefined means uncomputed; null means it was computed and
+     * there isn't any (e.g. a circle with a single inner tangency point).
+     */
     public OuterCycle: undefined | IGraphCycle | null = undefined;
 
-    constructor(circle: Circle, node1: GraphNode, node2: GraphNode, id?: any) {
+    constructor(circle: Circle, node1: GraphNode, node2: GraphNode, id: string) {
         this._circle = circle;
         this._node1 = node1;
         this._node2 = node2;
