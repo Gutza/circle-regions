@@ -221,10 +221,10 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         );
     }
 
-    // TODO: This is not particularly conductive to lazy evaluation, it can be done more efficiently
+    // TODO: This is not particularly conductive to lazy evaluation, could it be done more efficiently for most cases?
     public boundingBoxOverlap = (that: Circle): boolean => (
-        Math.sign(this.boundingBox.minPoint.x - that.boundingBox.maxPoint.x) * Math.sign(this.boundingBox.maxPoint.x - that.boundingBox.minPoint.x) < 0.5 &&
-        Math.sign(this.boundingBox.minPoint.y - that.boundingBox.maxPoint.y) * Math.sign(this.boundingBox.maxPoint.y - that.boundingBox.minPoint.y) < 0.5
+        Math.sign(this.boundingBox.minPoint.x - that.boundingBox.maxPoint.x) != Math.sign(this.boundingBox.maxPoint.x - that.boundingBox.minPoint.x) &&
+        Math.sign(this.boundingBox.minPoint.y - that.boundingBox.maxPoint.y) != Math.sign(this.boundingBox.maxPoint.y - that.boundingBox.minPoint.y)
     );
 
     public equals = (that: Circle): boolean => (
