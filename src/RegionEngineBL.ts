@@ -165,38 +165,30 @@ export class RegionEngineBL {
             circle.parents = circle.children.filter(parent => !dirtyCircles.includes(parent));
         });
 
-        // TODO: Streamline this, we're traversing the same array three times in a row!
-
         // Affected nodes are all nodes which include dirty circles.
-        const affectedNodes: GraphNode[] = [];
-        for (var nodeIndex = 0; nodeIndex < this._nodes.length; nodeIndex++) {
-            const tangencyCollection = this._nodes[nodeIndex].tangencyCollection;
+        const remainingNodes: GraphNode[] = [];
+        this._nodes.forEach(node => {
+            let cleanNode = true;
             for (var circleIndex = 0; circleIndex < dirtyCircles.length; circleIndex++) {
-                if (tangencyCollection.getGroupByCircle(dirtyCircles[circleIndex]) === undefined) {
+                if (node.tangencyCollection.getGroupByCircle(dirtyCircles[circleIndex]) === undefined) {
                     continue;
                 }
 
-                affectedNodes.push(this._nodes[nodeIndex]);
+                cleanNode = false;
+                node.removeCircles(dirtyCircles);
                 break;
             }
-        }
 
-        // Remove the dirty circles from all affected nodes.
-        affectedNodes.forEach(node => node.removeCircles(dirtyCircles));
-
-        this._nodes = this._nodes.filter((node): boolean => {
-            if (!affectedNodes.includes(node)) {
-                return true;
+            if (cleanNode) {
+                remainingNodes.push(node);
+            } else {
+                this._circles.forEach(circle => {
+                    circle.removeVertexByNode(node);
+                });
             }
-
-            // TODO: Is it worth improving this? We could clean up all circles again if the node isn't valid.
-
-            this._circles.forEach(circle => {
-                circle.removeVertexByNode(node);
-            });
-
-            return false;
         });
+
+        this._nodes = remainingNodes;
     }
 
     /**

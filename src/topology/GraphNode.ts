@@ -154,9 +154,9 @@ export default class GraphNode {
     public removeCircles(circles: Circle[]): boolean {
         // First, remove the elements which contain the given circles from all tangency groups
         circles.forEach(circle => this._tangencyCollection.removeCircle(circle));
-
-        // Next, remove the empty tangency groups
         this._edges = this._edges.filter(edge => !circles.includes(edge.circle));
+        
+        // Next, remove the empty tangency groups
         return this._tangencyCollection.removeEmptyGroups();
     }
 
@@ -311,7 +311,7 @@ export default class GraphNode {
                     if (!tg.elements.has(tgEdge.circle.internalId)) {
                         return;
                     }
-                    
+
                     const perpendicularAngle = this.getPerpendicular(tgEdge, refAngle);
                     if (perpendicularAngle > minPerpendicularAngle) {
                         return;
