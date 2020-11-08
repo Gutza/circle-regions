@@ -3,7 +3,6 @@ import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
 import GraphNode from '../src/topology/GraphNode';
-import { TangencyGroup } from '../src/topology/TanGroupCollection';
 import { ETangencyParity } from '../src/Types';
 
 const engine = new RegionEngine();
@@ -60,7 +59,10 @@ describe("Tangency groups for two circles A-B", () => {
     });
 });
 
-engine.addCircle(new Circle(new Point(-3, 0), 3, "leftLarge"));
+const circle = new Circle(new Point(0, 0), 3, "leftLarge");
+engine.addCircle(circle);
+engine.regions;
+circle.center.x = -3;
 
 describe("Tangency groups for three circles AA-B", () => {
     assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
