@@ -211,10 +211,6 @@ export class RegionEngineBL {
                 if (!c1.isDirty && !c2.isDirty) {
                     continue;
                 }
-
-                if (!c1.boundingBoxOverlap(c2)) {
-                    continue;
-                }
                 
                 this.intersectCircles(c1, c2);
             }
@@ -377,6 +373,10 @@ export class RegionEngineBL {
     }
 
     protected intersectCircles = (circle1: Circle, circle2: Circle): void => {
+        if (!circle1.boundingBoxOverlap(circle2)) {
+            return;
+        }
+
         if (circle1 === circle2) {
             console.warn("Don't intersect a circle with itself!");
             return;
