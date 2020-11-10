@@ -30,6 +30,7 @@ export class RegionEngineBL {
     protected _regions: TCircleRegions = [];
     protected _staleRegions: boolean = true;
     protected _debugMode: ERegionDebugMode;
+    protected _lastCircles: {x: number, y: number, r: number, iId: number}[] = [];
 
     public onRegionChange: FOnDrawableEvent | undefined;
 
@@ -237,6 +238,7 @@ export class RegionEngineBL {
             this._edges.delete(id);
         });
 
+        // !!cleanEdge.*Cycle is correct, since null cycles in dirty circles have already been deleted above.
         this._edges.forEach(cleanEdge => {
             if (!!cleanEdge.InnerCycle && cleanEdge.InnerCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
                 cleanEdge.InnerCycle = undefined;

@@ -8,7 +8,7 @@ export class RegionError extends Error {
     constructor(message: string, originalError: Error, regionCircles: Circle[], isStatic?: boolean) {
         super(message);
         this._circles = regionCircles;
-        this.message += " Circles: " + this.circleDump;
+        this.message += " Circles: " + this.circleDump + " Inner error: " + originalError.message;
         this._innerError = originalError;
         this._isStatic = isStatic;
 

@@ -12,7 +12,7 @@ export class RegionEngine extends RegionEngineBL {
     /**
      * Instantiate a new region engine.
      * 
-     * @param debugMode The debug mode. For most cases, static should be fine.
+     * @param debugMode The debug mode. You never need to change this for general use.
      */
     constructor(debugMode: ERegionDebugMode = ERegionDebugMode.static) {
         super(debugMode);
@@ -109,16 +109,29 @@ export class RegionEngine extends RegionEngineBL {
                 );
             }
 
-            // TODO: Attempt dynamic reproducing, as well
+            const currentCircles = this.dumpDynamicCircles(this._circles);
+            
             throw new RegionError(
-                "A statically unreproducible error has occurred while processing the regions: " + e.message,
+                "A statically unreproducible error has occurred while processing the regions. Please submit a bug report including all information in this message. " +
+                    JSON.stringify(this._lastCircles) + " --> " + JSON.stringify(currentCircles),
                 e as Error,
                 this.circles,
                 false
             );
         }
 
+        this._lastCircles = this.dumpDynamicCircles(this._circles);
+
         return this._regions;
+    }
+
+    private dumpDynamicCircles = (circles: Circle[]): {x: number, y: number, r: number, iId: number}[] => {
+        return circles.map(circle => ({
+            x: circle.center.x,
+            y: circle.center.y,
+            r: circle.radius,
+            iId: circle.internalId
+        }));
     }
 
     /**

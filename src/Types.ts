@@ -146,6 +146,5 @@ export enum ERegionType {
 
 export enum ERegionDebugMode {
     none = "none",
-    static = "static",
-    dynamic = "dynamic"
+    static = "static"
 }
