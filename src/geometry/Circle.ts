@@ -5,12 +5,11 @@ import { round } from "./utils/numbers";
 import { Point } from "./Point";
 import { PureGeometry } from "./PureGeometry";
 
-let circleCounter = 0;
-
 /**
  * The main circle class.
  */
 export class Circle extends PureGeometry implements IRegion, IDrawable {
+    private static internalCounter: number = 0;
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
     private _roundedBbox?: IBoundingBox;
@@ -64,7 +63,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._center.onGeometryChange = this.onCenterMove;
         this._radius = radius;
         this.id = id;
-        this._internalId = circleCounter++;
+        this._internalId = Circle.internalCounter++;
     }
 
     public onCenterMove = () => {
