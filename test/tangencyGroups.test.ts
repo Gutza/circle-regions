@@ -5,6 +5,16 @@ import { RegionEngine } from '../src/RegionEngine';
 import GraphNode from '../src/topology/GraphNode';
 import { ETangencyParity } from '../src/Types';
 
+{
+    // For starters, make sure this doesn't throw
+    const engine = new RegionEngine();
+    engine.addCircle(new Circle(new Point(-1, 0), 1));
+    engine.addCircle(new Circle(new Point(+2, 0), 2));
+    engine.regions;
+    engine.addCircle(new Circle(new Point(+0, 0), 3));
+    engine.regions;
+}
+
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));
 engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));
