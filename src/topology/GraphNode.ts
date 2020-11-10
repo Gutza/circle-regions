@@ -196,15 +196,15 @@ export default class GraphNode {
         // This could be optimized by inserting into a BST from the start;
         // see for instance https://github.com/gwtw/js-avl-tree/blob/master/src/avl-tree.js
         const unsortedSameSideNeighbors: TangencyElement[] = [];
-        edgeTanGroup.elements.forEach((tanElem, circleId) => {
+        edgeTanGroup.elements.forEach(tanElem => {
             if (tanElem === edgeTanElem || tanElem.parity !== edgeTanElem.parity) {
                 return;
             }
             unsortedSameSideNeighbors.push(tanElem);
         });
-        const sameSideNeighbors = unsortedSameSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
         
-        if (sameSideNeighbors.length > 0) {
+        if (unsortedSameSideNeighbors.length > 0) {
+            const sameSideNeighbors = unsortedSameSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
             let winningTangencyElement: TangencyElement | undefined = undefined;
             let getSameEdgeEnd: Function;
             if (currentDirection === ETraversalDirection.forward) {
@@ -239,18 +239,18 @@ export default class GraphNode {
 
         // Descending order
         const unsortedOppositeSideNeighbors: TangencyElement[] = [];
-        edgeTanGroup.elements.forEach((tanElem, circleId) => {
+        edgeTanGroup.elements.forEach(tanElem => {
             if (tanElem === edgeTanElem || tanElem.parity !== oppositeParity) {
                 return;
             }
             unsortedOppositeSideNeighbors.push(tanElem);
         });
-        const oppositeSideNeighbors = unsortedOppositeSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
 
-        if (oppositeSideNeighbors.length === 0) {
+        if (unsortedOppositeSideNeighbors.length === 0) {
             return undefined;
         }
 
+        const oppositeSideNeighbors = unsortedOppositeSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
         const winningEdges = this._edges.filter(edge => edge.circle === oppositeSideNeighbors[0].circle && edge.node2 === this);
         if (winningEdges.length !== 1) {
             throw new Error("Outer tangent edge found " + winningEdges.length + " times!");
@@ -270,7 +270,7 @@ export default class GraphNode {
 
         const tgElem = tanGroup.elements.get(currentEdge.circle.internalId);
         if (tgElem === undefined) {
-            throw new Error("Edge circle found in the tangency group!");
+            throw new Error("Edge circle not found in the tangency element!");
         }
 
         if (tgElem.parity !== ETangencyParity.chaos) {
