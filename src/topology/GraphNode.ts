@@ -9,7 +9,7 @@ export default class GraphNode {
     public touched: boolean = true;
     private _tangencyCollection: TanGroupCollection = new TanGroupCollection();
     private _coordinates: Point;
-    private _edges: GraphEdge[] = [];
+    private _edges: Map<string, GraphEdge> = new Map();
 
     constructor(coordinates: Point) {
         this._coordinates = coordinates;
@@ -17,7 +17,8 @@ export default class GraphNode {
 
     public addCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType) {
         if (!this.touched) {
-            this._edges = [];
+            // TODO: Shouldn't we also reset the tangency collection at this point?
+            this._edges = new Map();
             this.touched = true;
         }
 
@@ -141,18 +142,11 @@ export default class GraphNode {
     }
 
     public addEdge = (edge: GraphEdge): void => {
-        if (this._edges === undefined) {
-            this._edges = [];
-        }
-        this._edges.push(edge);
+        this._edges.set(edge.id, edge);
     }
 
     public removeEdge = (edge: GraphEdge): void => {
-        if (!this._edges.includes(edge)) {
-            return;
-        }
-
-        this._edges = this._edges.filter(myEdge => myEdge !== edge);
+        this._edges.delete(edge.id);
     }
 
     public get coordinates(): Point {
@@ -162,7 +156,11 @@ export default class GraphNode {
     public removeCircles(circles: Circle[]): boolean {
         // First, remove the elements which contain the given circles from all tangency groups
         circles.forEach(circle => this._tangencyCollection.removeCircle(circle));
-        this._edges = this._edges.filter(edge => !circles.includes(edge.circle));
+        this._edges.forEach((edge, edgeId) => {
+            if (circles.includes(edge.circle)) {
+                this._edges.delete(edgeId);
+            }
+        });
         
         // Next, remove the empty tangency groups
         return this._tangencyCollection.removeEmptyGroups();
@@ -225,7 +223,12 @@ export default class GraphNode {
 
             if (winningTangencyElement !== undefined) {
                 // Found a same side neighbor with a larger circle! Now let's find the edge.
-                const winningEdges = this._edges.filter(edge => edge.circle === winningTangencyElement?.circle && this === getSameEdgeEnd(edge));
+                const winningEdges: GraphEdge[] = [];
+                this._edges.forEach(edge => {
+                    if (edge.circle === winningTangencyElement?.circle && this === getSameEdgeEnd(edge)) {
+                        winningEdges.push(edge);
+                    }
+                });
                 if (winningEdges.length !== 1) {
                     throw new Error("Inner tangent edge found " + winningEdges.length + " times!");
                 }
@@ -259,7 +262,12 @@ export default class GraphNode {
         }
 
         const oppositeSideNeighbors = unsortedOppositeSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
-        const winningEdges = this._edges.filter(edge => edge.circle === oppositeSideNeighbors[0].circle && edge.node2 === this);
+        const winningEdges: GraphEdge[] = [];
+        this._edges.forEach(edge => {
+            if (this === edge.node2 && edge.circle === oppositeSideNeighbors[0].circle) {
+                winningEdges.push(edge);
+            }
+        });
         if (winningEdges.length !== 1) {
             throw new Error("Outer tangent edge found " + winningEdges.length + " times!");
         }
@@ -358,21 +366,22 @@ export default class GraphNode {
                 candidates.push(smallestYangCircles[0]);
             }
 
-            this._edges.
-                filter(candidateEdge => candidates.includes(candidateEdge.circle) && candidateEdge.node1 === this).
-                forEach(candidateEdge => {
-                    const perpendicularAngle = this.getPerpendicular(candidateEdge, refAngle);
-                    if (perpendicularAngle > minPerpendicularAngle) {
-                        return;
-                    }
-
-                    minPerpendicularAngle = perpendicularAngle;
-                    nextEdge = { 
-                        edge: candidateEdge,
-                        sameSide: true,
-                    };
+            this._edges.forEach(candidateEdge => {
+                if (this !== candidateEdge.node1 || !candidates.includes(candidateEdge.circle)) {
                     return;
-                });
+                }
+
+                const perpendicularAngle = this.getPerpendicular(candidateEdge, refAngle);
+                if (perpendicularAngle > minPerpendicularAngle) {
+                    return;
+                }
+
+                minPerpendicularAngle = perpendicularAngle;
+                nextEdge = { 
+                    edge: candidateEdge,
+                    sameSide: true,
+                };
+            });
 
             if (nextEdge !== undefined) {
                 return;
@@ -386,22 +395,26 @@ export default class GraphNode {
                 candidates.push(smallestYangCircles[smallestYangCircles.length-1]);
             }
 
-            this._edges.
-                filter(candidateEdge => candidates.includes(candidateEdge.circle) && candidateEdge.node2 === this).
-                forEach(candidateEdge => {
-                    const perpendicularAngle = this.getPerpendicular(candidateEdge, refAngle);
-                    if (perpendicularAngle > minPerpendicularAngle) {
-                        return;
-                    }
-
-                    minPerpendicularAngle = perpendicularAngle;
-                    nextEdge = { 
-                        edge: candidateEdge,
-                        sameSide: true,
-                    };
+            this._edges.forEach(candidateEdge => {
+                if (this !== candidateEdge.node2 || !candidates.includes(candidateEdge.circle)) {
                     return;
-                });
+                }
+                const perpendicularAngle = this.getPerpendicular(candidateEdge, refAngle);
+                if (perpendicularAngle > minPerpendicularAngle) {
+                    return;
+                }
+
+                minPerpendicularAngle = perpendicularAngle;
+                nextEdge = { 
+                    edge: candidateEdge,
+                    sameSide: true,
+                };
+            });
         });
+
+        if (nextEdge !== undefined) {
+            return nextEdge;
+        }
 
         // One last fallback before giving up: we're allowed to continue to the next edge
         // on the same circle, past the tangency point with another circle, if and only if
@@ -415,17 +428,22 @@ export default class GraphNode {
             // There's a reasonable expectation these are exceptional cases, so it's probably
             // not worth caching the next edge on the same circle after every vertex;
             // instead, we're going to extract it from the data we already have.
-            const nextRawEdge = currentEdge.node2.edges.find(edge => edge.circle === currentEdge.circle && edge !== currentEdge);
-            if (nextRawEdge === undefined) {
-                throw new Error("Multiple vertex circle with a single edge");
+
+            currentEdge.node2._edges.forEach(nextEdgeCandidate => {
+                if (nextEdge !== undefined || nextEdgeCandidate === currentEdge || nextEdgeCandidate.circle !== currentEdge.circle) {
+                    return;
+                }
+                nextEdge = {
+                    edge: nextEdgeCandidate,
+                    sameSide: true
+                };
+            });
+
+            if (nextEdge !== undefined) {
+                return nextEdge;
             }
-            return {
-                edge: nextRawEdge,
-                sameSide: true
-            };
-        }
-        
-        return nextEdge;
+            throw new Error("Multiple vertex circle with a single edge");
+        }        
     }
 
     private getPerpendicular(edge: GraphEdge, refAngle: number): number {
@@ -437,9 +455,5 @@ export default class GraphNode {
         }
 
         return normalizeAngle(thisVertex.angle + (this === edge.node1 ? -1 : 1) * Math.PI / 2 - refAngle);
-    }
-
-    public get edges(): GraphEdge[] {
-        return this._edges;
     }
 }
