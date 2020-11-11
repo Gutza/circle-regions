@@ -147,6 +147,14 @@ export default class GraphNode {
         this._edges.push(edge);
     }
 
+    public removeEdge = (edge: GraphEdge): void => {
+        if (!this._edges.includes(edge)) {
+            return;
+        }
+
+        this._edges = this._edges.filter(myEdge => myEdge !== edge);
+    }
+
     public get coordinates(): Point {
         return this._coordinates;
     }

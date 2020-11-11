@@ -236,6 +236,7 @@ export class RegionEngineBL {
 
             dirtyEdges.push(edge);
             this._edges.delete(id);
+            this._nodes.forEach(node => node.removeEdge(edge));
         });
 
         // !!cleanEdge.*Cycle is correct, since null cycles in dirty circles have already been deleted above.

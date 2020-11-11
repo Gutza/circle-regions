@@ -47,6 +47,9 @@ export class RegionEngine extends RegionEngineBL {
             return;
         }
 
+        // TODO: This is really ugly: we expect a circle as a parameter, but then we throw it away and expect
+        // them to use the circles in the region engine instead. Not only that, but this crappy approach
+        // guarantees a double increase in Circle.internal 
         const newCircle = new Circle(circle.center, circle.radius, circle.id);
         newCircle.isDirty = true;
         newCircle.onGeometryChange = () => this.onCircleChange(newCircle);
