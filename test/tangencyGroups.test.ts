@@ -15,6 +15,26 @@ import { ETangencyParity } from '../src/Types';
     engine.regions;
 }
 
+describe("Testing the rounding algorithm", () => {
+    const expCircle = (exp: number, cx: number, cy: number, r: number): Circle => {
+        const expNum = Math.pow(10, exp);
+        return new Circle(new Point(cx * expNum, cy * expNum), r * expNum);
+    }
+
+    it ("Rounding should work well across a wide gamut of scales", () => {
+        for (var exp = -5; exp <= 10; exp++)
+        {
+            const engine = new RegionEngine();
+            engine.addCircle(expCircle(exp, -Math.SQRT2, -Math.SQRT2, 2));
+            engine.addCircle(expCircle(exp, +Math.SQRT2, +Math.SQRT2, 2));
+            engine.addCircle(expCircle(exp, -Math.SQRT2, +Math.SQRT2, 2));
+            engine.addCircle(expCircle(exp, +Math.SQRT2, -Math.SQRT2, 2));
+            engine.regions;
+            assert.strictEqual(engine.nodes.length, 5, "Rounding fails for exp=" + exp);
+        }    
+    });
+});
+
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));
 engine.addCircle(new Circle(new Point(2, 0), 2, "rightSmall"));

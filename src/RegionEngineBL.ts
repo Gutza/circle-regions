@@ -392,13 +392,11 @@ export class RegionEngineBL {
         }
 
         if (circle1 === circle2) {
-            console.warn("Don't intersect a circle with itself!");
-            return;
+            throw new Error("Attempting to intersect a circle with itself! (same instance)");
         }
     
         if (circle1.equals(circle2)) {
-            console.warn("Don't intersect a circle with an identical one");
-            return;
+            throw new Error("Attempting to intersect a circle with an identical one! (different instance, same coordinates)");
         }
     
         // Math.sqrt(a**2 + b**2) is more precise than Math.hypot(a, b)
