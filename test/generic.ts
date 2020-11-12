@@ -1,4 +1,4 @@
-import assert = require('assert');
+import assert from 'assert';
 import { ArcPolygon } from '../src/geometry/ArcPolygon';
 
 import { Circle } from '../src/geometry/Circle';

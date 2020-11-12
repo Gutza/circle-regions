@@ -66,7 +66,7 @@ export interface FOnDrawableEvent {
 
 export enum ETangencyType {
     innerTangent = "inner",
-    outerTangent = "outer"
+    outerTangent = "outer",
 };
 
 export enum EIntersectionType {
@@ -146,5 +146,11 @@ export enum ERegionType {
 
 export enum ERegionDebugMode {
     none = "none",
-    static = "static"
+    static = "static",
+}
+
+export enum ERoundingSize {
+    small = "small",
+    default = "default",
+    large = "large",
 }

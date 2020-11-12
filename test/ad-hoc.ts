@@ -1,5 +1,5 @@
 import { Circle, Point, RegionEngine } from "../src";
-import assert = require('assert');
+import assert from 'assert';
 
 const dumps = [
     [
