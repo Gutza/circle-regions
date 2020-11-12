@@ -64,20 +64,43 @@ export default class GraphNode {
         }
 
         if (tgElem1.parity === ETangencyParity.chaos || tgElem2.parity === ETangencyParity.chaos) {
-            // Start by assuming this, and only change assumptions if needed
+            /*
+            Both circles have tangency groups, and at least one of them is chaotic -- but now it turns
+            out they should actually live in the same tangency group. We have to remove (one of) the
+            chaotic tangency groups, and move that circle in the same tangency group as the other one.
+
+            The "known element" is the tangency element which already has a non-chaotic parity. If
+            both are chaotic, we just randomly assign a parity to one of them and conventionally
+            declare that's now known.
+            */
             let knownElement = tgElem1;
             let chaoticElement = tgElem2;
+            let knownGroup = tanGroup1;
+            let chaoticGroup = tanGroup2;
 
             if (tgElem1.parity === ETangencyParity.chaos && tgElem2.parity === ETangencyParity.chaos) {
-                // If both are chaotic, just assign one, respecting the assumption above
                 tgElem1.parity = ETangencyParity.yin;
             } else if (tgElem1.parity === ETangencyParity.chaos) {
                 knownElement = tgElem2;
                 chaoticElement = tgElem1;
+                knownGroup = tanGroup2;
+                chaoticGroup = tanGroup1;
             }
 
+            // Change the parity of the chaotic element, remove it from its old group, and add it to its new group.
+            // We don't need to remove the empty groups, because we're not leaving any laying around.
             chaoticElement.parity = this.otherParity(knownElement.parity, intersectionType);
+            knownGroup.elements.set(chaoticElement.circle.internalId, chaoticElement);
+            this._tangencyCollection.tangencyGroups = this._tangencyCollection.tangencyGroups.filter(tgrp => tgrp !== chaoticGroup);
             return;
+        }
+
+        // Both circles are already properly 
+        if (
+            (intersectionType === ETangencyType.innerTangent && tgElem1.parity !== tgElem2.parity) ||
+            (intersectionType === ETangencyType.outerTangent && tgElem1.parity === tgElem2.parity)
+        ) {
+            throw new Error("Extra! Extra! Read all about it! These circles break Euclidean geometry!");
         }
     }
 

@@ -130,7 +130,7 @@ export class RegionEngineBL {
             currentEdgeEndNode = oEnd.node;
             currentEdgeDirection = oEnd.direction;
 
-             if (currentEdge === startEdge) {
+            if (currentEdge === startEdge) {
                 return cycle;
             }
         }
