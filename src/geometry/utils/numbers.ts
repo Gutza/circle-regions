@@ -4,4 +4,4 @@ const lodashRound = require('lodash.round');
  * @param n The number to round.
  */
 
-export const round = (n: number) => lodashRound(n, 10);
+export const round = (n: number) => lodashRound(n, 5);
