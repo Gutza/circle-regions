@@ -22,7 +22,7 @@ describe("Testing the rounding algorithm", () => {
     }
 
     it ("Rounding should work well across a wide gamut of scales", () => {
-        for (var exp = -5; exp <= 10; exp++)
+        for (var exp = -5; exp <= 11; exp++)
         {
             const engine = new RegionEngine();
             engine.addCircle(expCircle(exp, -Math.SQRT2, -Math.SQRT2, 2));
@@ -31,7 +31,7 @@ describe("Testing the rounding algorithm", () => {
             engine.addCircle(expCircle(exp, +Math.SQRT2, -Math.SQRT2, 2));
             engine.regions;
             assert.strictEqual(engine.nodes.length, 5, "Rounding fails for exp=" + exp);
-        }    
+        }
     });
 });
 
