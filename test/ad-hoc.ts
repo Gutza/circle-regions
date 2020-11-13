@@ -22,6 +22,8 @@ const dumps = [
         [-Math.SQRT2, +Math.SQRT2, 2],
         [+Math.SQRT2, -Math.SQRT2, 2],
     ],
+    // TODO: Why is this issue not trully reproducible, as defined by the bug report?
+    [[200000000000,0,200000000000],[0.000012246467991473532,200000000000,200000000000],[-200000000000,0.000024492935982947064,200000000000],[-0.000036739403974420595,-200000000000,200000000000]],
 ];
 
 describe("Ad hoc region computation", () => {
