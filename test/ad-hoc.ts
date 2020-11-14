@@ -22,9 +22,12 @@ const dumps = [
         [-Math.SQRT2, +Math.SQRT2, 2],
         [+Math.SQRT2, -Math.SQRT2, 2],
     ],
-    // TODO: Why is this issue not actually reproducible, as shown by the native bug report mechanism?
-    // TODO: Automatically test within the actual bug reporting mechanism whether the report is indeed reproducible (parseFloat(toString()) or similar)
-    [[200000000000,0,200000000000],[0.000012246467991473532,200000000000,200000000000],[-200000000000,0.000024492935982947064,200000000000],[-0.000036739403974420595,-200000000000,200000000000]],
+    [
+        ["200000000000",0,"200000000000"],
+        ["0.000012246467991473532","200000000000","200000000000"],
+        ["-200000000000","0.000024492935982947064","200000000000"],
+        ["-0.000036739403974420595","-200000000000","200000000000"]
+    ],
 ];
 
 describe("Ad hoc region computation", () => {
@@ -37,6 +40,6 @@ describe("Ad hoc region computation", () => {
             assert.doesNotThrow(() => {
                 engine.regions;
             });
-        })
+        });
     });
 });

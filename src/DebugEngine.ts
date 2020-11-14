@@ -17,7 +17,20 @@ export class DebugEngine {
             return [];
         }
 
-        return DebugEngine._canonicalStatic(testCircles);
+        // We now know we can reproduce the issue statically -- but can we represent the values as strings?
+        const canonicalCircles =  DebugEngine._canonicalStatic(testCircles);
+        const _testFromString = canonicalCircles.map(circle => new TestCircle(
+            new Point(Number.parseFloat(circle.center.x.toString()), Number.parseFloat(circle.center.y.toString())),
+            Number.parseFloat(circle.radius.toString())
+        ));
+
+        // TODO: Actually handle this, instead of just bragging about it.
+        if (!DebugEngine._isStaticallyReproducible(_testFromString)) {
+            console.log("HA! GOTCHA!");
+        } else {
+            console.log("Reproducible from string");
+        }
+        return canonicalCircles;
     }
 
     private static _isStaticallyReproducible = (circles: TestCircle[]): boolean => {
