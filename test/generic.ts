@@ -71,57 +71,28 @@ describe("Crazy interior contour", () => {
     });
 })
 
+describe("Basic circle parent-child consistency", () => {
+    const engine = new RegionEngine();
 
+    const child = new Circle(new Point(0, 0), 1);
+    const parent = new Circle(new Point(0, 0), 100);
+    engine.addCircle(child);
+    engine.addCircle(parent);
+    engine.regions;
 
-/*
-import assert = require('assert');
-import Circle from '../src/geometry/Circle';
+    assert.strictEqual(child.parents.includes(parent), true);
+    assert.strictEqual(child.parents.length, 1);
 
-describe('Basic circle functionalities', () => {
-    let circle1 = new Circle({x: -3, y: 0}, 5);
-    let circle2 = new Circle({x: 3, y: 0}, 5);
+    assert.strictEqual(parent.children.includes(child), true);
+    assert.strictEqual(parent.children.length, 1);
 
-    circle1.intersect(circle2);
-    let segments1 = circle1.getSegments();
-    let segments2 = circle2.getSegments();
-    it('Pythagorean intersection should work', () => {
-        assert.equal(segments1.length, 2);
-        assert.equal(segments2.length, 2);
-    });
+    parent.radius = 99;
+    child.center.x = 20;
+    engine.regions;
 
-    const [ circ1seg1, circ1seg2 ] = segments1;
-    const [ circ2seg1, circ2seg2 ] = segments2;
+    assert.strictEqual(child.parents.includes(parent), true);
+    assert.strictEqual(child.parents.length, 1);
 
-    it('Pythagorean segments should match angle order', () => {
-        assert.equal(circ1seg1.intersection1.thisAngle < circ1seg1.intersection2.thisAngle, true);
-        assert.equal(circ1seg2.intersection1.thisAngle, circ1seg1.intersection2.thisAngle);
-        assert.equal(circ1seg2.intersection2.thisAngle, circ1seg1.intersection1.thisAngle);
-
-        assert.equal(circ2seg1.intersection1.thisAngle < circ2seg1.intersection2.thisAngle, true);
-        assert.equal(circ2seg2.intersection2.thisAngle, circ2seg1.intersection1.thisAngle);
-        assert.equal(circ2seg2.intersection1.thisAngle, circ2seg1.intersection2.thisAngle);
-    });
-
-    it('Pythagorean intersection points should match Pythagoras', () => {
-        assert.equal(circ1seg1.intersection1.intersection.point.x, 0);
-        assert.equal(circ1seg1.intersection1.intersection.point.y, 4);
-        assert.equal(circ1seg1.intersection2.intersection.point.x, 0);
-        assert.equal(circ1seg1.intersection2.intersection.point.y, -4);
-
-        assert.equal(circ1seg2.intersection1.intersection.point.x, 0);
-        assert.equal(circ1seg2.intersection1.intersection.point.y, -4);
-        assert.equal(circ1seg2.intersection2.intersection.point.x, 0);
-        assert.equal(circ1seg2.intersection2.intersection.point.y, 4);
-
-        assert.equal(circ2seg1.intersection1.intersection.point.x, 0);
-        assert.equal(circ2seg1.intersection1.intersection.point.y, 4);
-        assert.equal(circ2seg1.intersection2.intersection.point.x, 0);
-        assert.equal(circ2seg1.intersection2.intersection.point.y, -4);
-
-        assert.equal(circ2seg2.intersection1.intersection.point.x, 0);
-        assert.equal(circ2seg2.intersection1.intersection.point.y, -4);
-        assert.equal(circ2seg2.intersection2.intersection.point.x, 0);
-        assert.equal(circ2seg2.intersection2.intersection.point.y, 4);
-    });
+    assert.strictEqual(parent.children.includes(child), true);
+    assert.strictEqual(parent.children.length, 1);
 })
-*/

@@ -42,20 +42,17 @@ export class RegionEngine extends RegionEngineBL {
     public addCircle = (circle: Circle, guaranteedNew: boolean = false) => {
         this._staleRegions = false;
 
-        if (!guaranteedNew && this._circles.some(existingCircle => existingCircle.equals(circle))) {
-            console.warn(`Another circle with center (${circle.center.x}, ${circle.center.y}) and radius ${circle.radius} already exists."`);
-            return;
+        if (this._circles.includes(circle)) {
+            throw new Error("You can't add the same circle twice.");
         }
 
-        // TODO: This is really ugly: we expect a circle as a parameter, but then we throw it away and expect
-        // them to use the circles in the region engine instead. Not only that, but this crappy approach
-        // guarantees a double increase in Circle.internal 
-        const newCircle = new Circle(circle.center, circle.radius, circle.id);
-        newCircle.isDirty = true;
-        newCircle.onGeometryChange = () => this.onCircleChange(newCircle);
+        if (!guaranteedNew && this._circles.some(existingCircle => existingCircle.equals(circle))) {
+            throw new Error(`Another circle with center (${circle.center.x}, ${circle.center.y}) and radius ${circle.radius} already exists."`);
+        }
 
-        // We always want to create new circles, in order to remove their vertex and edge caches
-        this._circles.push(newCircle);
+        circle.isDirty = true;
+        circle.onGeometryChange = () => this.onCircleChange(circle);
+        this._circles.push(circle);
     };
 
     // TODO: Make sure this really is computationally cheap -- right now it isn't.

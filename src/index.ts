@@ -3,8 +3,6 @@
 
  TODO/L: Coverall
 
- TODO/M: Dump circles on exceptions, so people can easily send bug reports
-
  TODO/L: Rotating cardioid test
 
  TODO/M: Region "centroid" (largest inscribed circle)
@@ -18,6 +16,8 @@
  TODO/H: Documentation
 
  TODO/XH: Investigate documentation labels (lazy, cached, computationally cheap, etc)
+
+ TODO/H: Convert generic errors to project-specific errors
  */
 
 export { Circle } from "./geometry/Circle";

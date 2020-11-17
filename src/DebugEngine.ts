@@ -24,7 +24,6 @@ export class DebugEngine {
             Number.parseFloat(circle.radius.toString())
         ));
 
-        // TODO: Actually handle this, instead of just bragging about it.
         const reproducibleFromString  = DebugEngine._isStaticallyReproducible(_testFromString);
         return {circles: canonicalCircles, numericReproducible: true, stringReproducible: reproducibleFromString };
     }
