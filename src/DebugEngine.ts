@@ -11,10 +11,10 @@ class TestCircle extends Circle {
 }
 
 export class DebugEngine {
-    public static checkStatic = (circles: Circle[]): Circle[] => {
+    public static checkStatic = (circles: Circle[]): {circles: Circle[], numericReproducible: boolean, stringReproducible: boolean } => {
         const testCircles = circles.map(circle => new TestCircle(circle.center, circle.radius));
         if (!DebugEngine._isStaticallyReproducible(testCircles)) {
-            return [];
+            return {circles: [], numericReproducible: false, stringReproducible: false};
         }
 
         // We now know we can reproduce the issue statically -- but can we represent the values as strings?
@@ -25,12 +25,8 @@ export class DebugEngine {
         ));
 
         // TODO: Actually handle this, instead of just bragging about it.
-        if (!DebugEngine._isStaticallyReproducible(_testFromString)) {
-            console.log("HA! GOTCHA!");
-        } else {
-            console.log("Reproducible from string");
-        }
-        return canonicalCircles;
+        const reproducibleFromString  = DebugEngine._isStaticallyReproducible(_testFromString);
+        return {circles: canonicalCircles, numericReproducible: true, stringReproducible: reproducibleFromString };
     }
 
     private static _isStaticallyReproducible = (circles: TestCircle[]): boolean => {
