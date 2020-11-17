@@ -11,16 +11,14 @@ export class RegionError extends Error {
         this.message += " Circles: " + this.circleDump + " Inner error: " + originalError.message;
         this._innerError = originalError;
         this._isStatic = isStatic;
-
-        // TODO: If static, reduce the circles to the minimum set which still generates the exception.
     }
 
     public get circleDump(): string {
         return JSON.stringify(this._circles.map(circle => {
             return [
-                circle.center.x.toString(),
-                circle.center.y.toString(),
-                circle.radius.toString(),
+                circle.center.x,
+                circle.center.y,
+                circle.radius,
             ];
         }));
     }
