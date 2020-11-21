@@ -381,8 +381,13 @@ export class RegionEngineBL {
 
             let regionType = ERegionType.region;
             if (isContour) {
-                // We don't need oriented edges: all edges in contours are clockwise
-                regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
+                if (cycle.oEdges.length < 3) {
+                    // Two-edge regions are always inner regions
+                    regionType = ERegionType.innerContour;
+                } else {
+                    // We don't need oriented edges: all edges in contours are clockwise
+                    regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
+                }
             }
             const region = new ArcPolygon(arcs, regionType);
             this._regions.push(region);
