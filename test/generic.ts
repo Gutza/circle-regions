@@ -95,4 +95,23 @@ describe("Basic circle parent-child consistency", () => {
 
     assert.strictEqual(parent.children.includes(child), true);
     assert.strictEqual(parent.children.length, 1);
-})
+});
+
+describe("Two-circle intersections must never produce inner regions", () => {
+    const steps = 17;
+    const centerRad = 1.5;
+    it("Two-circle intersections must always contain exactly three regions and one outer contour", () => {
+        for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI/steps) {
+            const degAngle = Math.round(angle * 180 / Math.PI);
+            const engine = new RegionEngine;
+            engine.addCircle(new Circle(new Point(0, 0), 1));
+            const dynamicCircle = new Circle(new Point(Math.cos(angle) * centerRad, Math.sin(angle) * centerRad), 1);
+            engine.addCircle(dynamicCircle);
+            const regions = engine.regions;
+            assert.strictEqual(regions.filter(r => r instanceof ArcPolygon && r.regionType === ERegionType.outerContour).length, 1, `There should be exactly one outer contours at ${degAngle}°`);
+            assert.strictEqual(regions.filter(r => r instanceof ArcPolygon && r.regionType === ERegionType.region).length, 3, `There should be exactly three regions at ${degAngle}°`);
+            assert.strictEqual(regions.filter(r => r instanceof Circle).length, 0, `There should be no stand-alone circles at ${degAngle}°`);
+            assert.strictEqual(regions.filter(r => r instanceof ArcPolygon && r.regionType === ERegionType.innerContour).length, 0, `There should be no inner contours at ${degAngle}°`);
+        }
+    });
+});

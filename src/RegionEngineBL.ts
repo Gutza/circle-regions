@@ -383,7 +383,7 @@ export class RegionEngineBL {
             if (isContour) {
                 if (cycle.oEdges.length < 3) {
                     // Two-edge regions are always inner regions
-                    regionType = ERegionType.innerContour;
+                    regionType = ERegionType.outerContour;
                 } else {
                     // We don't need oriented edges: all edges in contours are clockwise
                     regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
