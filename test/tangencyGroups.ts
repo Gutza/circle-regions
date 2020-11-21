@@ -41,7 +41,10 @@ function getElementCountsByParity(node: GraphNode): {yin: number, yang: number} 
 }
 
 describe("Tangency groups for two circles A-B", () => {
-    assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
+    const stale = engine.isStale;
+    it("Adding a circle should result in stale regions", () => {
+        assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
+    });
     engine.regions;
 
     let tanGroupCount = 0;
@@ -75,7 +78,10 @@ engine.regions;
 circle.center.x = -3;
 
 describe("Tangency groups for three circles AA-B", () => {
-    assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
+    const stale = engine.isStale;
+    it("Adding a circle should result in stale regions", () => {
+        assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
+    });
     engine.regions;
 
     let yinCount = 0;
@@ -103,7 +109,10 @@ describe("Tangency groups for three circles AA-B", () => {
 engine.addCircle(new Circle(new Point(4, 0), 4, "rightLarge"));
 
 describe("Tangency groups for four circles AA-BB", () => {
-    assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
+    const stale = engine.isStale;
+    it("Adding a circle should result in stale regions", () => {
+        assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
+    });
     engine.regions;
 
     let tanGroupCount = 0;
@@ -136,7 +145,10 @@ describe("Tangency groups for four circles AA-BB", () => {
 engine.addCircle(new Circle(new Point(0, 5), 5, "top"));
 
 describe("Tangency groups for five circles AA-BB + C", () => {
-    assert.strictEqual(engine.isStale, false, "Adding a circle should not result in stale regions");
+    const stale = engine.isStale;
+    it("Adding a circle should result in stale regions", () => {
+        assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
+    });
     engine.regions;
 
     let tanGroupCount = 0;

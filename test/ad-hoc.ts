@@ -28,7 +28,7 @@ describe("Ad hoc region computation", () => {
     dumps.forEach((dump, dumpIndex) => {
         const engine = new RegionEngine();
         dump.forEach((circleData, index) => {
-            engine.addCircle(new Circle(new Point(circleData[0] as number, circleData[1] as number), circleData[2] as number, "C"+(index+1)));
+            engine.addCircle(new Circle(new Point(circleData[0], circleData[1]), circleData[2], "C"+(index+1)));
         });
         it("Ad hoc dump #" + dumpIndex + " should not throw errors", () => {
             assert.doesNotThrow(() => {

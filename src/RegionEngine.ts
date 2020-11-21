@@ -30,7 +30,7 @@ export class RegionEngine extends RegionEngineBL {
         
         this._regions.forEach(region => this.emit(EDrawableEventType.delete, region));
         this._regions = [];
-        this._staleRegions = true;
+        this._staleRegions = false;
     }
 
     /**
@@ -40,7 +40,7 @@ export class RegionEngine extends RegionEngineBL {
      * @param guaranteedNew Set to true if there is an external mechanism which ensures this is geometrically distinct from every other circle already added.
      */
     public addCircle = (circle: Circle, guaranteedNew: boolean = false) => {
-        this._staleRegions = false;
+        this._staleRegions = true;
 
         if (this._circles.includes(circle)) {
             throw new Error("You can't add the same circle twice.");
@@ -57,6 +57,7 @@ export class RegionEngine extends RegionEngineBL {
 
     // TODO: Make sure this really is computationally cheap -- right now it isn't.
     // TODO: See https://stackoverflow.com/questions/30304719/javascript-fastest-way-to-remove-object-from-array
+    // TODO: Mark all intersecting circles as dirty
     /**
      * Remove an existing circle from the engine.
      * Guaranteed computationally cheap.
@@ -65,11 +66,11 @@ export class RegionEngine extends RegionEngineBL {
     public removeCircle = (circle: Circle) => {
         circle.onGeometryChange = undefined;
         this._circles = this._circles.filter(c => c !== circle);
-        this._staleRegions = false;
+        this._staleRegions = true;
     };
 
     /**
-     * Check if the regions are unchanged. Requires no computation.
+     * Check if the regions need recomputing. Requires no computation.
      */
     public get isStale(): boolean {
         return this._staleRegions;
@@ -82,7 +83,7 @@ export class RegionEngine extends RegionEngineBL {
      * or the most expensive of all, if everything changed.
      */
     public get regions(): TCircleRegions {
-        if (this._staleRegions) {
+        if (!this._staleRegions) {
             return this._regions;
         }
 

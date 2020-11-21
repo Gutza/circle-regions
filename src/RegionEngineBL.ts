@@ -28,7 +28,11 @@ export class RegionEngineBL {
     protected _edges: Map<string, GraphEdge> = new Map();
     protected _circles: Circle[] = [];
     protected _regions: TCircleRegions = [];
-    protected _staleRegions: boolean = true;
+
+    /**
+     * True if the regions need to be recomputed, false if they're still current.
+     */
+    protected _staleRegions: boolean = false;
     protected _debugMode: ERegionDebugMode;
     protected _lastCircles: {x: number, y: number, r: number, iId: number}[] = [];
 
@@ -54,11 +58,11 @@ export class RegionEngineBL {
         // (5/5)
         this.refreshRegions(cycles);
 
-        this._staleRegions = true;
+        this._staleRegions = false;
     }
 
     protected onCircleChange = (circle: Circle) => {
-        this._staleRegions = false;
+        this._staleRegions = true;
         this.emit(EDrawableEventType.redraw, circle);
     }
 
