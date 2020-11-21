@@ -66,6 +66,10 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._internalId = Circle.internalCounter++;
     }
 
+    public clone = () => {
+        return new Circle(this._center, this._radius);
+    }
+
     public onCenterMove = () => {
         this._resetCommonGeometryCaches();
         this.isDirty = true;

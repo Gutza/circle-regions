@@ -32,7 +32,7 @@ export class DebugEngine {
         const regionEngine = new RegionEngine(ERegionDebugMode.none);
         circles.forEach(circle => {
             if (circle.test) {
-                regionEngine.addCircle(circle);
+                regionEngine.addCircle(circle.clone());
             }
         });
 

@@ -92,7 +92,7 @@ export class RegionEngine extends RegionEngineBL {
         } catch(e) {
             if (this._debugMode === ERegionDebugMode.none) {
                 throw new RegionError(
-                    "An error has occurred while processing the regions. You're running in debugMode=none, so no static/dynamic tests have been performed.",
+                    "An error has occurred while processing regions. You're running in debugMode=none, so no static/dynamic tests have been performed.",
                     e as Error,
                     this.circles,
                     undefined
@@ -104,7 +104,7 @@ export class RegionEngine extends RegionEngineBL {
             if (canonicalCircles.numericReproducible) {
                 const possiblyNotReproducible = canonicalCircles.stringReproducible ? "" : " (DIFFICULT TO REPRODUCE)";
                 throw new RegionError(
-                    "A statically reproducible error has occurred while processing the regions" + possiblyNotReproducible + ". Please submit a bug report including all information in this message.",
+                    "A statically reproducible error has occurred while processing regions" + possiblyNotReproducible + ". Please submit a bug report including all information in this message.",
                     e as Error,
                     canonicalCircles.circles,
                     true
@@ -114,7 +114,7 @@ export class RegionEngine extends RegionEngineBL {
             const currentCircles = this.dumpDynamicCircles(this._circles);
             
             throw new RegionError(
-                "A statically unreproducible error has occurred while processing the regions. Please submit a bug report including all information in this message. " +
+                "A statically unreproducible error has occurred while processing regions. Please submit a bug report including all information in this message. " +
                     JSON.stringify(this._lastCircles) + " --> " + JSON.stringify(currentCircles),
                 e as Error,
                 this._circles,
