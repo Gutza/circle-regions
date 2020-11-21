@@ -338,6 +338,7 @@ export class RegionEngineBL {
             this.emit(EDrawableEventType.add, circle);
         });
 
+        var outerContourCount = 0;
         cycles.forEach(cycle => {
             const arcs: CircleArc[] = [];
             let isContour = true;
@@ -384,15 +385,22 @@ export class RegionEngineBL {
                 if (cycle.oEdges.length < 3) {
                     // Two-edge regions are always inner regions
                     regionType = ERegionType.outerContour;
+                    outerContourCount++;
                 } else {
                     // We don't need oriented edges: all edges in contours are clockwise
                     regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
+                    if (regionType === ERegionType.outerContour) {
+                        outerContourCount++;
+                    }
                 }
             }
             const region = new ArcPolygon(arcs, regionType);
             this._regions.push(region);
             this.emit(EDrawableEventType.add, region);
         });
+        if (outerContourCount === 0) {
+            throw new Error("This region set has no outer contours!");
+        }
     }
 
     protected intersectCircles = (circle1: Circle, circle2: Circle): void => {
