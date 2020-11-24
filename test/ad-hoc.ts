@@ -22,7 +22,6 @@ const dumps = [
         [-Math.SQRT2, +Math.SQRT2, 2],
         [+Math.SQRT2, -Math.SQRT2, 2],
     ],
-    [[510,258,50],[606,230,50],[570,170,50]],
 ];
 
 describe("Ad hoc region computation", () => {

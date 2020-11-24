@@ -342,9 +342,11 @@ export class RegionEngineBL {
         cycles.forEach(cycle => {
             const arcs: CircleArc[] = [];
             let isContour = true;
-            let topmostEdge = cycle.oEdges[0].edge;
+            let topmostEdge: GraphEdge | undefined;
             cycle.oEdges.forEach(oEdge => {
-                if (oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
+                if (topmostEdge === undefined && oEdge.edge.node1 !== oEdge.edge.node2) {
+                    topmostEdge = oEdge.edge;
+                } else if (topmostEdge !== undefined && oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
                     topmostEdge = oEdge.edge;
                 }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
@@ -382,7 +384,7 @@ export class RegionEngineBL {
 
             let regionType = ERegionType.region;
             if (isContour) {
-                if (cycle.oEdges.length < 3) {
+                if (topmostEdge === undefined || cycle.oEdges.length < 3) {
                     // Two-edge regions are always inner regions
                     regionType = ERegionType.outerContour;
                     outerContourCount++;
