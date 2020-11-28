@@ -41,6 +41,7 @@ export class Point extends PureGeometry implements IPoint {
      */
     public set x(x: number) {
         this._x = x;
+        this._roundedPoint = undefined;
         this.emit(EGeometryEventType.move);
     }
 
@@ -49,6 +50,7 @@ export class Point extends PureGeometry implements IPoint {
      */
     public set y(y: number) {
         this._y = y;
+        this._roundedPoint = undefined;
         this.emit(EGeometryEventType.move);
     }
 

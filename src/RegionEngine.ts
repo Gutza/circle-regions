@@ -102,7 +102,7 @@ export class RegionEngine extends RegionEngineBL {
             const canonicalCircles = DebugEngine.checkStatic(this.circles);
 
             if (canonicalCircles.numericReproducible) {
-                const possiblyNotReproducible = canonicalCircles.stringReproducible ? "" : " (DIFFICULT TO REPRODUCE)";
+                const possiblyNotReproducible = canonicalCircles.stringReproducible ? "" : " (rounding challenge)";
                 throw new RegionError(
                     "A statically reproducible error has occurred while processing regions" + possiblyNotReproducible + ". Please submit a bug report including all information in this message.",
                     e as Error,
