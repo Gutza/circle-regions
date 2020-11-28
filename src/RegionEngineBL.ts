@@ -400,8 +400,10 @@ export class RegionEngineBL {
             this._regions.push(region);
             this.emit(EDrawableEventType.add, region);
         });
-        if (this._regions.filter(regionElement => regionElement instanceof ArcPolygon).length > 0 && outerContourCount === 0) {
-            throw new Error("This region has no outer contours!");
+
+        const arcPolygons = this._regions.filter(regionElement => regionElement instanceof ArcPolygon);
+        if (arcPolygons.length > 0 && arcPolygons.filter(ap => (ap as ArcPolygon).regionType === ERegionType.outerContour).length == 0) {
+            throw new Error("This region set has no outer contours!");
         }
     }
 
