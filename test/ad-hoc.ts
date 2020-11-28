@@ -1,34 +1,31 @@
 import { Circle, Point, RegionEngine } from "../src";
 import assert from 'assert';
 
-const dumps = [
-    // Ad hoc dump #0
-    [[510,258,50],[606,230,50],[570,170,50]],
-
-    // Ad hoc dump #1
-    [[371,123,50],[291,183,50],[341,181,50]],
-
-    // Ad hoc dump #2
-    [[1, 0, 1],[1, 1, 1],[0, 1, 1]],
-
-    // Ad hoc dump #3
-    [
-        [-Math.SQRT2, -Math.SQRT2, 2],
-        [-Math.SQRT2, +Math.SQRT2, 2],
-        [+Math.SQRT2, -Math.SQRT2, 2],
-    ],
-
-    // Ad hoc dump #4
-    [[510,258,50],[606,230,50],[533,161,50]],
+const adHocData = [
+    { label: "Inner/outer contour canonical", circles: [[-3, 4, 5],[3,-4,5],[-6,0,1]] },
+    { label: "Two intersecting circles, plus a tangent friend", circles: [[510,258,50],[606,230,50],[570,170,50]] },
+    { label: "Tangency in circle", circles: [[371,123,50],[291,183,50],[341,181,50]] },
+    {
+        label: "Rounding test",
+        circles: [
+            [-Math.SQRT2, -Math.SQRT2, 2],
+            [-Math.SQRT2, +Math.SQRT2, 2],
+            [+Math.SQRT2, -Math.SQRT2, 2],
+        ]
+    },
+    { label: "Inner/outer contour organic", circles: [[510,258,50],[606,230,50],[512,181,50]] },
+    { label: "Inner/outer contour simplified (easier)", circles: [[-3, 0, 3],[4,0,4],[-3,-3,1]] },
+    { label: "Inner/outer contour (only two circles)", circles: [[-3, 4, 5],[3,-4,5]] },
+    { label: "Inner/outer contour exaggerated", circles: [[-3, 4, 5],[3,-4,5],[-6,0,8]] },
 ];
 
 describe("Ad hoc region computation", () => {
-    dumps.forEach((dump, dumpIndex) => {
+    adHocData.forEach((adHocAtom, dumpIndex) => {
         const engine = new RegionEngine();
-        dump.forEach((circleData, index) => {
+        adHocAtom.circles.forEach((circleData, index) => {
             engine.addCircle(new Circle(new Point(circleData[0], circleData[1]), circleData[2], "C" + (index + 1)));
         });
-        it("Ad hoc dump #" + dumpIndex + " should not throw errors", () => {
+        it(`Ad hoc atom «${adHocAtom.label}» should not throw errors`, () => {
             assert.doesNotThrow(() => {
                 engine.regions;
             });

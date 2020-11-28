@@ -59,6 +59,12 @@ export class RegionEngineBL {
         this.refreshRegions(cycles);
 
         this._staleRegions = false;
+
+        // TODO: This is just sanity check; it can be removed when the code is mature enough.
+        const arcPolygons = this._regions.filter(regionElement => regionElement instanceof ArcPolygon);
+        if (arcPolygons.length > 0 && arcPolygons.filter(ap => (ap as ArcPolygon).regionType === ERegionType.outerContour).length == 0) {
+            throw new Error("This region set has no outer contours!");
+        }
     }
 
     protected onCircleChange = (circle: Circle) => {
@@ -338,16 +344,17 @@ export class RegionEngineBL {
             this.emit(EDrawableEventType.add, circle);
         });
 
-        var outerContourCount = 0;
         cycles.forEach(cycle => {
             const arcs: CircleArc[] = [];
             let isContour = true;
             let topmostEdge: GraphEdge | undefined;
             cycle.oEdges.forEach(oEdge => {
-                if (topmostEdge === undefined && oEdge.edge.node1 !== oEdge.edge.node2) {
-                    topmostEdge = oEdge.edge;
-                } else if (topmostEdge !== undefined && oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
-                    topmostEdge = oEdge.edge;
+                if (oEdge.edge.circle.vertices.length > 1) {
+                    if (topmostEdge === undefined) {
+                        topmostEdge = oEdge.edge;
+                    } else if (oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
+                        topmostEdge = oEdge.edge;
+                    }
                 }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
                 isContour = isContour && isClockwise;
@@ -387,24 +394,15 @@ export class RegionEngineBL {
                 if (topmostEdge === undefined || cycle.oEdges.length < 3) {
                     // Two-edge regions are always inner regions
                     regionType = ERegionType.outerContour;
-                    outerContourCount++;
                 } else {
                     // We don't need oriented edges: all edges in contours are clockwise
                     regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
-                    if (regionType === ERegionType.outerContour) {
-                        outerContourCount++;
-                    }
                 }
             }
             const region = new ArcPolygon(arcs, regionType);
             this._regions.push(region);
             this.emit(EDrawableEventType.add, region);
         });
-
-        const arcPolygons = this._regions.filter(regionElement => regionElement instanceof ArcPolygon);
-        if (arcPolygons.length > 0 && arcPolygons.filter(ap => (ap as ArcPolygon).regionType === ERegionType.outerContour).length == 0) {
-            throw new Error("This region set has no outer contours!");
-        }
     }
 
     protected intersectCircles = (circle1: Circle, circle2: Circle): void => {
