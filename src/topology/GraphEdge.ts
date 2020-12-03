@@ -1,4 +1,5 @@
 import { Circle } from "../geometry/Circle";
+import CircleVertex from "../geometry/CircleVertex";
 import { IGraphCycle } from "../Types";
 import GraphNode from "./GraphNode";
 
@@ -6,6 +7,8 @@ export default class GraphEdge {
     private _circle: Circle;
     private _node1: GraphNode;
     private _node2: GraphNode;
+    private _vertex1: CircleVertex;
+    private _vertex2: CircleVertex;
 
     public id: string;
 
@@ -23,10 +26,12 @@ export default class GraphEdge {
      */
     public OuterCycle: undefined | IGraphCycle | null = undefined;
 
-    constructor(circle: Circle, node1: GraphNode, node2: GraphNode, id: string) {
+    constructor(circle: Circle, vertex1: CircleVertex, vertex2: CircleVertex, id: string) {
         this._circle = circle;
-        this._node1 = node1;
-        this._node2 = node2;
+        this._node1 = vertex1.node;
+        this._node2 = vertex2.node;
+        this._vertex1 = vertex1;
+        this._vertex2 = vertex2;
         this.id = id;
     }
 
@@ -36,6 +41,14 @@ export default class GraphEdge {
 
     public get node2(): GraphNode {
         return this._node2;
+    }
+
+    public get vertex1(): CircleVertex {
+        return this._vertex1;
+    }
+
+    public get vertex2(): CircleVertex {
+        return this._vertex2;
     }
 
     public get circle(): Circle {

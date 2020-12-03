@@ -2,7 +2,7 @@ import { Circle, Point } from ".";
 import { ArcPolygon } from "./geometry/ArcPolygon";
 import CircleArc from "./geometry/CircleArc";
 import CircleVertex from "./geometry/CircleVertex";
-import { TWO_PI } from "./geometry/utils/angles";
+import { HALF_PI, TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
@@ -279,7 +279,7 @@ export class RegionEngineBL {
                     continue;
                 }
 
-                const newEdge = new GraphEdge(dirtyCircle, dirtyCircle.vertices[i].node, dirtyCircle.vertices[i+1] ? dirtyCircle.vertices[i+1].node : dirtyCircle.vertices[0].node, newEdgeId);
+                const newEdge = new GraphEdge(dirtyCircle, dirtyCircle.vertices[i], dirtyCircle.vertices[i+1] ? dirtyCircle.vertices[i+1] : dirtyCircle.vertices[0], newEdgeId);
                 this._edges.set(newEdge.id, newEdge);
                 newEdge.node1.addEdge(newEdge);
                 if (newEdge.node1 !== newEdge.node2) {
@@ -352,6 +352,10 @@ export class RegionEngineBL {
                 if (oEdge.edge.circle.vertices.length > 1) {
                     if (topmostEdge === undefined) {
                         topmostEdge = oEdge.edge;
+                    } else if (oEdge.edge.circle === topmostEdge.circle) {
+                        if (Math.abs(HALF_PI - oEdge.edge.vertex1.angle - oEdge.edge.vertex2.angle) < Math.abs(HALF_PI - topmostEdge.vertex1.angle - topmostEdge.vertex2.angle)) {
+                            topmostEdge = oEdge.edge;
+                        }
                     } else if (oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
                         topmostEdge = oEdge.edge;
                     }

@@ -1,4 +1,5 @@
 export const TWO_PI = Math.PI * 2;
+export const HALF_PI = Math.PI / 2;
 
 /**
  * Normalizes an arbitrary angle, constraining it to [0...2π]
