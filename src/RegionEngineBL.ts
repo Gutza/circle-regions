@@ -349,16 +349,17 @@ export class RegionEngineBL {
             let isContour = true;
             let topmostEdge: GraphEdge | undefined;
             cycle.oEdges.forEach(oEdge => {
-                if (oEdge.edge.circle.vertices.length > 1) {
-                    if (topmostEdge === undefined) {
-                        topmostEdge = oEdge.edge;
-                    } else if (oEdge.edge.circle === topmostEdge.circle) {
-                        if (Math.abs(HALF_PI - oEdge.edge.vertex1.angle - oEdge.edge.vertex2.angle) < Math.abs(HALF_PI - topmostEdge.vertex1.angle - topmostEdge.vertex2.angle)) {
-                            topmostEdge = oEdge.edge;
-                        }
-                    } else if (oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
+                if (topmostEdge === undefined) {
+                    topmostEdge = oEdge.edge;
+                } else if (oEdge.edge.circle === topmostEdge.circle) {
+                    // The topmost edge is the one with the midpoint angle closest to π/2.
+                    const oEdgeDelta = Math.abs(HALF_PI - this.midAngle(oEdge.edge.vertex2.angle, oEdge.edge.vertex1.angle));
+                    const topEdgeDelta = Math.abs(HALF_PI - this.midAngle(topmostEdge.vertex2.angle, topmostEdge.vertex1.angle));
+                    if (oEdgeDelta < topEdgeDelta) {
                         topmostEdge = oEdge.edge;
                     }
+                } else if (oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
+                    topmostEdge = oEdge.edge;
                 }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
                 isContour = isContour && isClockwise;
@@ -395,11 +396,12 @@ export class RegionEngineBL {
 
             let regionType = ERegionType.region;
             if (isContour) {
-                if (topmostEdge === undefined || cycle.oEdges.length < 3) {
-                    // Two-edge regions are always inner regions
+                if (topmostEdge === undefined || cycle.oEdges.length < 3 || topmostEdge.circle.vertices.length == 1) {
+                    // Two-edge regions are always inner regions, and so are regions which contain a tangent circle at the top.
                     regionType = ERegionType.outerContour;
                 } else {
-                    // We don't need oriented edges: all edges in contours are clockwise
+                    // We don't need oriented edges: all edges in contours are clockwise,
+                    // so the start node is always node2, tracing the circle clockwise to node1.
                     regionType = topmostEdge.node2.coordinates.x < topmostEdge.node1.coordinates.x ? ERegionType.outerContour : ERegionType.innerContour;
                 }
             }
@@ -407,6 +409,10 @@ export class RegionEngineBL {
             this._regions.push(region);
             this.emit(EDrawableEventType.add, region);
         });
+    }
+
+    private midAngle = (startAngle: number, endAngle: number): number => {
+        return (startAngle + endAngle)/2 - (startAngle < endAngle ? Math.PI : 0);
     }
 
     protected intersectCircles = (circle1: Circle, circle2: Circle): void => {
