@@ -6,7 +6,10 @@ import { Point } from "./Point";
 import { PureGeometry } from "./PureGeometry";
 
 /**
- * The main circle class.
+ * The main circle class. You can instantiate new circles either by calling
+ * this ctor, and then adding the circles to regions via @see RegionEngine.addCircle(),
+ * or you can just call helper method @see RegionEngine.add(), and retrieve the resulting
+ * @see Circle entity from there.
  */
 export class Circle extends PureGeometry implements IRegion, IDrawable {
     private static internalCounter: number = 0;

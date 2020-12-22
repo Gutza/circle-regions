@@ -1,7 +1,10 @@
 import { IDrawable, ERegionType } from "../Types";
 import CircleArc from "./CircleArc";
-import { TWO_PI } from "./utils/angles";
 
+/**
+ * Think of a polygon. Now imagine a polygon with edges made of circle arcs
+ * instead of line segments. That's an @see ArcPolygon.
+ */
 export class ArcPolygon implements IDrawable {
     public shape: object | undefined;
     public id: any;
