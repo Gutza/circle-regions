@@ -43,11 +43,11 @@ export class RegionEngine extends RegionEngineBL {
         this._staleRegions = true;
 
         if (this._circles.includes(circle)) {
-            throw new Error("You can't add the same circle twice.");
+            throw new Error(`Duplicate circle: same instance C(${circle.center.x}, ${circle.center.y})R${circle.radius}`);
         }
 
         if (!guaranteedNew && this._circles.some(existingCircle => existingCircle.equals(circle))) {
-            throw new Error(`Another circle with center (${circle.center.x}, ${circle.center.y}) and radius ${circle.radius} already exists."`);
+            throw new Error(`Duplicate circle: new instance C(${circle.center.x}, ${circle.center.y})R${circle.radius}`);
         }
 
         circle.isDirty = true;

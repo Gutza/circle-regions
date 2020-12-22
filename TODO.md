@@ -1,4 +1,6 @@
+- XH.Coding: Improve circle ctors
 - XH.Documentation: Documentation for public methods/classes
+- H.Feature: Allow disabling rounding features altogether for web-based applications
 - H.Documentation: Investigate documentation labels (lazy, cached, computationally cheap, etc)
 - H.Coding: Convert generic errors to project-specific errors
 - M.Testing: Coveralls
