@@ -4,6 +4,7 @@ import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
 import { DebugEngine } from "./DebugEngine";
 import { RegionError } from "./geometry/utils/RegionError";
+import { Point } from "./geometry/Point";
 
 /**
  * The main engine for computing regions resulted from intersecting circles.
@@ -31,6 +32,21 @@ export class RegionEngine extends RegionEngineBL {
         this._regions.forEach(region => this.emit(EDrawableEventType.delete, region));
         this._regions = [];
         this._staleRegions = false;
+    }
+
+    /**
+     * Helper method which instantiates a new circle, calls @see addCircle(), and returns the newly-added @see Circle instance.
+     * @param centerX The new circle's X coordinate
+     * @param centerY The new circle's Y coordinate
+     * @param radius The new circle's radius
+     * @param circleId The new circle's ID
+     * @param guaranteedNew Same as @see addCircle()'s guaranteedNew parameter
+     * @returns The @see Circle entity that was just added to the region engine
+     */
+    public add = (centerX: number, centerY: number, radius: number, circleId?: any, guaranteedNew: boolean = false): Circle => {
+        const newCircle = new Circle(new Point(centerX, centerY), radius, circleId);
+        this.addCircle(newCircle, guaranteedNew);
+        return newCircle;
     }
 
     /**

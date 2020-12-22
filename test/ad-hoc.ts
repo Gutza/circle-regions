@@ -26,7 +26,7 @@ describe("Ad hoc region computation", () => {
     adHocData.forEach((adHocAtom, dumpIndex) => {
         const engine = new RegionEngine();
         adHocAtom.circles.forEach((circleData, index) => {
-            engine.addCircle(new Circle(new Point(circleData[0], circleData[1]), circleData[2], "C" + (index + 1)));
+            engine.add(circleData[0], circleData[1], circleData[2], "C" + (index + 1));
         });
         it(`Ad hoc atom «${adHocAtom.label}» should not throw errors`, () => {
             assert.doesNotThrow(() => {
