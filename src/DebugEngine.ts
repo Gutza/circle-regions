@@ -37,7 +37,7 @@ export class DebugEngine {
         });
 
         try {
-            regionEngine.regions;
+            regionEngine.computeRegions();
         } catch(e) {
             return true;
         }

@@ -366,7 +366,7 @@ export default class GraphNode {
                 return nextEdge;
             }
 
-            // TODO: optimize with BST
+            // TODO: is it worth optimizing this with BST or similar?
             let candidates: Circle[] = [];
             const unsortedYinCircles: Circle[] = [];
             const unsortedYangCircles: Circle[] = [];

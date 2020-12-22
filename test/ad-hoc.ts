@@ -30,7 +30,7 @@ describe("Ad hoc region computation", () => {
         });
         it(`Ad hoc atom «${adHocAtom.label}» should not throw errors`, () => {
             assert.doesNotThrow(() => {
-                engine.regions;
+                engine.computeRegions();
             });
         });
     });

@@ -14,9 +14,9 @@ describe("Four overlapping axis-centered circles", () => {
     engine.addCircle(new Circle(new Point(+0, -1), 2, "bottom"));
     it("Basic region count and discrimination", () => {
         assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
-        assert.strictEqual(14, engine.regions.length, "There should be 14 regions in total");
-        assert.strictEqual(0, engine.regions.filter(region => region instanceof Circle).length, "There should be no circles");
-        assert.strictEqual(1, engine.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+        assert.strictEqual(14, engine.computeRegions().length, "There should be 14 regions in total");
+        assert.strictEqual(0, engine.computeRegions().filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.computeRegions().filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
     });
 });
 
@@ -27,10 +27,10 @@ describe("Canonical interior contour", () => {
     engine.addCircle(new Circle(new Point(+1.78, +0.00), 2, "bottom right"));
     it("Basic inner/outer contour discrimination", () => {
         assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
-        assert.strictEqual(8, engine.regions.length, "There should be 8 regions in total");
-        assert.strictEqual(0, engine.regions.filter(region => region instanceof Circle).length, "There should be no circles");
-        assert.strictEqual(1, engine.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
-        assert.strictEqual(1, engine.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.innerContour).length, "There should be a single inner contour");
+        assert.strictEqual(8, engine.computeRegions().length, "There should be 8 regions in total");
+        assert.strictEqual(0, engine.computeRegions().filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.computeRegions().filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+        assert.strictEqual(1, engine.computeRegions().filter(region => (region as ArcPolygon).regionType === ERegionType.innerContour).length, "There should be a single inner contour");
     });
 });
 
@@ -64,10 +64,10 @@ describe("Crazy interior contour", () => {
     engine.addCircle(new Circle(new Point(568, 503), 50));
     it("Static inner/outer contour discrimination", () => {
         assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
-        assert.strictEqual(54, engine.regions.length, "There should be 54 regions in total"); // Yes, I actually counted them
-        assert.strictEqual(0, engine.regions.filter(region => region instanceof Circle).length, "There should be no circles");
-        assert.strictEqual(1, engine.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
-        assert.strictEqual(1, engine.regions.filter(region => (region as ArcPolygon).regionType === ERegionType.innerContour).length, "There should be a single inner contour");
+        assert.strictEqual(54, engine.computeRegions().length, "There should be 54 regions in total"); // Yes, I actually counted them
+        assert.strictEqual(0, engine.computeRegions().filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.computeRegions().filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+        assert.strictEqual(1, engine.computeRegions().filter(region => (region as ArcPolygon).regionType === ERegionType.innerContour).length, "There should be a single inner contour");
     });
 })
 
@@ -78,7 +78,7 @@ describe("Basic circle parent-child consistency", () => {
     const parent = new Circle(new Point(0, 0), 100);
     engine.addCircle(child);
     engine.addCircle(parent);
-    engine.regions;
+    engine.computeRegions();
 
     assert.strictEqual(child.parents.includes(parent), true);
     assert.strictEqual(child.parents.length, 1);
@@ -88,7 +88,7 @@ describe("Basic circle parent-child consistency", () => {
 
     parent.radius = 99;
     child.center.x = 20;
-    engine.regions;
+    engine.computeRegions();
 
     assert.strictEqual(child.parents.includes(parent), true);
     assert.strictEqual(child.parents.length, 1);
@@ -107,7 +107,7 @@ describe("Two-circle intersections must never produce inner regions", () => {
             engine.addCircle(new Circle(new Point(0, 0), 1));
             const dynamicCircle = new Circle(new Point(Math.cos(angle) * centerRad, Math.sin(angle) * centerRad), 1);
             engine.addCircle(dynamicCircle);
-            const regions = engine.regions;
+            const regions = engine.computeRegions();
             assert.strictEqual(regions.filter(r => r instanceof ArcPolygon && r.regionType === ERegionType.outerContour).length, 1, `There should be exactly one outer contours at ${degAngle}°`);
             assert.strictEqual(regions.filter(r => r instanceof ArcPolygon && r.regionType === ERegionType.region).length, 3, `There should be exactly three regions at ${degAngle}°`);
             assert.strictEqual(regions.filter(r => r instanceof Circle).length, 0, `There should be no stand-alone circles at ${degAngle}°`);

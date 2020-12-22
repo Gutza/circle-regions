@@ -82,7 +82,7 @@ export class RegionEngine extends RegionEngineBL {
      * This method is the cheapest of all, if nothing changed since the last time it was called,
      * or the most expensive of all, if everything changed.
      */
-    public get regions(): TCircleRegions {
+    public computeRegions(): TCircleRegions {
         if (!this._staleRegions) {
             return this._regions;
         }

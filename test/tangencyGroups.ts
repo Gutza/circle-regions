@@ -10,9 +10,9 @@ import { ETangencyParity } from '../src/Types';
     const engine = new RegionEngine();
     engine.addCircle(new Circle(new Point(-1, 0), 1));
     engine.addCircle(new Circle(new Point(+2, 0), 2));
-    engine.regions;
+    engine.computeRegions();
     engine.addCircle(new Circle(new Point(+0, 0), 3));
-    engine.regions;
+    engine.computeRegions();
 }
 
 const engine = new RegionEngine();
@@ -45,7 +45,7 @@ describe("Tangency groups for two circles A-B", () => {
     it("Adding a circle should result in stale regions", () => {
         assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
     });
-    engine.regions;
+    engine.computeRegions();
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
@@ -74,7 +74,7 @@ describe("Tangency groups for two circles A-B", () => {
 
 const circle = new Circle(new Point(0, 0), 3, "leftLarge");
 engine.addCircle(circle);
-engine.regions;
+engine.computeRegions();
 circle.center.x = -3;
 
 describe("Tangency groups for three circles AA-B", () => {
@@ -82,7 +82,7 @@ describe("Tangency groups for three circles AA-B", () => {
     it("Adding a circle should result in stale regions", () => {
         assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
     });
-    engine.regions;
+    engine.computeRegions();
 
     let yinCount = 0;
     let yangCount = 0;
@@ -113,7 +113,7 @@ describe("Tangency groups for four circles AA-BB", () => {
     it("Adding a circle should result in stale regions", () => {
         assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
     });
-    engine.regions;
+    engine.computeRegions();
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {
@@ -149,7 +149,7 @@ describe("Tangency groups for five circles AA-BB + C", () => {
     it("Adding a circle should result in stale regions", () => {
         assert.strictEqual(stale, true, "Adding a circle should result in stale regions");
     });
-    engine.regions;
+    engine.computeRegions();
 
     let tanGroupCount = 0;
     engine.nodes.forEach(node => {

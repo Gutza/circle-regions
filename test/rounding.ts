@@ -18,7 +18,7 @@ const roundingWorkbenchSimple = (label: string, roundingSize: ERoundingSize, min
             engine.addCircle(expCircle(exp, +Math.SQRT2, +Math.SQRT2, 2));
             engine.addCircle(expCircle(exp, -Math.SQRT2, +Math.SQRT2, 2));
             engine.addCircle(expCircle(exp, +Math.SQRT2, -Math.SQRT2, 2));
-            engine.regions;
+            engine.computeRegions();
             const nodeCount = engine.nodes.length;
             const testExp = exp;
             it (label + " rounding should work at 10^" + testExp, () => {
@@ -48,7 +48,7 @@ const roundingWorkbenchExtra = (label: string, roundingSize: ERoundingSize, minE
                         engine.addCircle(expCircle(testExp, circleRadius * Math.cos(circleFinalAngle), circleRadius * Math.sin(circleFinalAngle), circleRadius));
                     }
                     assert.doesNotThrow(() => {
-                        engine.regions;
+                        engine.computeRegions();
                     }, "Rounding throws error for exp=" + testExp + "@" + Math.round(180 * testAngle / Math.PI) + "°");
                     const nodeCount = engine.nodes.length;
                     assert.strictEqual(nodeCount, 5, "Rounding doesn't compute for exp=" + testExp + "@" + Math.round(180 * testAngle / Math.PI) + "°");
