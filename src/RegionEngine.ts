@@ -69,7 +69,7 @@ export class RegionEngine extends RegionEngineBL {
         circle.isDirty = true;
         circle.onGeometryChange = () => this.onCircleChange(circle);
         this._circles.push(circle);
-    };
+    }
 
     // TODO: Make sure this really is computationally cheap -- right now it isn't.
     // TODO: See https://stackoverflow.com/questions/30304719/javascript-fastest-way-to-remove-object-from-array
@@ -83,7 +83,7 @@ export class RegionEngine extends RegionEngineBL {
         circle.onGeometryChange = undefined;
         this._circles = this._circles.filter(c => c !== circle);
         this._staleRegions = true;
-    };
+    }
 
     /**
      * Check if the regions need recomputing. Requires no computation.

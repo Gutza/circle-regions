@@ -4,6 +4,7 @@ import GraphEdge from "./GraphEdge";
 import { normalizeAngle } from '../geometry/utils/angles';
 import { Point } from "..";
 import { TangencyElement, TangencyGroup, TanGroupCollection } from "./TanGroupCollection";
+import { xor } from "../geometry/utils/xor";
 
 export default class GraphNode {
     public touched: boolean = true;
@@ -89,7 +90,7 @@ export default class GraphNode {
 
             // Change the parity of the chaotic element, remove it from its old group, and add it to its new group.
             // We don't need to remove the empty groups, because we're not leaving any laying around.
-            chaoticElement.parity = this.otherParity(knownElement.parity, intersectionType);
+            chaoticElement.parity = GraphNode._otherParity(knownElement.parity, intersectionType);
             knownGroup.elements.set(chaoticElement.circle.internalId, chaoticElement);
             this._tangencyCollection.tangencyGroups = this._tangencyCollection.tangencyGroups.filter(tgrp => tgrp !== chaoticGroup);
             return;
@@ -104,24 +105,11 @@ export default class GraphNode {
         }
     }
 
-    public otherParity(knownParity: ETangencyParity, tangencyType: ETangencyType): ETangencyParity {
-        if (knownParity === ETangencyParity.chaos) {
-            throw new Error("The known parity can't be chaos!");
-        }
-
-        if (knownParity === ETangencyParity.yin) {
-            if (tangencyType === ETangencyType.innerTangent) {
-                return ETangencyParity.yin;
-            } else {
-                return ETangencyParity.yang;
-            }
-        }
-
-        if (tangencyType === ETangencyType.innerTangent) {
-            return ETangencyParity.yang;
-        } else {
-            return ETangencyParity.yin;
-        }
+    private static _otherParity(knownParity: ETangencyParity, tangencyType: ETangencyType): ETangencyParity {
+        return xor(
+            knownParity === ETangencyParity.yin,
+            tangencyType === ETangencyType.outerTangent
+        ) ? ETangencyParity.yin : ETangencyParity.yang;
     }
 
     private _addTangentCircle(newCircle: Circle, existingCircle: Circle, tangencyType: ETangencyType, existingGroup: TangencyGroup): void {
@@ -133,7 +121,7 @@ export default class GraphNode {
             tgElem.parity = ETangencyParity.yin;
         }
 
-        existingGroup.addElement(newCircle, this.otherParity(tgElem.parity, tangencyType));
+        existingGroup.addElement(newCircle, GraphNode._otherParity(tgElem.parity, tangencyType));
     }
 
     private _addNewCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType): void {
