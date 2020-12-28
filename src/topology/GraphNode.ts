@@ -253,7 +253,7 @@ export default class GraphNode {
 
         // No luck on the same side; look for an outer region by picking the largest
         // circle on the opposite side -- but only if we're traversing backwards
-        // (when we traverse forwards we're looking for inner regions)
+        // (when we traverse forwards we're only looking for inner regions)
         if (currentDirection === ETraversalDirection.forward) {
             return undefined;
         }
@@ -300,11 +300,13 @@ export default class GraphNode {
             throw new Error("Edge circle not found in the tangency element!");
         }
 
+        let isTangencyContour = false;
         if (tgElem.parity !== ETangencyParity.chaos) {
             const nextTangentEdge = this._getNextTangentEdge(currentEdge, currentDirection, tanGroup, tgElem);
             if (nextTangentEdge !== undefined) {
                 return nextTangentEdge;
             }
+            isTangencyContour = true;
         }
 
         let minPerpendicularAngle = Number.MAX_VALUE;
@@ -429,18 +431,20 @@ export default class GraphNode {
 
         // One last fallback before giving up: we're allowed to continue to the next edge
         // on the same circle, past the tangency point with another circle, if and only if
-        // the current region is on the interior of this circle (i.e. forward),
-        // AND there exists a different interior edge which belongs to this circle.
+        // there exists a different interior edge which belongs to this circle.
+        // Depending on whether we're traversing the circle forward or backward,
+        // the next edge on this circle meets the current edge at node1 (if backward)
+        // or at node2 (if forward).
         if (
             nextEdge === undefined &&
-            currentDirection === ETraversalDirection.forward &&
             currentEdge.circle.vertices.length > 1
         ) {
             // There's a reasonable expectation these are exceptional cases, so it's probably
             // not worth caching the next edge on the same circle after every vertex;
             // instead, we're going to extract it from the data we already have.
 
-            currentEdge.node2._edges.forEach(nextEdgeCandidate => {
+            const endNode = (currentDirection === ETraversalDirection.forward) ? currentEdge.node2 : currentEdge.node1;
+            endNode._edges.forEach(nextEdgeCandidate => {
                 if (nextEdge !== undefined || nextEdgeCandidate === currentEdge || nextEdgeCandidate.circle !== currentEdge.circle) {
                     return;
                 }
@@ -454,7 +458,11 @@ export default class GraphNode {
                 return nextEdge;
             }
             throw new Error("Multiple vertex circle with a single edge");
-        }        
+        }
+
+        if (isTangencyContour && currentDirection === ETraversalDirection.backward) {
+            currentEdge.circle.isOuterContour = true;
+        }
     }
 
     private getPerpendicular(edge: GraphEdge, refAngle: number): number {

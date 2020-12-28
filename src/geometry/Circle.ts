@@ -53,9 +53,15 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
     private _bbox?: IBoundingBox;
 
-    public isDirty: boolean = false; // it gets set to true when added to a RegionEngine
+    /**
+     * Use this to check if this circle's intersection cache is stale.
+     */
+    public isStale: boolean = false;
 
     public shape: object | undefined;
+
+    // TODO: Outer contour if the circle is alone, but never if it has parents
+    public isOuterContour: boolean = false;
 
     /**
      * Instantiate a new circle entity.
@@ -69,13 +75,26 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._internalId = Circle.internalCounter++;
     }
 
-    public clone = () => {
+    /**
+     * Helper method which creates a new circle with the same
+     * coordinates as this one. If no id is provided, the clone will
+     * have no circle ID (it will not clone the original's).
+     */
+    public clone = (id?: any) => {
         return new Circle(this._center, this._radius);
+    }
+
+    /**
+     * Sets this circle's stale status to stale.
+     */
+    public setStale = () => {
+        this.isStale = true;
+        this.isOuterContour = false;
     }
 
     public onCenterMove = () => {
         this._resetCommonGeometryCaches();
-        this.isDirty = true;
+        this.setStale();
         this.emit(EGeometryEventType.move);
     }
 
@@ -86,7 +105,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
         this._vertices.push(vertex);
         this._sortedVertices = false;
-        this.isDirty = true;
+        this.setStale();
     }
 
     public removeVertexByNode(node: GraphNode) {
@@ -95,7 +114,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         }
 
         this._vertices = this._vertices.filter(v => v.node !== node);
-        this.isDirty = true;
+        this.setStale();
         // they are still sorted
     }
 
@@ -103,6 +122,9 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         return this._vertices.find(v => v.node === node);
     }
 
+    /**
+     * Retrieve this circle's vertices (i.e. intersection points with other circles)
+     */
     public get vertices(): CircleVertex[] {
         if (this._sortedVertices) {
             return this._vertices;
@@ -152,7 +174,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._bbox = undefined;
         this._roundedBbox = undefined;
         this._vertices = [];
-        this.isDirty = true;
+        this.isStale = true;
     }
 
     /**

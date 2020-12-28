@@ -97,12 +97,12 @@ export enum ETangencyParity {
  */
 export enum ETraversalDirection {
     /**
-     * Trigonometric direction.
+     * Trigonometric direction. Encompasses regions inside the circle.
      */
     forward = "forward",
 
     /**
-     * Clockwise direction; reverse the nodes when traversing.
+     * Clockwise direction; reverse the nodes when traversing. Encompasses regions outside the circle.
      */
     backward = "backward",
 };

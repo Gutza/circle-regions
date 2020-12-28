@@ -2,6 +2,9 @@ import { Circle, Point, RegionEngine } from "../src";
 import assert from 'assert';
 
 const adHocData = [
+    { label: "Three tangent circles", circles: [[0,1,2],[0,-1,2],[0,0,1]] },
+    { label: "Two outer tangent circles", circles: [[0,-1,1],[0,1,1]] },
+    { label: "Two inner tangent circles", circles: [[0,-1,2],[0,0,1]] },
     { label: "Three silly circles", circles: [[515,375,50],[604,342,50],[499,291,50]] },
     { label: "Three circles around the origin", circles: [[-3,0,3],[4,0,4],[0,5,5]] },
     { label: "More silly circles", circles: [[508,306,50],[525,247,50],[431,301,50]] },
@@ -23,7 +26,7 @@ const adHocData = [
 ];
 
 describe("Ad hoc region computation", () => {
-    adHocData.forEach((adHocAtom, dumpIndex) => {
+    adHocData.forEach(adHocAtom => {
         const engine = new RegionEngine();
         adHocAtom.circles.forEach((circleData, index) => {
             engine.add(circleData[0], circleData[1], circleData[2], "C" + (index + 1));

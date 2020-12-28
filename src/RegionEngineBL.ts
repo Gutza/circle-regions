@@ -4,6 +4,7 @@ import CircleArc from "./geometry/CircleArc";
 import CircleVertex from "./geometry/CircleVertex";
 import { HALF_PI, TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
+import { xor } from "./geometry/utils/xor";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
@@ -37,6 +38,7 @@ export class RegionEngineBL {
     protected _lastCircles: {x: number, y: number, r: number, iId: number}[] = [];
 
     public onRegionChange: FOnDrawableEvent | undefined;
+    protected _deletedCircles: Circle[] = [];
 
     constructor(debugMode: ERegionDebugMode) {
         this._debugMode = debugMode;
@@ -44,13 +46,13 @@ export class RegionEngineBL {
 
     protected recomputeRegions = () => {
         //  (1/5)
-        this.removeDirtyNodesVertices();
+        this.removeStaleNodesVertices();
         
         // (2/5)
         this.computeIntersections();
 
         // (3/5)
-        this.rebuildDirtyEdges();
+        this.rebuildStaleEdges();
 
         // (4/5)
         const cycles = this.extractGraphCycles();
@@ -61,8 +63,12 @@ export class RegionEngineBL {
         this._staleRegions = false;
 
         // TODO: This is just sanity check; it can be removed when the code is mature enough.
+        if (this._regions.some(regionElement => regionElement instanceof Circle && regionElement.isOuterContour)) {
+            return;
+        }
+
         const arcPolygons = this._regions.filter(regionElement => regionElement instanceof ArcPolygon);
-        if (arcPolygons.length > 0 && arcPolygons.filter(ap => (ap as ArcPolygon).regionType === ERegionType.outerContour).length == 0) {
+        if (arcPolygons.length > 0 && !arcPolygons.some(ap => (ap as ArcPolygon).regionType === ERegionType.outerContour)) {
             throw new Error("This region set has no outer contours!");
         }
     }
@@ -73,8 +79,8 @@ export class RegionEngineBL {
     }
 
     protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): GraphNode => {
-        circle1.isDirty = true;
-        circle2.isDirty = true;
+        circle1.isStale = true;
+        circle2.isStale = true;
 
         let sameCoordinates = this._nodes.find(n =>
             n.coordinates.roundedPoint.x === intersectionPoint.roundedPoint.x &&
@@ -146,84 +152,96 @@ export class RegionEngineBL {
         }
     }
     
-    protected removeDirtyRegions = (dirtyCircles: Circle[]): void => {
+    protected removeStaleRegions = (staleCircles: Circle[]): void => {
         this._regions = this._regions.filter(region => {
             if (region instanceof Circle) {
                 return true;
             }
 
-            if (region.arcs.every(arc => !dirtyCircles.includes(arc.circle))) {
+            if (region.arcs.every(arc => !staleCircles.includes(arc.circle))) {
                 return true;
             }
 
             this.emit(EDrawableEventType.delete, region);
             return false;
         });
-    };
+    }
 
     // (1/5)
-    protected removeDirtyNodesVertices = (): void => {
-        let dirtyCircles = this._circles.filter(circle => circle.isDirty);
+    protected removeStaleNodesVertices = (): void => {
+        const staleCircles = this._circles.filter(circle => circle.isStale).concat(this._deletedCircles);
 
         this._circles.forEach(circle => {
-            if (dirtyCircles.includes(circle)) {
+            if (staleCircles.includes(circle)) {
                 circle.parents = [];
                 circle.children = [];
                 return;
             }
-            circle.children = circle.children.filter(child => !dirtyCircles.includes(child));
-            circle.parents = circle.children.filter(parent => !dirtyCircles.includes(parent));
+            circle.children = circle.children.filter(child => !staleCircles.includes(child));
+            circle.parents = circle.children.filter(parent => !staleCircles.includes(parent));
         });
 
         const remainingNodes: GraphNode[] = [];
         this._nodes.forEach(node => {
             node.touched = false;
-            let isNodeClean = true;
-            for (var circleIndex = 0; circleIndex < dirtyCircles.length; circleIndex++) {
-                if (node.tangencyCollection.getGroupByCircle(dirtyCircles[circleIndex]) === undefined) {
+            let isNodeFresh = true;
+            for (var circleIndex = 0; circleIndex < staleCircles.length; circleIndex++) {
+                if (node.tangencyCollection.getGroupByCircle(staleCircles[circleIndex]) === undefined) {
                     continue;
                 }
 
-                isNodeClean = false;
-                node.removeCircles(dirtyCircles);
+                isNodeFresh = false;
+                node.removeCircles(staleCircles);
                 break;
             }
 
-            if (isNodeClean) {
+            if (isNodeFresh) {
                 remainingNodes.push(node);
             } else {
                 // Unfortunately we have to iterate over the circles again because we
-                // need a complete iteration above to determine if the node is clean.
+                // need a complete iteration above to determine if the node is fresh.
                 this._circles.forEach(circle => {
                     circle.removeVertexByNode(node);
                 });
             }
         });
-
         this._nodes = remainingNodes;
+
+        // Let's also delete the edges and regions involving the deleted circles,
+        // so we can reset the deletedCircles array ASAP and get it out of the way.
+        this.removeStaleRegions(this._deletedCircles);
+        this._edges.forEach((edge, id) => {
+            if (!this._deletedCircles.includes(edge.circle)) {
+                return;
+            }
+
+            this._edges.delete(id);
+            this._nodes.forEach(node => node.removeEdge(edge));
+        });
+        this._deletedCircles = [];
     }
 
     /**
      * (2/5)
      * This sets parents and children among circles, and creates nodes by
-     * intersecting dirty circles with all other circles. When an intersection
-     * is found between a dirty circle and a clean circle, the clean circle
+     * intersecting stale circles with all other circles. When an intersection
+     * is found between a stale circle and a fresh circle, the fresh circle
      * gets contaminated -- its vertices need re-sorting, its edges deleted and re-created,
-     * and all adjacent regions need to be revisited. Therefore it's marked as dirty in addNode().
+     * and all adjacent regions need to be revisited. Therefore it's marked as stale in addNode().
      * 
-     * As such, dirty child/parent, vertex and node cleanup must be performed before computing the
+     * As such, stale child/parent, vertex and node cleanup must be performed before computing the
      * intersections, while edge and region cleanup must be done after computing them.
      * 
-     * This means the set of dirty circles could increase during this step, so:
-     * (1) The notion of a circle being dirty means different things before and after this step;
-     * (2) The list of dirty circles must be recomputed after this operation (do not cache it across this step).
+     * This means the set of stale circles could increase during this step, so:
+     * (1) The notion of a circle being stale means different things before and after this step;
+     * (2) The list of stale circles must be recomputed after this operation (do not cache it across this step).
      */
     protected computeIntersections = () => {
         for (let i = 0; i < this._circles.length-1; i++) {
             const c1 = this._circles[i];
             for (let j = i+1; j < this._circles.length; j++) {
                 const c2 = this._circles[j];
-                if (!c1.isDirty && !c2.isDirty) {
+                if (!c1.isStale && !c2.isStale) {
                     continue;
                 }
                 
@@ -233,44 +251,44 @@ export class RegionEngineBL {
     }
 
     // (3/5)
-    protected rebuildDirtyEdges = () => {
-        let dirtyCircles = this._circles.filter(circle => circle.isDirty);
+    protected rebuildStaleEdges = () => {
+        const staleCircles = this._circles.filter(circle => circle.isStale);
 
-        this.removeDirtyRegions(dirtyCircles);
+        this.removeStaleRegions(staleCircles);
         
-        const dirtyEdges: GraphEdge[] = [];
+        const staleEdges: GraphEdge[] = [];
         this._edges.forEach((edge, id) => {
-            if (!dirtyCircles.includes(edge.circle)) {
+            if (!staleCircles.includes(edge.circle)) {
                 return;
             }
 
-            dirtyEdges.push(edge);
+            staleEdges.push(edge);
             this._edges.delete(id);
             this._nodes.forEach(node => node.removeEdge(edge));
         });
 
-        // !!cleanEdge.*Cycle is correct, since null cycles in dirty circles have already been deleted above.
-        this._edges.forEach(cleanEdge => {
-            if (!!cleanEdge.InnerCycle && cleanEdge.InnerCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
-                cleanEdge.InnerCycle = undefined;
+        // !!freshEdge.*Cycle is correct, since null cycles in stale circles have already been deleted above.
+        this._edges.forEach(freshEdge => {
+            if (!!freshEdge.InnerCycle && freshEdge.InnerCycle.oEdges.some(oEdge => staleEdges.includes(oEdge.edge))) {
+                freshEdge.InnerCycle = undefined;
             }
 
-            if (!!cleanEdge.OuterCycle && cleanEdge.OuterCycle.oEdges.some(oEdge => dirtyEdges.includes(oEdge.edge))) {
-                cleanEdge.OuterCycle = undefined;
+            if (!!freshEdge.OuterCycle && freshEdge.OuterCycle.oEdges.some(oEdge => staleEdges.includes(oEdge.edge))) {
+                freshEdge.OuterCycle = undefined;
             }
         });
 
-        dirtyCircles.forEach(dirtyCircle => {
+        staleCircles.forEach(staleCircle => {
             this._nodes.forEach(node => {
-                if (node.tangencyCollection.getGroupByCircle(dirtyCircle) === undefined) {
+                if (node.tangencyCollection.getGroupByCircle(staleCircle) === undefined) {
                     return;
                 }
-                dirtyCircle.addVertex(new CircleVertex(node, dirtyCircle));
+                staleCircle.addVertex(new CircleVertex(node, staleCircle));
             });
 
-            for (let i = 0; i < dirtyCircle.vertices.length; i++) {
+            for (let i = 0; i < staleCircle.vertices.length; i++) {
                 // This will add a single edge for circles which have a single tangency point; that's ok
-                const newEdgeId = "c." + dirtyCircle.internalId + "/e." + i;
+                const newEdgeId = "c." + staleCircle.internalId + "/e." + i;
 
                 const oldEdge = this._edges.get(newEdgeId);
                 if (oldEdge !== undefined) {
@@ -279,14 +297,14 @@ export class RegionEngineBL {
                     continue;
                 }
 
-                const newEdge = new GraphEdge(dirtyCircle, dirtyCircle.vertices[i], dirtyCircle.vertices[i+1] ? dirtyCircle.vertices[i+1] : dirtyCircle.vertices[0], newEdgeId);
+                const newEdge = new GraphEdge(staleCircle, staleCircle.vertices[i], staleCircle.vertices[i+1] ? staleCircle.vertices[i+1] : staleCircle.vertices[0], newEdgeId);
                 this._edges.set(newEdge.id, newEdge);
                 newEdge.node1.addEdge(newEdge);
                 if (newEdge.node1 !== newEdge.node2) {
                     newEdge.node2.addEdge(newEdge);
                 }
             }
-            dirtyCircle.isDirty = false;
+            staleCircle.isStale = false;
         });
     }
 
@@ -337,6 +355,10 @@ export class RegionEngineBL {
 
         this._circles.forEach(circle => {
             circle.isDisplayed = circle.vertices.length === 0;
+            if (circle.isOuterContour) {
+                this._regions.push(circle);
+                return;
+            }
             if (circle.vertices.length !== 0 || this._regions.includes(circle)) {
                 return;
             }
