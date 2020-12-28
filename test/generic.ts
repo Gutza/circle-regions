@@ -7,16 +7,25 @@ import { RegionEngine } from '../src/RegionEngine';
 import { ERegionType } from '../src/Types';
 
 describe("Removing circles", () => {
-    const engine = new RegionEngine();
-    engine.addCircle(new Circle(new Point(-1, +0), 2, "left"));
-    engine.addCircle(new Circle(new Point(+1, +0), 2, "right"));
-
-    let midCircle = engine.add(0, 0, 1, "middle");
-    engine.computeRegions();
-
-    engine.removeCircle(midCircle);
-    
     it("Recomputing regions after removing a circle should work", () => {
+        const engine = new RegionEngine();
+        engine.addCircle(new Circle(new Point(-1, +0), 2, "left"));
+        engine.addCircle(new Circle(new Point(+1, +0), 2, "right"));
+
+        assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
+        assert.strictEqual(4, engine.computeRegions().length, "There should be 4 regions in total");
+        assert.strictEqual(0, engine.computeRegions().filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.computeRegions().filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+
+        let midCircle = engine.add(0, 0, 1, "middle");
+
+        assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
+        assert.strictEqual(6, engine.computeRegions().length, "There should be 6 regions in total");
+        assert.strictEqual(0, engine.computeRegions().filter(region => region instanceof Circle).length, "There should be no circles");
+        assert.strictEqual(1, engine.computeRegions().filter(region => (region as ArcPolygon).regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+
+        engine.removeCircle(midCircle);
+        
         assert.strictEqual(engine.isStale, true, "Regions should be stale after removing circles");
         assert.strictEqual(4, engine.computeRegions().length, "There should be 4 regions in total");
         assert.strictEqual(0, engine.computeRegions().filter(region => region instanceof Circle).length, "There should be no circles");
