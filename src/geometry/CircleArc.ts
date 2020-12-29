@@ -77,6 +77,10 @@ export class CircleArc {
         return this._fractionalLength;
     }
 
+    public get totalLength(): number {
+        return this.fractionalLength * this.circle.perimeter;
+    }
+
     public get midAngle(): number {
         if (this._midAngle !== undefined) {
             return this._midAngle;

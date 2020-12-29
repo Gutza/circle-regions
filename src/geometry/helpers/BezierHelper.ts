@@ -1,12 +1,52 @@
-import { CircleArc } from "../CircleArc";
+import { ArcPolygon } from "../ArcPolygon";
+
+// TODO: Improve the conventions here, they're too biased towards circle-regions. See the end of this file for an example.
 
 /**
- * A generic Bezier vertex DTO structure.
+ * The main convenience Bezier function -- it rolls together all necessary logic and callbacks
+ * for generating complete Bezier paths. It just calls @see verticesToAnchors()
+ * and @see arcsToVertices(). Even if you choose to roll your own, make sure to
+ * check out its code in order to understand how this is all supposed to work out.
+ * @param arcs A @see CircleArc array representing a closed region
+ * @param anchorCallback A callback mapping @see IVertexDTO entities unto Bezier vertex entities for your rendering engine of choice
+ * @param pathCallback A callback mapping arrays of Bezier vertices unto path entities for your rendering engine of choice
+ * @returns A single path entity
+ */
+export function renderPolygonArc<TPath, TAnchor>
+    (
+        arcPolygon: ArcPolygon,
+        anchorCallback: (vertex1: IVertexDTO, vertex2: IVertexDTO) => TAnchor,
+        pathCallback: (anchors: TAnchor[]) => TPath
+    ): TPath {
+        const vertices = arcsToVertices(arcPolygon);
+        const anchors = verticesToAnchors<TAnchor>(vertices, anchorCallback);
+        return pathCallback(anchors);
+}
+
+/**
+ * A conventional Bezier vertex DTO structure. By convention, these only
+ * hold the coordinates of the current vertex, and the coordinates for the
+ * next control point (not the coordinates of the previous control point).
  */
 export interface IVertexDTO {
+    /**
+     * The x coordinate of the vertex.
+     */
     x: number,
+
+    /**
+     * The y coordinate of the vertex.
+     */
     y: number,
+
+    /**
+     * The x coordinate of the next control point.
+     */
     cpX: number,
+
+    /**
+     * The y coordinate of the next control point.
+     */
     cpY: number,
 }
 
@@ -24,38 +64,17 @@ export interface IArcDTO {
 const K4 = 4 * (Math.SQRT2 - 1) * (4 / 3);
 
 /**
- * A convenience function which rolls together all necessary logic and callbacks
- * for generating complete Bezier paths. It just calls @see verticesToAnchors()
- * and @see arcsToVertices(). Even if you choose to roll your own, make sure to
- * check out its code in order to understand how this is all supposed to work out.
- * @param arcs A @see CircleArc array representing a closed region
- * @param anchorCallback A callback mapping @see IVertexDTO entities unto Bezier vertex entities for your rendering engine of choice
- * @param pathCallback A callback mapping arrays of Bezier vertices unto path entities for your rendering engine of choice
- * @returns A single path entity
- */
-export function bezierPolygonArc<TPath, TAnchor>
-    (
-        arcs: CircleArc[],
-        anchorCallback: (vertex1: IVertexDTO, vertex2: IVertexDTO) => TAnchor,
-        pathCallback: (anchors: TAnchor[]) => TPath
-    ): TPath {
-        const vertices = arcsToVertices(arcs);
-        const anchors = verticesToAnchors<TAnchor>(vertices, anchorCallback);
-        return pathCallback(anchors);
-}
-
-/**
- * This is only "pure" Bezier helper function in the bunch -- it approximates
- * native circle-regions regions represented as @see CircleArc arrays as Bezier curves.
+ * The main "pure" helper Bezier function -- it approximates
+ * native circle-regions ArcPolygon entities to Bezier curves.
  * This function outputs conventional DTO Bezier entities, which then have to be
  * converted to entities native to the rendering engine you're using to actually display
  * the regions.
- * @param arcs An array of @see CircleArc entities which represent a closed region cycle.
+ * @param 
  */
-export function arcsToVertices(arcs: CircleArc[]): IArcDTO[] {
+export function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
     const arcMetas: IArcDTO[] = [];
-    for (let arcIndex = 0; arcIndex < arcs.length; arcIndex++) {
-        const arc = arcs[arcIndex];
+    for (let arcIndex = 0; arcIndex < arcPolygon.arcs.length; arcIndex++) {
+        const arc = arcPolygon.arcs[arcIndex];
         const arcMeta: IArcDTO = {
             vertices: [],
         };
@@ -99,7 +118,7 @@ export function arcsToVertices(arcs: CircleArc[]): IArcDTO[] {
  * @param vertices An array of conventional arcs, as produced by @see arcsToVertices()
  * @param anchorCallback A callback mapping conventional vertex pairs unto concrete Bezier anchor entities.
  */
-export function verticesToAnchors<TAnchor>(vertices: IArcDTO[], anchorCallback: (vertex1: IVertexDTO, vertex2: IVertexDTO) => TAnchor): TAnchor[] {
+export function verticesToAnchors<TAnchor>(vertices: IArcDTO[], anchorCallback: (currentCP: IVertexDTO, previousCP: IVertexDTO) => TAnchor): TAnchor[] {
     const anchors: TAnchor[] = [];
     for (let arcIndex = 0; arcIndex < vertices.length; arcIndex++) {
         const arcMeta = vertices[arcIndex];
@@ -127,3 +146,19 @@ export function verticesToAnchors<TAnchor>(vertices: IArcDTO[], anchorCallback: 
 
     return anchors;
 }
+
+/*
+const createPolygonArc = (arcs: CircleRegions.CircleArc[]): Two.Path => (
+    CircleRegions.BezierHelper.bezierPolygonArc(
+        arcs,
+        (currV, leftCpV) => (
+            new Two.Anchor(
+                currV.x, currV.y,
+                leftCpV.cpX, leftCpV.cpY,
+                -currV.cpX, -currV.cpY,
+                Two.Commands.curve
+            )
+        ),
+        anchors => new Two.Path(anchors, true, false, true)
+    )
+*/

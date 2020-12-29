@@ -4,6 +4,7 @@ import GraphNode from "../topology/GraphNode";
 import { round } from "./utils/numbers";
 import { Point } from "./Point";
 import { PureGeometry } from "./PureGeometry";
+import { TWO_PI } from "./utils/angles";
 
 /**
  * The main circle class. You can instantiate new circles either by calling
@@ -54,6 +55,11 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
      * Internal cache for the circle's area.
      */
     private _area?: number;
+
+    /**
+     * Internal cache for the circle's perimeter.
+     */
+    private _perimeter?: number;
 
     private _bbox?: IBoundingBox;
 
@@ -280,5 +286,14 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
     public get internalId(): number {
         return this._internalId;
+    }
+
+    public get perimeter(): number {
+        if (this._perimeter !== undefined) {
+            return this._perimeter;
+        }
+
+        this._perimeter = TWO_PI * this.radius;
+        return this._perimeter;
     }
 }
