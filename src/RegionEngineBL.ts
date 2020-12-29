@@ -382,6 +382,13 @@ export class RegionEngineBL {
                     }
                 } else if (oEdge.edge.circle.center.roundedPoint.y > topmostEdge.circle.center.roundedPoint.y) {
                     topmostEdge = oEdge.edge;
+                } else if (
+                    oEdge.edge.circle.center.roundedPoint.y == topmostEdge.circle.center.roundedPoint.y &&
+                    oEdge.edge.circle.vertices.length > topmostEdge.circle.vertices.length
+                ) {
+                    // If two distinct circles have the exact same y coordinate, choose
+                    // the edge belonging to the circle with more vertices.
+                    topmostEdge = oEdge.edge;
                 }
                 const isClockwise = oEdge.direction === ETraversalDirection.backward;
                 isContour = isContour && isClockwise;

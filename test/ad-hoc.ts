@@ -2,6 +2,7 @@ import { Circle, Point, RegionEngine } from "../src";
 import assert from 'assert';
 
 const adHocData = [
+    { label: "Three random circles", circles: [[521,228,50],[638,225,50],[564,228,50]] },
     { label: "Three tangent circles", circles: [[0,1,2],[0,-1,2],[0,0,1]] },
     { label: "Two outer tangent circles", circles: [[0,-1,1],[0,1,1]] },
     { label: "Two inner tangent circles", circles: [[0,-1,2],[0,0,1]] },
