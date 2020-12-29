@@ -15,8 +15,6 @@ export function renderPolygonArc <TPath, TAnchor>
         return pathCallback(anchors);
 }
 
-// TODO: Streamline this function
-
 /**
  * The main "pure" helper polygon function -- it approximates
  * native circle-regions ArcPolygon entities to sets of points.
@@ -24,29 +22,27 @@ export function renderPolygonArc <TPath, TAnchor>
  * @param resolution How many vertices per planar unit; the default is a reasonable compromise between accuracy and speed for 1:1 displays
  * @returns An array of coordinate pairs representing the points
  */
-export const arcsToVertices = (arcPolygon: ArcPolygon, resolution = DEFAULT_RESOLUTION): IPoint[] => {
+export function arcsToVertices (arcPolygon: ArcPolygon, resolution = DEFAULT_RESOLUTION): IPoint[] {
     let vertexCount = 0;
-    arcPolygon.arcs.forEach(arc => {
-        vertexCount += Math.max(2, Math.floor(resolution * arc.totalLength));
-    });
+    arcPolygon.arcs.forEach(arc => { vertexCount += Math.max(2, Math.floor(resolution * arc.totalLength)); });
 
     const vertices: IPoint[] = new Array(vertexCount);
 
-    let arcsDone = 0;
-    for (let arcIndex = 0; arcIndex < arcPolygon.arcs.length; arcIndex++) {
-        const { startAngle, endAngle, totalLength } = arcPolygon.arcs[arcIndex];
-        const { x, y } = arcPolygon.arcs[arcIndex].circle.center;
-        const radius = arcPolygon.arcs[arcIndex].circle.radius;
+    let vertexIndex = 0;
+    arcPolygon.arcs.forEach(arc => {
+        const { startAngle, endAngle, totalLength } = arc;
+        const { x: centerX, y: centerY } = arc.circle.center;
+        const radius = arc.circle.radius;
         const arcLenAtRes = Math.max(2, Math.floor(resolution * totalLength));
         for (let θindex = 0; θindex < arcLenAtRes; θindex++) {
             const θ = startAngle + (θindex / arcLenAtRes) * (endAngle - startAngle);
-            vertices[arcsDone + θindex] = {
-                x: x + radius * Math.cos(θ),
-                y: y + radius * Math.sin(θ),
+            vertices[vertexIndex] = {
+                x: centerX + radius * Math.cos(θ),
+                y: centerY + radius * Math.sin(θ),
             };
+            vertexIndex++;
         }
-        arcsDone += arcLenAtRes;
-    }
+    })
 
     return vertices;
 }
