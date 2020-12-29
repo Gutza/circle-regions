@@ -2,7 +2,7 @@ import { IPoint } from "../Types";
 import { Circle } from "./Circle";
 import { TWO_PI } from "./utils/angles";
 
-export default class CircleArc {
+export class CircleArc {
     private _circle: Circle;
     private _startAngle: number;
     private _endAngle: number;

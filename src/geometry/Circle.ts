@@ -18,10 +18,14 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     private _roundedBbox?: IBoundingBox;
     private _roundedRadius?: number;
 
+    // TODO: Sort out isDisplayed and isOuterContour
     /**
      * Boolean indicating whether this circle should ever be displayed as such (or whether it's split into arcs which make up region boundaries).
      */
     public isDisplayed = false;
+
+    // TODO: Outer contour if the circle is alone, but never if it has parents
+    public isOuterContour: boolean = false;
 
     public id: any;
     private _internalId: number;
@@ -60,9 +64,6 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
     public shape: object | undefined;
 
-    // TODO: Outer contour if the circle is alone, but never if it has parents
-    public isOuterContour: boolean = false;
-
     /**
      * Instantiate a new circle entity.
      */
@@ -78,10 +79,10 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     /**
      * Helper method which creates a new circle with the same
      * coordinates as this one. If no id is provided, the clone will
-     * have no circle ID (it will not clone the original's).
+     * have no circle ID (it will never clone the original's).
      */
     public clone = (id?: any) => {
-        return new Circle(this._center, this._radius);
+        return new Circle(this._center, this._radius, id);
     }
 
     /**

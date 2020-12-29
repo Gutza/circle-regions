@@ -1,5 +1,5 @@
 import { IDrawable, ERegionType } from "../Types";
-import CircleArc from "./CircleArc";
+import { CircleArc } from "./CircleArc";
 
 /**
  * Think of a polygon. Now imagine a polygon with edges made of circle arcs
