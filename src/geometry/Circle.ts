@@ -216,14 +216,35 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         };
     }
 
-    // Using Point instead of IPoint in order to force programmers to use Point's caching mechanism
     public isPointInside = (point: Point, exact: boolean = false): boolean => {
+        if (!this.isPointInsideBBox(point, exact)) {
+            return false;
+        }
+
+        let centerPoint: Point;
+        let radiusSquared = this.radius ** 2;
+        if (exact) {
+            centerPoint = this.center;
+        } else {
+            centerPoint = this.center.roundedPoint;
+            radiusSquared = round(radiusSquared);
+        }
+
+        let pointDistFromCenterSquared = (centerPoint.x - point.x) ** 2 + (centerPoint.y - point.y) ** 2;
+        if (exact) {
+            pointDistFromCenterSquared = round(pointDistFromCenterSquared);
+        }
+
+        return pointDistFromCenterSquared <= radiusSquared;
+    }
+
+    private isPointInsideBBox = (point: Point, exact: boolean = false): boolean => {
         if (!exact) {
             return (
-                point.x > this.boundingBox.minPoint.x &&
-                point.x < this.boundingBox.maxPoint.x &&
-                point.y > this.boundingBox.minPoint.y &&
-                point.y < this.boundingBox.maxPoint.y
+                point.x >= this.boundingBox.minPoint.x &&
+                point.x <= this.boundingBox.maxPoint.x &&
+                point.y >= this.boundingBox.minPoint.y &&
+                point.y <= this.boundingBox.maxPoint.y
             );
         }
 
