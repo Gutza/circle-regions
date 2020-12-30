@@ -5,18 +5,18 @@ import { ArcPolygon } from "../ArcPolygon";
  * The main convenience Bezier function -- it rolls together all necessary logic and callbacks
  * for generating complete Bezier paths. This is probably the function you'll want to use.
  * @param arcs A @see CircleArc array representing a closed region
- * @param anchorCallback A callback mapping @see IInternalVertexDTO entities unto Bezier vertex entities for your rendering engine of choice
+ * @param vertexCallback A callback mapping @see IInternalVertexDTO entities unto Bezier vertex entities for your rendering engine of choice
  * @param pathCallback A callback mapping arrays of Bezier vertices unto path entities for your rendering engine of choice
  * @returns A single path entity
  */
 export function renderPolygonArc<TPath, TAnchor>
     (
         arcPolygon: ArcPolygon,
-        anchorCallback: (vertex: IBezierVertex) => TAnchor,
+        vertexCallback: (vertex: IBezierVertex) => TAnchor,
         pathCallback: (anchors: TAnchor[]) => TPath
     ): TPath {
         const vertices = arcsToVertices(arcPolygon);
-        const anchors = verticesToAnchors<TAnchor>(vertices, anchorCallback);
+        const anchors = verticesToAnchors<TAnchor>(vertices, vertexCallback);
         return pathCallback(anchors);
 }
 
