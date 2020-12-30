@@ -31,7 +31,8 @@ During October-November 2020 I created and refined the main algorithm and most o
 - It provides helper methods for easily rendering the resulting regions using your rendering engine of choice (both polygonal and Bezier); both approaches employ world-class output precision;
 - It caches everything that can be cached from one iteration to the next (moving a circle outside of the arrangement doesn't cause all intersections and regions to be re-evaluated);
 - As a by-product of intersecting all circles, it correctly identifies circles wholly contained in other circles;
-- Supports event-driven rendering.
+- Supports event-driven rendering;
+- Small footprint, and extremely spartan dependencies.
 
 ## Status and known limitations
 The 1.x tier is still in alpha. The actual intersection engine is already very robust (to my knowledge), but there are still issues with several secondary mechanisms:
@@ -63,7 +64,7 @@ const engine = new CircleRegions.RegionEngine();
 var c1 = engine.add(0, 5, 5);
 var c2 = engine.add(0, -4, 4);
 var c3 = engine.add(3, 0, 3);
-console.log(engine.);
+console.log(engine.computeRegions());
 ```
 
 Typescript is also supported; the definitions are bundled with the npm package.
