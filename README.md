@@ -141,10 +141,13 @@ export const run = () => {
     
     const tRegions = new Two.Group();
     tRegions.id = "regions";
+
     const tCircles = new Two.Group();
     tCircles.id = "circles";
+
     const tInnerContours = new Two.Group();
     tInnerContours.id = "inner-contours";
+    
     tCircleGeometry.add(tOuterContours, tInnerContours, tRegions, tCircles);
 
     const demoRegionEngine = new CircleRegions.RegionEngine();
