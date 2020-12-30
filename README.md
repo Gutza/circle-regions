@@ -52,7 +52,7 @@ The library can be used both in NodeJS, and as a stand-alone, browser library â€
 Install it with
 
 ```shell
-npm i circle-regions@1.0.0-alpha.1
+npm i circle-regions@1.0.0-alpha.2
 ```
 
 Change the version number, if you have to (I might forget to upade the documentation on every release). Then use it:
