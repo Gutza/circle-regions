@@ -15,7 +15,7 @@ I wanted this library to be as fast as it possibly could, and I wanted to treat 
 - Full: can treat all cases
 - No tangencies: can treat all cases except tangent circles
 - No concurrent intersections: only two circles can intersect at any one point
-- No tangencies AND no concurrent intersections.
+- No tangencies *and* no concurrent intersections allowed.
 
 At first glance, it seems like tangency and concurrent intersection limitations are not a big deal – after all, the 2D plane is quite vast, you can easily make sure circles aren't ever tangent, right? Also, why would you really ever need to intersect more than two circles in a single point? Well, it turns out there are quite a lot of commonplace setups where both of those types of configurations pop up. Think about circles intersecting at the origin – you only need a circle with radius 5 centered at (0,5), and another circle with radius 4 centered at (0,-4): tangency! Add another circle with radius 3 at (3,0) and you end up with three circles intersecting at the origin, two of which are tangent. So I decided to go full monty.
 
@@ -32,6 +32,7 @@ During October-November 2020 I created and refined the main algorithm and most o
 - It caches everything that can be cached from one iteration to the next (moving a circle outside of the arrangement doesn't cause all intersections and regions to be recomputed);
 - As a by-product of intersecting all circles, it correctly identifies circles wholly contained in other circles;
 - Supports event-driven rendering;
+- The library features very defensive programming and extensive self-diagnosis, in order to help identifying and reporting bugs;
 - Small footprint, and extremely spartan dependencies.
 
 ## Status and known limitations
