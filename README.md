@@ -17,19 +17,19 @@ I wanted this library to be as fast as it possibly could, and I wanted to treat 
 - No concurrent intersections: only two circles can intersect at any one point
 - No tangencies AND no concurrent intersections.
 
-At first glance, it seems like tangency and concurrent intersection limitations are not a big deal – after all, the 2D plane is quite vast, you can easily make sure circles aren't ever tangent, right? Also, why would you really ever need to intersect more than two circles in a single point? Well, it turns out there are quite a lot of common-place setups where both of those types of configurations pop up. Think about circles intersecting at the origin – you only need a circle with radius 5 centered at (0,5), and another circle with radius 4 centered at (0,-4): tangency! Add another circle with radius 3 at (3,0) and you end up with three circles intersecting at the origin, two of which are tangent. So I decided to go full monty.
+At first glance, it seems like tangency and concurrent intersection limitations are not a big deal – after all, the 2D plane is quite vast, you can easily make sure circles aren't ever tangent, right? Also, why would you really ever need to intersect more than two circles in a single point? Well, it turns out there are quite a lot of commonplace setups where both of those types of configurations pop up. Think about circles intersecting at the origin – you only need a circle with radius 5 centered at (0,5), and another circle with radius 4 centered at (0,-4): tangency! Add another circle with radius 3 at (3,0) and you end up with three circles intersecting at the origin, two of which are tangent. So I decided to go full monty.
 
-During October-November 2020 I created and refined the main algorithm and most of the code architecture for tier 1.x. I had planned (and announced) that I'd release the new version in November at the latest, but I had a really hectic period at work, and the code turned out to need much more refinement than I had originally anticipated. So here I was, on December 30th, writing this document in order to publish version 1.0.0-alpha.1 in 2020 (which did happen).
+During October-November 2020 I created and refined the main algorithm and most of the code architecture for tier 1.x. I had planned (and announced) that I'd release the new version in November at the latest, but I had a really hectic period at work, and the code turned out to need way more refinement than I had originally anticipated. So here I was, on December 30th, writing this document in order to publish version 1.0.0-alpha.1 in 2020 (which did happen).
 
 ## Features
-- Works properly for all possible circle configurations – any number of inner and/or tangent circles, any number of circles intersecting at the same point;
+- Works properly for all possible circle configurations – any number of inner and/or outer concurrent tangencies, any number of circles intersecting at the same point, any combination of inner tangent/outer tangent/secant intersections at the same point;
 - Properly handles the floating point precision in JavaScript to reliably identify concurrent tangencies and intersections;
 - Configurable precision, with a couple of presets for atypical setups (particularly small and particularly large scales);
 - It does *not* use [big-js](https://www.npmjs.com/package/big-js) or friends, for two reasons: performance, and those libraries' limitations when it comes to trig functions;
 - It properly discriminates between regions which partition circles and contours;
 - It properly discriminates between inner and outer contours;
-- It provides helper methods for easily rendering the resulting regions using your rendering engine of choice (both polygonal and Bezier); both approaches employ world-class output precision;
-- It caches everything that can be cached from one iteration to the next (moving a circle outside of the arrangement doesn't cause all intersections and regions to be re-evaluated);
+- It provides helper methods for easily rendering the resulting regions using your rendering engine of choice (both polygonal and Bezier); both approaches employ world-class output precision – and using any SVG renderer you can easily export the output to very precise SVG files;
+- It caches everything that can be cached from one iteration to the next (moving a circle outside of the arrangement doesn't cause all intersections and regions to be recomputed);
 - As a by-product of intersecting all circles, it correctly identifies circles wholly contained in other circles;
 - Supports event-driven rendering;
 - Small footprint, and extremely spartan dependencies.
