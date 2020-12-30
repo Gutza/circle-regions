@@ -1,3 +1,4 @@
+import { IPoint } from "../../Types";
 import { ArcPolygon } from "../ArcPolygon";
 
 /**
@@ -17,6 +18,26 @@ export function renderPolygonArc<TPath, TAnchor>
         const vertices = arcsToVertices(arcPolygon);
         const anchors = verticesToAnchors<TAnchor>(vertices, anchorCallback);
         return pathCallback(anchors);
+}
+
+/**
+ * A conventional structure for transporting complete Bezier vertices.
+ */
+export interface IBezierVertex {
+    /**
+     * The coordinates of the vertex.
+     */
+    vcoords: IPoint,
+
+    /**
+     * The coordinates of the control point on the left.
+     */
+    leftCP: IPoint,
+
+    /**
+     * The coordinates of the control point on the right.
+     */
+    rightCP: IPoint,
 }
 
 /**
@@ -44,41 +65,6 @@ interface IInternalVertexDTO {
      * The y coordinate of the next control point.
      */
     cpY: number,
-}
-
-/**
- * A conventional structure for transporting complete Bezier vertices.
- */
-export interface IBezierVertex {
-    /**
-     * The x coordinate of the vertex.
-     */
-    vx: number,
-
-    /**
-     * The y coordinate of the vertex.
-     */
-    vy: number,
-
-    /**
-     * The x coordinate of the previous control point.
-     */
-    prevCPx: number,
-
-    /**
-     * The y coordinate of the previous control point.
-     */
-    prevCPy: number,
-
-    /**
-     * The x coordinate of the next control point.
-     */
-    nextCPx: number,
-
-    /**
-     * The y coordinate of the next control point.
-     */
-    nextCPy: number,
 }
 
 /**
@@ -193,11 +179,17 @@ function concreteAnchor<TAnchor>(
         anchorCallback: (vertex: IBezierVertex) => TAnchor
     ): TAnchor {
         return anchorCallback({
-            vx: currV.vx,
-            vy: currV.vy,
-            prevCPx: leftCpV.cpX,
-            prevCPy: leftCpV.cpY,
-            nextCPx: -currV.cpX,
-            nextCPy: -currV.cpY
+            vcoords: {
+                x: currV.vx,
+                y: currV.vy,
+            },
+            leftCP: {
+                x: leftCpV.cpX,
+                y: leftCpV.cpY,
+            },
+            rightCP: {
+                x: -currV.cpX,
+                y: -currV.cpY,
+            },
         })
     }
