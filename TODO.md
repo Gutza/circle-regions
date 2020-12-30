@@ -1,0 +1,12 @@
+- XH.Documentation: Documentation for public methods/classes
+- H.Feature: Helper functions for drawing regions using polygons
+- H.Feature: Helper functions for drawing regions using Bezier curves
+- H.Feature: Allow disabling rounding features altogether for web-based applications
+- H.Documentation: Investigate documentation labels (lazy, cached, computationally cheap, etc)
+- H.Coding: Convert generic errors to project-specific errors
+- M.Testing: Coveralls
+- M.Feature: Region "centroid" (largest inscribed circle)
+- M.Feature: Region persistence (optional; based on parents and neighbors)
+- M.Feature: Region change events (depends on region persistence)
+- L.Performance: Performance benchmarks
+- XL.Testing: Rotating cardioid test

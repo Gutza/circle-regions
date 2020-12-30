@@ -2,3 +2,8 @@ node_modules
 *.js
 *.js.map
 dist/**/*.d.ts
+*.js.tmp*
+*.tgz
+.vscode
+/package-lock.json
+/yarn.lock
