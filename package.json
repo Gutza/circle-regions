@@ -41,8 +41,7 @@
     "yarn-or-npm": "^3.0.1"
   },
   "dependencies": {
-    "lodash.round": "^4.0.4",
-    "uuid": "^8.3.1"
+    "lodash.round": "^4.0.4"
   },
   "keywords": [
     "circle",

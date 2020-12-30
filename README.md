@@ -17,9 +17,9 @@ I wanted this library to be as fast as it possibly could, and I wanted to treat 
 - No concurrent intersections: only two circles can intersect at any one point
 - No tangencies AND no concurrent intersections.
 
-At first glance, it seems like tangency and concurrent intersection limitations are not a big deal – after all, the 2D plane is quite vast, you can easily make sure circles aren't ever tangent, right? Also, why would you really ever need to intersect more than two circles in a single point? Well, it turns out there are quite a lot of common-place setups where both of those types of configurations pop up. Think about circles intersecting in the origin – you only need a circle with radius 5 centered at (0,5), and another circle with radius 4 centered at (0,-4): tangency. Add another circle with radius 3 at (3,0) and you end up with three circles intersecting at the origin, two of which are tangent. So I decided to go full monty.
+At first glance, it seems like tangency and concurrent intersection limitations are not a big deal – after all, the 2D plane is quite vast, you can easily make sure circles aren't ever tangent, right? Also, why would you really ever need to intersect more than two circles in a single point? Well, it turns out there are quite a lot of common-place setups where both of those types of configurations pop up. Think about circles intersecting at the origin – you only need a circle with radius 5 centered at (0,5), and another circle with radius 4 centered at (0,-4): tangency! Add another circle with radius 3 at (3,0) and you end up with three circles intersecting at the origin, two of which are tangent. So I decided to go full monty.
 
-During October-November 2020 I created and refined the main algorithm and most of the code architecture for tier 1.x. I had planned (and announced) that I'd release the new version in November at the latest, but I had a really hectic period at work, and the code turned out to need much more refinement than I had originally anticipated. So here I am, on December 30th, writing this document – and the code is not pushed to NPM yet.
+During October-November 2020 I created and refined the main algorithm and most of the code architecture for tier 1.x. I had planned (and announced) that I'd release the new version in November at the latest, but I had a really hectic period at work, and the code turned out to need much more refinement than I had originally anticipated. So here I was, on December 30th, writing this document in order to publish version 1.0.0-alpha.1 in 2020 (which did happen).
 
 ## Features
 - Works properly for all possible circle configurations – any number of inner and/or tangent circles, any number of circles intersecting at the same point;
@@ -51,10 +51,10 @@ The library can be used both in NodeJS, and as a stand-alone, browser library �
 Install it with
 
 ```shell
-npm install circle-regions
+npm i circle-regions@1.0.0-alpha.1
 ```
 
-And use it
+Change the version number, if you have to (I might forget to upade the documentation on every release). Then use it:
 
 ```javascript
 "use strict";
@@ -147,7 +147,7 @@ export const run = () => {
 
     const tInnerContours = new Two.Group();
     tInnerContours.id = "inner-contours";
-    
+
     tCircleGeometry.add(tOuterContours, tInnerContours, tRegions, tCircles);
 
     const demoRegionEngine = new CircleRegions.RegionEngine();
