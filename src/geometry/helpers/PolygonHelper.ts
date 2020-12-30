@@ -10,7 +10,7 @@ const DEFAULT_RESOLUTION = 0.1;
  * @param arcPolygon A region represented as a native arc polygon
  * @param vertexCallback A callback which maps native vertices to rendering-ready polygon vertices
  * @param pathCallback A callback which maps rendering-ready arrays of polygon vertices to rendering-ready paths
- * @param resolution How many vertices per planar unit; the default is a reasonable compromise between accuracy and speed for 1:1 displays
+ * @param resolution How many vertices per planar unit; the default is a reasonable compromise between accuracy and speed for 1:1 displays (one segment for every ten pixels)
  */
 export function renderPolygonArc <TPath, TAnchor>
     (
@@ -31,7 +31,7 @@ export function renderPolygonArc <TPath, TAnchor>
  * @param resolution How many vertices per planar unit; the default is a reasonable compromise between accuracy and speed for 1:1 displays
  * @returns An array of coordinate pairs representing the points
  */
-function arcsToVertices (arcPolygon: ArcPolygon, resolution = DEFAULT_RESOLUTION): IPoint[] {
+function arcsToVertices (arcPolygon: ArcPolygon, resolution: number): IPoint[] {
     let vertexCount = 0;
     arcPolygon.arcs.forEach(arc => { vertexCount += Math.max(2, Math.floor(resolution * arc.totalLength)); });
 
