@@ -13,14 +13,19 @@ export class RegionError extends Error {
         this._isStatic = isStatic;
     }
 
-    public get circleDump(): string {
-        return JSON.stringify(this._circles.map(circle => {
-            return [
+    public static circlesToString = (circles: Circle[]): string => {
+        return JSON.stringify(circles.map(
+            circle => ([
                 circle.center.x,
                 circle.center.y,
                 circle.radius,
-            ];
-        }));
+                circle.internalId,
+            ])
+        ));
+    }
+
+    public get circleDump(): string {
+        return RegionError.circlesToString(this._circles);
     }
 
     public get circles(): Circle[] {

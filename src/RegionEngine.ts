@@ -115,14 +115,14 @@ export class RegionEngine extends RegionEngineBL {
                 );
             }
 
-            const canonicalCircles = DebugEngine.checkStatic(this.circles);
+            const debugData = DebugEngine.checkStatic(this.circles);
 
-            if (canonicalCircles.numericReproducible) {
-                const possiblyNotReproducible = canonicalCircles.stringReproducible ? "" : " (rounding challenge)";
+            if (debugData.numericReproducible) {
+                const possiblyNotReproducible = debugData.stringReproducible ? "" : " (rounding challenge)";
                 throw new RegionError(
                     "A statically reproducible error has occurred while processing regions" + possiblyNotReproducible + ". Please submit a bug report including all information in this message.",
                     e as Error,
-                    canonicalCircles.circles,
+                    debugData.circles,
                     true
                 );
             }
@@ -131,7 +131,7 @@ export class RegionEngine extends RegionEngineBL {
             
             throw new RegionError(
                 "A statically unreproducible error has occurred while processing regions. Please submit a bug report including all information in this message. " +
-                    JSON.stringify(this._lastCircles) + " --> " + JSON.stringify(currentCircles),
+                    this.circlesToString(this._lastCircles) + ", " + this.circlesToString(currentCircles),
                 e as Error,
                 this._circles,
                 false
@@ -150,6 +150,10 @@ export class RegionEngine extends RegionEngineBL {
             r: circle.radius,
             iId: circle.internalId
         }));
+    }
+
+    private circlesToString = (circles: {x: number, y: number, r: number, iId: number}[]): string => {
+        return JSON.stringify(circles.map(circle => ([circle.x, circle.y, circle.r, circle.iId])));
     }
 
     /**

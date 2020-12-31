@@ -26,7 +26,7 @@ const adHocData = [
     { label: "Inner/outer contour exaggerated", circles: [[-3, 4, 5],[3,-4,5],[-6,0,8]] },
 ];
 
-describe("Ad hoc region computation", () => {
+describe("Ad hoc tests (static)", () => {
     adHocData.forEach(adHocAtom => {
         const engine = new RegionEngine();
         adHocAtom.circles.forEach((circleData, index) => {
