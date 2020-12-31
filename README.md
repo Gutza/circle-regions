@@ -26,6 +26,7 @@ During October-November 2020 I created and refined the main algorithm and most o
 - Properly handles the floating point precision in JavaScript to reliably identify concurrent tangencies and intersections;
 - Configurable precision, with a couple of presets for atypical setups (particularly small and particularly large scales);
 - It does *not* use [big-js](https://www.npmjs.com/package/big-js) or friends, for two reasons: performance, and those libraries' limitations when it comes to trig functions;
+
 ![Region elements](images/contour-demo.png)
 - It properly discriminates between contours and regions which partition circles;
 - It properly discriminates between inner and outer contours;
