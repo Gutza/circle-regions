@@ -22,11 +22,11 @@ At first glance, it seems like tangency and concurrent intersection limitations 
 During October-November 2020 I created and refined the main algorithm and most of the code architecture for tier 1.x. I had planned (and announced) that I'd release the new version in November at the latest, but I had a really hectic period at work, and the code turned out to need way more refinement than I had originally anticipated. So here I was, on December 30th, writing this document in order to publish version 1.0.0-alpha.1 in 2020 (which did happen).
 
 ## Features
-![Region elements](images/contour-demo.png)
 - Works properly for all possible circle configurations – any number of inner and/or outer concurrent tangencies, any number of circles intersecting at the same point, any combination of inner tangent/outer tangent/secant intersections at the same point;
 - Properly handles the floating point precision in JavaScript to reliably identify concurrent tangencies and intersections;
 - Configurable precision, with a couple of presets for atypical setups (particularly small and particularly large scales);
 - It does *not* use [big-js](https://www.npmjs.com/package/big-js) or friends, for two reasons: performance, and those libraries' limitations when it comes to trig functions;
+![Region elements](images/contour-demo.png)
 - It properly discriminates between contours and regions which partition circles;
 - It properly discriminates between inner and outer contours;
 - It provides helper methods for easily rendering the resulting regions using your rendering engine of choice (both polygonal and Bezier); both approaches employ world-class output precision – and using any SVG renderer you can easily export the output to very precise SVG files;
