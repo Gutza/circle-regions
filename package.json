@@ -19,6 +19,7 @@
     "url": "https://github.com/Gutza/circle-regions"
   },
   "license": "MIT",
+  "files": ["dist/**/*"],
   "scripts": {
     "clean": "tsc --build --clean",
     "build": "tsc --build",

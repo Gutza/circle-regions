@@ -1,5 +1,5 @@
 .vscode
+.github
 circle-regions.Bundle.js
 circle-regions*.tgz
-test/
-README.md
+TODO.md
