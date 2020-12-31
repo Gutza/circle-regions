@@ -68,10 +68,10 @@ var c3 = engine.add(3, 0, 3);
 console.log(engine.computeRegions());
 ```
 
-Typescript is also supported; the definitions are bundled with the npm package.
-
 ### Browser
-Generate the JavaScript bundle
+Depending on your preferred workflow, you might want to write pure JavaScript all the way, or pure TypeScript all the way. As such, you're either going to transpile this library to JavaScript prior to integrating it with your project, or you're going to write your TypeScript code using this library, and then transpile the whole thing to JavaScript.
+
+If you're using TypeScript you already know how to set up your project and transpile, so I won't document that here. If you need a pure JavaScript export of this library, you have to clone this repository locally, then execute
 
 ```shell
 npm run browserify
@@ -79,9 +79,10 @@ npm run browserify
 
 This will produce a plain JavaScript file called `circle-regions.Bundle.js`, which you can load in your HTML file.
 
-Here are a couple of examples rendering circles in [Two.js](https://two.js.org/):
+### Rendering
+Here are a couple of examples rendering circles with [Two.js](https://two.js.org/), using TypeScript:
 
-```javascript
+```typescript
 // Polygon rendering
 
 import * as CircleRegions from 'circle-regions';
@@ -96,8 +97,7 @@ export const createPolygonArc = (arcPolygon: CircleRegions.ArcPolygon): Two.Path
 );
 ```
 or
-
-```javascript
+```typescript
 // Bezier rendering
 
 import * as CircleRegions from 'circle-regions';
@@ -120,7 +120,7 @@ export const createPolygonArc = (arcPolygon: CircleRegions.ArcPolygon): Two.Path
 ```
 
 You can then use either of those to render your regions like so:
-```javascript
+```typescript
 import * as CircleRegions from "circle-regions";
 import { createPolygonArc } from "./graphics/CreatePolyArc"; // <-- your createPolygonArc library (see above)
 import Two from "two.js";
