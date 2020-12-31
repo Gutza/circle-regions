@@ -1,6 +1,6 @@
 {
   "name": "circle-regions",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Circle Intersection Regions",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -19,7 +19,9 @@
     "url": "https://github.com/Gutza/circle-regions"
   },
   "license": "MIT",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "clean": "tsc --build --clean",
     "build": "tsc --build",
