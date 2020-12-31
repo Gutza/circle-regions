@@ -2,31 +2,32 @@
 [![GitHub Actions status](https://github.com/gutza/circle-regions/workflows/mocha%20test/badge.svg?branch=master)](https://github.com/gutza/circle-regions/actions)
 [![GitHub Actions status](https://github.com/gutza/circle-regions/workflows/browserify/badge.svg?branch=master)](https://github.com/gutza/circle-regions/actions)
 
-This is probably the world's fastest solution for computing all regions in a 2D plane resulted from intersecting any number of circles, in any configuration. This is 100% original art; this library was originally inspired by [Harrison Hogg's](http://hogg.io/) wonderful "[circles](https://github.com/HHogg/circles)" art project, but the current version is a completely original approach, and the entire library was completely rewritten from scratch.
+This is probably the world's fastest solution for computing all regions on a 2D plane resulted from intersecting any number of circles, in any configuration. This is 100% original art; this library was originally inspired by [Harrison Hogg's](http://hogg.io/) wonderful "[circles](https://github.com/HHogg/circles)" art project, but the current version is a completely original approach, and the entire library was completely rewritten from scratch.
 
 ## Project history
 *Feel free to skip on to the installation section below if you're not interested in this.*
 
 Harrison Hogg's project, which you can check out live [here](https://circles.hogg.io/), inspired me back in September 2020 to search for an efficient way to algorithmically partition the plane as dictated by intersecting circles. His original algorithm is described on [HHogg's website](https://hogg.io/writings/circle-intersections) – and I also saved the algorithm description on the [Wayback Machine](https://web.archive.org/web/20200930112821/https://hogg.io/writings/circle-intersections), in case he decides to drop it off the website for some reason.
 
-I extracted Harrison's engine as a stand-alone library in September-October 2020, and that was the 0.x tier of this library. Harrison's algorithm (and code) proved the problem was tractable, but ultimately I wasn't completely happy with his solution. His approach is based on extensive geometric verifications, which slows things down considerably. I'm not sure if there are bugs in his code of whether his algorithm has some built-in limitations, as well, but I also bumped into some issues in some edge cases. None of these are real show-stoppers for his art project, but I wanted this to be really high octane – and that approach just wasn't enough.
+I extracted Harrison's engine as a stand-alone library in September-October 2020, and that was the 0.x tier of this library. Harrison's algorithm (and code) proved the problem was tractable, but ultimately I wasn't completely happy with his solution. His approach is based on extensive geometric verifications, which slows things down considerably. I also bumped into some issues with his code for some edge cases, although to be honest I don't know if these are caused by fixable bugs in his code or by some limitations built into his algorithm. None of these are real show-stoppers for his art project, but I wanted this to be really high octane – and that approach just wasn't enough.
 
 I wanted this library to be as fast as it possibly could, and I wanted to treat all possible circle configurations on a 2D plane. Algorithms (and even problems) in this area are typically broken down into the following categories:
-- Full: can treat all cases
-- No tangencies: can treat all cases except tangent circles
-- No concurrent intersections: only two circles can intersect at any one point
-- No tangencies *and* no concurrent intersections allowed.
+- full: treat all cases;
+- no tangencies: can treat all cases except tangent circles;
+- no concurrent intersections: only two circles can intersect at any one point;
+- no tangencies *and* no concurrent intersections allowed.
 
-At first glance, it seems like tangency and concurrent intersection limitations are not a big deal – after all, the 2D plane is quite vast, you can easily make sure circles aren't ever tangent, right? Also, why would you really ever need to intersect more than two circles in a single point? Well, it turns out there are quite a lot of commonplace setups where both of those types of configurations pop up. Think about circles intersecting at the origin – you only need a circle with radius 5 centered at (0,5), and another circle with radius 4 centered at (0,-4): tangency! Add another circle with radius 3 at (3,0) and you end up with three circles intersecting at the origin, two of which are tangent. So I decided to go full monty.
+At first glance, it seems like tangency and concurrent intersection limitations are not a big deal at all – after all, the 2D plane is quite vast, you can easily make sure circles aren't ever tangent, right? Also, why would you really ever need to intersect more than two circles in a single point? Well, it turns out there are quite a lot of commonplace setups where both of those types of configurations pop up. Think about circles intersecting at the origin – you only need a circle with radius 5 centered at (0,5), and another circle with radius 4 centered at (0,-4): tangency! Add another circle with radius 3 at (3,0) and you end up with three circles intersecting at the origin, two of which are tangent. So I decided to go full monty.
 
 During October-November 2020 I created and refined the main algorithm and most of the code architecture for tier 1.x. I had planned (and announced) that I'd release the new version in November at the latest, but I had a really hectic period at work, and the code turned out to need way more refinement than I had originally anticipated. So here I was, on December 30th, writing this document in order to publish version 1.0.0-alpha.1 in 2020 (which did happen).
 
 ## Features
+![Region elements](images/contour-demo.png)
 - Works properly for all possible circle configurations – any number of inner and/or outer concurrent tangencies, any number of circles intersecting at the same point, any combination of inner tangent/outer tangent/secant intersections at the same point;
 - Properly handles the floating point precision in JavaScript to reliably identify concurrent tangencies and intersections;
 - Configurable precision, with a couple of presets for atypical setups (particularly small and particularly large scales);
 - It does *not* use [big-js](https://www.npmjs.com/package/big-js) or friends, for two reasons: performance, and those libraries' limitations when it comes to trig functions;
-- It properly discriminates between regions which partition circles and contours;
+- It properly discriminates between contours and regions which partition circles;
 - It properly discriminates between inner and outer contours;
 - It provides helper methods for easily rendering the resulting regions using your rendering engine of choice (both polygonal and Bezier); both approaches employ world-class output precision – and using any SVG renderer you can easily export the output to very precise SVG files;
 - It caches everything that can be cached from one iteration to the next (moving a circle outside of the arrangement doesn't cause all intersections and regions to be recomputed);
@@ -74,6 +75,7 @@ Depending on your preferred workflow, you might want to write pure JavaScript al
 If you're using TypeScript you already know how to set up your project and transpile, so I won't document that here. If you need a pure JavaScript export of this library, you have to clone this repository locally, then execute
 
 ```shell
+npm install
 npm run browserify
 ```
 
