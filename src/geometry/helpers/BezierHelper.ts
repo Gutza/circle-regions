@@ -73,6 +73,7 @@ interface IInternalVertexDTO {
  * in this context, it always holds circle arcs.
  */
 interface IArcDTO {
+    singleCircle: boolean,
     vertices: IInternalVertexDTO[],
 }
 
@@ -92,12 +93,12 @@ const K4 = 4 * (Math.SQRT2 - 1) * (4 / 3);
 function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
     const arcMetas: IArcDTO[] = [];
 
-    // Closed arcPolygons are complete, stand-alone circles.
-    const closed = arcPolygon.arcs.length == 1;
+    const singleCircle = arcPolygon.arcs.length == 1;
     for (let arcIndex = 0; arcIndex < arcPolygon.arcs.length; arcIndex++) {
         const arc = arcPolygon.arcs[arcIndex];
         const arcMeta: IArcDTO = {
             vertices: [],
+            singleCircle: singleCircle,
         };
         arcMetas.push(arcMeta);
 
@@ -105,16 +106,16 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
         const xc = arc.circle.center.x;
         const yc = arc.circle.center.y;
 
-        // For closed arcPolygons, we always want four vertices.
+        // For arcPolygons which represent single circles, we always want four vertices.
         // For all others, we want two endpoints and an extra vertex
         // for every 90°. Yes, that does mean that for circles with a single
         // tangency point, which are not considered closed, we'll end up
         // with five control points instead of four -- that's correct, because
         // we need both endpoints' control points associated to this circle to
         // participate in approximating it.
-        const vertexCount = closed ? 4 : (1 + Math.floor(4 * arc.fractionalLength));
-        const segmentCount = closed ? vertexCount : (vertexCount - 1);
-        
+        const vertexCount = singleCircle ? 5 : (1 + Math.floor(4 * arc.fractionalLength));
+        const segmentCount = vertexCount - 1;
+
         const angularStep = (arc.endAngle - arc.startAngle) / segmentCount;
         const cpAmplitude = radius * K4 * arc.fractionalLength / segmentCount;
         const trigSign = arc.isClockwise ? -1 : 1;
@@ -141,13 +142,13 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
  * Bezier anchor entities used by your rendering engine of choice.
  * Take a look at @see bezierPolygonArc() to see how this is supposed to be integrated
  * into your code.
- * @param vertices An array of conventional arcs, as produced by @see arcsToVertices()
+ * @param arcs An array of conventional arcs, as produced by @see arcsToVertices()
  * @param anchorCallback A callback mapping conventional vertex pairs unto concrete Bezier anchor entities.
  */
-function verticesToAnchors<TAnchor>(vertices: IArcDTO[], anchorCallback: (vertex: IBezierVertex) => TAnchor): TAnchor[] {
+function verticesToAnchors<TAnchor>(arcs: IArcDTO[], anchorCallback: (vertex: IBezierVertex) => TAnchor): TAnchor[] {
     const anchors: TAnchor[] = [];
-    for (let arcIndex = 0; arcIndex < vertices.length; arcIndex++) {
-        const arcMeta = vertices[arcIndex];
+    for (let arcIndex = 0; arcIndex < arcs.length; arcIndex++) {
+        const arcMeta = arcs[arcIndex];
 
         // The last vertex is never drawn, since it would overlap the first vertex on the next arc.
         // Instead, collect the left CP from the last vertex on the previous arc when drawing
@@ -160,13 +161,13 @@ function verticesToAnchors<TAnchor>(vertices: IArcDTO[], anchorCallback: (vertex
                 continue;
             }
 
-            let prevMeta: IArcDTO;
+            let prevArcMeta: IArcDTO;
             if (arcIndex === 0) {
-                prevMeta = vertices[vertices.length - 1];
+                prevArcMeta = arcs[arcs.length - 1];
             } else {
-                prevMeta = vertices[arcIndex - 1];
+                prevArcMeta = arcs[arcIndex - 1];
             }
-            anchors.push(concreteAnchor(currV, prevMeta.vertices[prevMeta.vertices.length - 1], anchorCallback));
+            anchors.push(concreteAnchor(currV, prevArcMeta.vertices[prevArcMeta.vertices.length - 1], anchorCallback));
         }
     }
 
