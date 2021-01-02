@@ -107,21 +107,20 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
         const yc = arc.circle.center.y;
 
         // For arcPolygons which represent single circles, we always want four vertices.
-        // For all others, we want two endpoints and an extra vertex
+        // For all others, we want one starting endpoint and an extra vertex
         // for every 90°. Yes, that does mean that for circles with a single
         // tangency point, which are not considered closed, we'll end up
         // with five control points instead of four -- that's correct, because
         // we need both endpoints' control points associated to this circle to
         // participate in approximating it.
-        const vertexCount = singleCircle ? 5 : (2 + Math.floor(4 * arc.fractionalLength));
-        const segmentCount = vertexCount - 1;
+        const segmentCount = singleCircle ? 4 : (1 + Math.floor(4 * arc.fractionalLength));
 
         const angularStep = (arc.endAngle - arc.startAngle) / segmentCount;
         const cpAmplitude = radius * K4 * arc.fractionalLength / segmentCount;
         const trigSign = arc.isClockwise ? -1 : 1;
 
         // Also compute the control points for the final vertex
-        for (let vIndex = 0; vIndex < vertexCount; vIndex++) {
+        for (let vIndex = 0; vIndex < segmentCount + 1; vIndex++) {
             const vertexAngle = arc.startAngle + angularStep * vIndex;
             const sinAng = Math.sin(vertexAngle);
             const cosAng = Math.cos(vertexAngle);
@@ -162,10 +161,10 @@ function verticesToAnchors<TAnchor>(arcs: IArcDTO[], anchorCallback: (vertex: IB
             }
 
             let prevArcMeta: IArcDTO;
-            if (arcIndex === 0) {
-                prevArcMeta = arcs[arcs.length - 1];
-            } else {
+            if (arcIndex !== 0) {
                 prevArcMeta = arcs[arcIndex - 1];
+            } else {
+                prevArcMeta = arcs[arcs.length - 1];
             }
             anchors.push(concreteAnchor(currV, prevArcMeta.vertices[prevArcMeta.vertices.length - 1], anchorCallback));
         }
