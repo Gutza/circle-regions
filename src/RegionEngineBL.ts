@@ -181,7 +181,9 @@ export class RegionEngineBL {
             circle.parents = circle.children.filter(parent => !staleCircles.includes(parent));
         });
 
-        const remainingNodes: GraphNode[] = [];
+        // TODO: Revisit the BL below, it looks rather sketchy (probably patched several times).
+
+        let remainingNodes: GraphNode[] = [];
         this._nodes.forEach(node => {
             node.touched = false;
             let isNodeFresh = true;
@@ -206,19 +208,36 @@ export class RegionEngineBL {
             }
         });
         this._nodes = remainingNodes;
+        
+        // Remove nodes which only contain one circle
+        remainingNodes = [];
+        this._nodes.forEach(node => {
+            if (1 >= node.tangencyCollection.tangencyGroups.reduce<number>((prevV, tanGroup) => prevV + tanGroup.elements.size, 0)) {
+                node.tangencyCollection.tangencyGroups.forEach(tg => {
+                    tg.elements.forEach(tge => {
+                        tge.circle.removeVertexByNode(node);
+                    })
+                })
+                return;
+            }
+            remainingNodes.push(node);
+        });
+        this._nodes = remainingNodes;
 
         // Let's also delete the edges and regions involving the deleted circles,
         // so we can reset the deletedCircles array ASAP and get it out of the way.
-        this.removeStaleRegions(this._deletedCircles);
-        this._edges.forEach((edge, id) => {
-            if (!this._deletedCircles.includes(edge.circle)) {
-                return;
-            }
+        if (this._deletedCircles.length > 0) {
+            this.removeStaleRegions(this._deletedCircles);
+            this._edges.forEach((edge, id) => {
+                if (!this._deletedCircles.includes(edge.circle)) {
+                    return;
+                }
 
-            this._edges.delete(id);
-            this._nodes.forEach(node => node.removeEdge(edge));
-        });
-        this._deletedCircles = [];
+                this._edges.delete(id);
+                this._nodes.forEach(node => node.removeEdge(edge));
+            });
+            this._deletedCircles = [];
+        }
     }
 
     /**
