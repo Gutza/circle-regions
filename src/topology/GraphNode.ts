@@ -462,11 +462,10 @@ export default class GraphNode {
         }
 
         if (isTangencyContour) {
-            const thisCircle = currentEdge.circle;
-            if (currentDirection === ETraversalDirection.backward) {
-                thisCircle.isExposed = true;
+            if (currentDirection === ETraversalDirection.forward) {
+                currentEdge.circle.isEmpty = true;
             } else {
-                thisCircle.isExposed = true;
+                currentEdge.circle.isExposed = true;
             }
         }
     }

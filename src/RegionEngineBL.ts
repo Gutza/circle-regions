@@ -340,7 +340,8 @@ export class RegionEngineBL {
     protected refreshRegions = (cycles: IGraphCycle[]): void => {
         this._circles.forEach(circle => {
             if (circle.vertices.length === 0) {
-                circle.isExposed = circle.isEmpty = true;
+                circle.isExposed = true;
+                circle.isEmpty = true;
             }
             if (circle.isEmpty && !this._regions.includes(circle.innerRegion)) {
                 this._regions.push(circle.innerRegion);
