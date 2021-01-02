@@ -63,14 +63,26 @@ export class RegionEngineBL {
         this._staleRegions = false;
 
         // TODO: This is just sanity check; it can be removed when the code is mature enough.
-        if (this._regions.some(regionElement => regionElement instanceof Circle && regionElement.isOuterContour)) {
+        let someArcPolygons = false;
+        for (let i = 0; i < this._regions.length; i++) {
+            const regionElement = this._regions[i];
+            if (regionElement instanceof Circle) {
+                if (regionElement.isOuterContour) {
+                    return;
+                }
+                continue;
+            }
+            
+            if (regionElement.regionType == ERegionType.outerContour) {
+                return;
+            }
+            someArcPolygons = true;
+        }
+        if (!someArcPolygons) {
             return;
         }
 
-        const arcPolygons = this._regions.filter(regionElement => regionElement instanceof ArcPolygon);
-        if (arcPolygons.length > 0 && !arcPolygons.some(ap => (ap as ArcPolygon).regionType === ERegionType.outerContour)) {
-            throw new Error("This region set has no outer contours!");
-        }
+        throw new Error("This region set has no outer contours!");
     }
 
     protected onCircleChange = (circle: Circle) => {
@@ -78,24 +90,20 @@ export class RegionEngineBL {
         this.emit(EDrawableEventType.redraw, circle);
     }
 
-    protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): GraphNode => {
-        circle1.isStale = true;
-        circle2.isStale = true;
+    protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): void => {
+        circle1.setStale();
+        circle2.setStale();
 
-        let sameCoordinates = this._nodes.find(n =>
-            n.coordinates.roundedPoint.x === intersectionPoint.roundedPoint.x &&
-            n.coordinates.roundedPoint.y === intersectionPoint.roundedPoint.y
-        );
+        let sameCoordinates = this._nodes.find(n => n.coordinates.equals(intersectionPoint));
 
         if (sameCoordinates !== undefined) {
             sameCoordinates.addCirclePair(circle1, circle2, intersectionType);
-            return sameCoordinates;
+            return;
         }
         
         const newNode = new GraphNode(intersectionPoint);
         newNode.addCirclePair(circle1, circle2, intersectionType);
         this._nodes.push(newNode);
-        return newNode;
     }
 
     protected extractGraphCycle(startEdge: GraphEdge, direction: ETraversalDirection): IGraphCycle | null {
@@ -476,7 +484,8 @@ export class RegionEngineBL {
             throw new Error("Attempting to intersect a circle with an identical one! (different instance, same coordinates)");
         }
     
-        // Math.sqrt(a**2 + b**2) is more precise than Math.hypot(a, b)
+        // Math.sqrt(a**2 + b**2) is slightly safer than Math.hypot(a, b); try running the mocha tests with this instead:
+        // const centerDist = Math.hypot(circle1.center.x - circle2.center.x, circle1.center.y - circle2.center.y);
         const centerDist = Math.sqrt((circle1.center.x - circle2.center.x) ** 2 + (circle1.center.y - circle2.center.y) ** 2);
         const roundedCenterDist = round(centerDist);
         if (roundedCenterDist > round(circle1.radius + circle2.radius)) {

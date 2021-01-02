@@ -193,7 +193,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._bbox = undefined;
         this._roundedBbox = undefined;
         this._vertices = [];
-        this.isStale = true;
+        this.setStale();
     }
 
     /**

@@ -66,7 +66,7 @@ export class RegionEngine extends RegionEngineBL {
             throw new Error(`Duplicate circle: new instance C(${circle.center.x}, ${circle.center.y})R${circle.radius}`);
         }
 
-        circle.isStale = true;
+        circle.setStale();
         circle.onGeometryChange = () => this.onCircleChange(circle);
         this._circles.push(circle);
     }
