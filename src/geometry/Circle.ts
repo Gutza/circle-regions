@@ -5,6 +5,7 @@ import { round } from "./utils/numbers";
 import { Point } from "./Point";
 import { PureGeometry } from "./PureGeometry";
 import { TWO_PI } from "./utils/angles";
+import { xor } from "./utils/xor";
 
 /**
  * The main circle class. You can instantiate new circles either by calling
@@ -105,6 +106,11 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this.emit(EGeometryEventType.move);
     }
 
+    /**
+     * Adds a new vertex to this circle. If genuinely new, this will also
+     * cause vertices to be re-sorted, and the circle to be maked as stale.
+     * @param vertex The vertex to add.
+     */
     public addVertex(vertex: CircleVertex) {
         if (this._vertices.includes(vertex) || this._vertices.some(v => v.node === vertex.node)) {
             return;
@@ -115,6 +121,12 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this.setStale();
     }
 
+    /**
+     * Removes an existing vertex from this circle. If present, this will also
+     * cause the circle to be marked as stale, but the vertices won't be re-sorted
+     * (removing elements doesn't alter sorting).
+     * @param node The vertex to remove.
+     */
     public removeVertexByNode(node: GraphNode) {
         if (!this._vertices.some(v => v.node === node)) {
             return;
@@ -122,7 +134,6 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
         this._vertices = this._vertices.filter(v => v.node !== node);
         this.setStale();
-        // they are still sorted
     }
 
     public getVertexByNode(node: GraphNode): CircleVertex | undefined {
@@ -130,7 +141,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     }
 
     /**
-     * Retrieve this circle's vertices (i.e. intersection points with other circles)
+     * Retrieve this circle's vertices (i.e. intersection points with other circles).
      */
     public get vertices(): CircleVertex[] {
         if (this._sortedVertices) {
@@ -150,7 +161,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     }
 
     /**
-     * This circle's radius.
+     * Retrieve this circle's radius.
      */
     get radius(): number {
         return this._radius;
@@ -265,10 +276,9 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         );
     }
 
-    // TODO: This is not particularly conductive to lazy evaluation, could it be done more efficiently for most cases?
     public boundingBoxOverlap = (that: Circle): boolean => (
-        Math.sign(this.boundingBox.minPoint.x - that.boundingBox.maxPoint.x) != Math.sign(this.boundingBox.maxPoint.x - that.boundingBox.minPoint.x) &&
-        Math.sign(this.boundingBox.minPoint.y - that.boundingBox.maxPoint.y) != Math.sign(this.boundingBox.maxPoint.y - that.boundingBox.minPoint.y)
+        xor(this.boundingBox.minPoint.x < that.boundingBox.maxPoint.x, this.boundingBox.maxPoint.x < that.boundingBox.minPoint.x) &&
+        xor(this.boundingBox.minPoint.y < that.boundingBox.maxPoint.y, this.boundingBox.maxPoint.y < that.boundingBox.minPoint.y)
     );
 
     public equals = (that: Circle): boolean => (

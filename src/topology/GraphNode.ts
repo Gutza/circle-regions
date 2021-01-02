@@ -19,6 +19,7 @@ export default class GraphNode {
     public addCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType) {
         if (!this.touched) {
             // TODO: Shouldn't we also reset the tangency collection at this point?
+            // TODO: Also, is this safe? We essentially remove edges, but only from nodes!
             this._edges = new Map();
             this.touched = true;
         }
