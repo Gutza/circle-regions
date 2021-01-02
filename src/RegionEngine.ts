@@ -1,11 +1,7 @@
-import { Circle } from "./geometry/Circle";
-import { EDrawableEventType, ERegionDebugMode } from "./Types";
+import { Circle, EDrawableEventType, ERegionDebugMode, Point, ArcPolygon, RegionError } from ".";
 import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
 import { DebugEngine } from "./DebugEngine";
-import { RegionError } from "./geometry/utils/RegionError";
-import { Point } from "./geometry/Point";
-import { ArcPolygon } from "./geometry/ArcPolygon";
 
 /**
  * The main engine for computing regions resulted from intersecting circles.

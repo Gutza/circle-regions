@@ -1,10 +1,7 @@
-import { Circle, Point } from ".";
-import { ArcPolygon } from "./geometry/ArcPolygon";
-import { CircleArc } from "./geometry/CircleArc";
+import { Circle, Point, ArcPolygon, CircleArc } from ".";
 import CircleVertex from "./geometry/CircleVertex";
 import { HALF_PI, TWO_PI } from "./geometry/utils/angles";
 import { round } from "./geometry/utils/numbers";
-import { xor } from "./geometry/utils/xor";
 import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 

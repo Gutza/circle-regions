@@ -1,4 +1,4 @@
-import { Circle } from "../Circle";
+import { Circle } from "../geometry/Circle";
 
 export class RegionError extends Error {
     private _innerError: Error;
