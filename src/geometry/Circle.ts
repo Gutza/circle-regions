@@ -326,6 +326,10 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         };
     }
 
+    private _getContour = (isClockwise: boolean): CircleArc => (
+        new CircleArc(this, 0, 0, this.zeroPoint, this.zeroPoint, isClockwise)
+    );
+
     private _innerContour?: ArcPolygon;
     public get innerContour(): ArcPolygon {
         if (this._innerContour !== undefined) {
@@ -333,7 +337,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         }
 
         return this._innerContour = new ArcPolygon(
-            [new CircleArc(this, 0, TWO_PI, this.zeroPoint, this.zeroPoint, false)],
+            [this._getContour(false)],
             ERegionType.region
         );
     }
@@ -345,7 +349,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         }
 
         return this._outerContour = new ArcPolygon(
-            [new CircleArc(this, TWO_PI, 0, this.zeroPoint, this.zeroPoint, true)],
+            [this._getContour(true)],
             ERegionType.outerContour
         );
     }

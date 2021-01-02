@@ -1,5 +1,6 @@
 import { IPoint } from "../../Types";
 import { ArcPolygon } from "../ArcPolygon";
+import { makeSafeRenderingArc } from "./helperHelpers";
 
 /**
  * The main convenience Bezier function -- it rolls together all necessary logic and callbacks
@@ -95,7 +96,7 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
 
     const singleCircle = arcPolygon.arcs.length == 1;
     for (let arcIndex = 0; arcIndex < arcPolygon.arcs.length; arcIndex++) {
-        const arc = arcPolygon.arcs[arcIndex];
+        const arc = makeSafeRenderingArc(arcPolygon.arcs[arcIndex]);
         const arcMeta: IArcDTO = {
             vertices: [],
             singleCircle: singleCircle,
