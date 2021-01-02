@@ -55,7 +55,6 @@ export interface FOnGeometryEvent {
 export enum EDrawableEventType {
     delete = "delete",
     add = "add",
-    redraw = "redraw",
 }
 
 export interface FOnDrawableEvent {
