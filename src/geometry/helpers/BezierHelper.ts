@@ -106,13 +106,14 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
         const xc = arc.circle.center.x;
         const yc = arc.circle.center.y;
 
-        // For arcPolygons which represent single circles, we always want four vertices.
-        // For all others, we want one starting endpoint and an extra vertex
-        // for every 90°. Yes, that does mean that for circles with a single
-        // tangency point, which are not considered closed, we'll end up
-        // with five control points instead of four -- that's correct, because
-        // we need both endpoints' control points associated to this circle to
-        // participate in approximating it.
+        // For arcPolygons which represent single circles, we always want
+        // four segments.
+        // For all other arcPolygons, we want at least one segment, plus an
+        // additional one for every full 90°. Yes, that does mean that for
+        // circles with a single tangency point, which by definition are not
+        // single circles, we'll end up with five control points -- that's
+        // correct, because we need both endpoints' control points associated
+        // to this circle to participate in approximating it.
         const segmentCount = singleCircle ? 4 : (1 + Math.floor(4 * arc.fractionalLength));
 
         const angularStep = (arc.endAngle - arc.startAngle) / segmentCount;
