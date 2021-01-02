@@ -58,10 +58,8 @@ export enum EDrawableEventType {
     redraw = "redraw",
 }
 
-export type TDrawableGeometry = Circle | ArcPolygon;
-
 export interface FOnDrawableEvent {
-    (eventType: EDrawableEventType, entity: TDrawableGeometry): void;
+    (eventType: EDrawableEventType, arcPolygon: ArcPolygon): void;
 }
 
 export enum ETangencyType {

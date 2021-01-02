@@ -69,9 +69,8 @@ export class RegionEngineBL {
         throw new Error("This region set has no outer contours!");
     }
 
-    protected onCircleChange = (circle: Circle) => {
+    protected onCircleChange = () => {
         this._staleRegions = true;
-        this.emit(EDrawableEventType.redraw, circle);
     }
 
     protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): void => {

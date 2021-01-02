@@ -2,8 +2,8 @@ import { IDrawable, ERegionType } from "../Types";
 import { CircleArc } from "./CircleArc";
 
 /**
- * Imagine a polygon with edges made of circle arcs
- * instead of line segments. This is that.
+ * A a polygon with edges made of circle arcs
+ * instead of line segments.
  */
 export class ArcPolygon implements IDrawable {
     public shape: object | undefined;

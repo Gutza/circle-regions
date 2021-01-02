@@ -27,11 +27,10 @@ export class RegionEngine extends RegionEngineBL {
         this._nodes = [];
         this._edges = new Map();
         
-        this._circles.forEach(circle => this.emit(EDrawableEventType.delete, circle));
-        this._circles = [];
-        
         this._regions.forEach(region => this.emit(EDrawableEventType.delete, region));
         this._regions = [];
+        this._circles = [];
+
         this._staleRegions = false;
     }
 
@@ -68,7 +67,7 @@ export class RegionEngine extends RegionEngineBL {
         }
 
         circle.setStale();
-        circle.onGeometryChange = () => this.onCircleChange(circle);
+        circle.onGeometryChange = () => this.onCircleChange();
         this._circles.push(circle);
     }
 
