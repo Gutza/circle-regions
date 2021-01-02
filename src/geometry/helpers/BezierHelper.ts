@@ -91,6 +91,9 @@ const K4 = 4 * (Math.SQRT2 - 1) * (4 / 3);
  */
 function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
     const arcMetas: IArcDTO[] = [];
+
+    // Closed arcPolygons are complete, stand-alone circles.
+    const closed = arcPolygon.arcs.length == 1;
     for (let arcIndex = 0; arcIndex < arcPolygon.arcs.length; arcIndex++) {
         const arc = arcPolygon.arcs[arcIndex];
         const arcMeta: IArcDTO = {
@@ -102,10 +105,15 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
         const xc = arc.circle.center.x;
         const yc = arc.circle.center.y;
 
-        // Two endpoints, plus one extra vertex for every 120 degrees.
-        // That's at most 2 + 2 = 4 vertices, since all arcs are less than 360 degrees.
-        // As such, each individual Bezier curve approximates an arc segment less than 90 degrees.
-        const vertexCount = 2 + Math.floor(3 * arc.fractionalLength);
+        // For closed arcPolygons, we always want four vertices.
+        // For all others, we want two endpoints and an extra vertex
+        // for every 90°. Yes, that does mean that for circles with a single
+        // tangency point, which are not considered closed, we'll end up
+        // with five control points instead of four -- that's correct, because
+        // we need both endpoints' control points associated to this circle to
+        // participate in approximating it.
+        const vertexCount = closed ? 4 : 1 + Math.floor(4 * arc.fractionalLength);
+        
         const segmentCount = vertexCount - 1;
         const angularStep = (arc.endAngle - arc.startAngle) / segmentCount;
         const cpAmplitude = radius * K4 * arc.fractionalLength / segmentCount;
