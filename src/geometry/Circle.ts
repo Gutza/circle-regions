@@ -345,7 +345,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         }
 
         return this._outerContour = new ArcPolygon(
-            [new CircleArc(this, 0, TWO_PI, this.zeroPoint, this.zeroPoint, true)],
+            [new CircleArc(this, TWO_PI, 0, this.zeroPoint, this.zeroPoint, true)],
             ERegionType.outerContour
         );
     }
