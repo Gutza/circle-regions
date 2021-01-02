@@ -1,4 +1,4 @@
-import { EGeometryEventType, IBoundingBox, IDrawable, IRegion } from "../Types";
+import { EGeometryEventType, ERegionType, IBoundingBox, IDrawable, IPoint, IRegion } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { round } from "./utils/numbers";
@@ -6,6 +6,8 @@ import { Point } from "./Point";
 import { PureGeometry } from "./PureGeometry";
 import { TWO_PI } from "./utils/angles";
 import { xor } from "./utils/xor";
+import { ArcPolygon } from "./ArcPolygon";
+import { CircleArc } from "./CircleArc";
 
 /**
  * The main circle class. You can instantiate new circles either by calling
@@ -17,8 +19,6 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     private static internalCounter: number = 0;
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
-    private _roundedBbox?: IBoundingBox;
-    private _roundedRadius?: number;
 
     /**
      * This is a stand-alone circle, and it should be rendered as two
@@ -61,11 +61,6 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
      * Internal cache for the circle's area.
      */
     private _area?: number;
-
-    /**
-     * Internal cache for the circle's perimeter.
-     */
-    private _perimeter?: number;
 
     private _bbox?: IBoundingBox;
 
@@ -184,12 +179,13 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     }
 
     /**
-     * Change this circle's radius.
+     * Resize this circle.
      */
     set radius(radius: number) {
         this._area = undefined;
         this._radius = radius;
         this._roundedRadius = undefined;
+        this._perimeter = undefined;
         this._resetCommonGeometryCaches();
         this.emit(EGeometryEventType.resize);
     }
@@ -197,6 +193,9 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     private _resetCommonGeometryCaches = () => {
         this._bbox = undefined;
         this._roundedBbox = undefined;
+        this._zeroPoint = undefined;
+        this._innerContour = undefined;
+        this._outerContour = undefined;
         this._vertices = [];
         this.setStale();
     }
@@ -229,6 +228,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         };
     }
 
+    private _roundedBbox?: IBoundingBox;
     public get roundedBoundingBox(): IBoundingBox {
         if (this._roundedBbox !== undefined) {
             return this._roundedBbox;
@@ -292,6 +292,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this.roundedRadius == that.roundedRadius
     );
 
+    private _roundedRadius?: number;
     public get roundedRadius(): number {
         if (this._roundedRadius !== undefined) {
             return this._roundedRadius;
@@ -304,6 +305,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         return this._internalId;
     }
 
+    private _perimeter?: number;
     public get perimeter(): number {
         if (this._perimeter !== undefined) {
             return this._perimeter;
@@ -311,5 +313,40 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
         this._perimeter = TWO_PI * this.radius;
         return this._perimeter;
+    }
+
+    private _zeroPoint?: IPoint;
+    public get zeroPoint(): IPoint {
+        if (this._zeroPoint !== undefined) {
+            return this._zeroPoint;
+        }
+        return this._zeroPoint = {
+            x: this.boundingBox.maxPoint.x,
+            y: this.center.y,
+        };
+    }
+
+    private _innerContour?: ArcPolygon;
+    public get innerContour(): ArcPolygon {
+        if (this._innerContour !== undefined) {
+            return this._innerContour;
+        }
+
+        return this._innerContour = new ArcPolygon(
+            [new CircleArc(this, 0, TWO_PI, this.zeroPoint, this.zeroPoint, false)],
+            ERegionType.region
+        );
+    }
+
+    private _outerContour?: ArcPolygon;
+    public get outerContour(): ArcPolygon {
+        if (this._outerContour !== undefined) {
+            return this._outerContour;
+        }
+
+        return this._outerContour = new ArcPolygon(
+            [new CircleArc(this, 0, TWO_PI, this.zeroPoint, this.zeroPoint, true)],
+            ERegionType.outerContour
+        );
     }
 }

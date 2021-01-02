@@ -9,7 +9,6 @@ import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
 import {
-    TCircleRegions,
     IGraphCycle,
     TIntersectionType,
     ETraversalDirection,
@@ -28,7 +27,7 @@ export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
     protected _edges: Map<string, GraphEdge> = new Map();
     protected _circles: Circle[] = [];
-    protected _regions: TCircleRegions = [];
+    protected _regions: ArcPolygon[] = [];
 
     /**
      * True if the regions need to be recomputed, false if they're still current.
@@ -63,22 +62,7 @@ export class RegionEngineBL {
         this._staleRegions = false;
 
         // TODO: This is just sanity check; it can be removed when the code is mature enough.
-        let someArcPolygons = false;
-        for (let i = 0; i < this._regions.length; i++) {
-            const regionElement = this._regions[i];
-            if (regionElement instanceof Circle) {
-                if (regionElement.isOuterContour) {
-                    return;
-                }
-                continue;
-            }
-
-            if (regionElement.regionType == ERegionType.outerContour) {
-                return;
-            }
-            someArcPolygons = true;
-        }
-        if (!someArcPolygons) {
+        if (this._regions.some(r => r.regionType == ERegionType.outerContour)) {
             return;
         }
 
@@ -162,10 +146,6 @@ export class RegionEngineBL {
     
     protected removeStaleRegions = (staleCircles: Circle[]): void => {
         this._regions = this._regions.filter(region => {
-            if (region instanceof Circle) {
-                return true;
-            }
-
             if (region.arcs.every(arc => !staleCircles.includes(arc.circle))) {
                 return true;
             }
@@ -359,38 +339,16 @@ export class RegionEngineBL {
 
     // (5/5)
     protected refreshRegions = (cycles: IGraphCycle[]): void => {
-        const deleteIndices: number[] = [];
-        
-        // Deleting regions because they used to be stand-alone circles and now are
-        // not anymore stand-alone is statistically rare; we don't want to re-initialize
-        // the regions array unconditionally every time.
-        this._regions.forEach((region, index) => {
-            if (region instanceof ArcPolygon || region.vertices.length === 0) {
-                return;
-            }
-            deleteIndices.push(index);
-        });
-        if (deleteIndices.length > 0) {
-            this._regions = this._regions.filter((region, index) => {
-                if (!deleteIndices.includes(index)) {
-                    return true;
-                }
-                this.emit(EDrawableEventType.delete, region);
-                return false;
-            });
-        }
-
         this._circles.forEach(circle => {
-            circle.isRegion = circle.vertices.length === 0;
-            if (circle.isOuterContour) {
-                this._regions.push(circle);
-                return;
+            const isRegion = circle.vertices.length === 0;
+            if (isRegion && !this._regions.includes(circle.innerContour)) {
+                this._regions.push(circle.innerContour);
+                this.emit(EDrawableEventType.add, circle.innerContour);
             }
-            if (circle.vertices.length !== 0 || this._regions.includes(circle)) {
-                return;
+            if ((isRegion || circle.isOuterContour) && !this._regions.includes(circle.outerContour)) {
+                this._regions.push(circle.outerContour);
+                this.emit(EDrawableEventType.add, circle.outerContour);
             }
-            this._regions.push(circle);
-            this.emit(EDrawableEventType.add, circle);
         });
 
         cycles.forEach(cycle => {

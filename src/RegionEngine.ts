@@ -1,10 +1,11 @@
 import { Circle } from "./geometry/Circle";
-import { EDrawableEventType, ERegionDebugMode, TCircleRegions } from "./Types";
+import { EDrawableEventType, ERegionDebugMode } from "./Types";
 import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
 import { DebugEngine } from "./DebugEngine";
 import { RegionError } from "./geometry/utils/RegionError";
 import { Point } from "./geometry/Point";
+import { ArcPolygon } from "./geometry/ArcPolygon";
 
 /**
  * The main engine for computing regions resulted from intersecting circles.
@@ -98,7 +99,7 @@ export class RegionEngine extends RegionEngineBL {
      * This method is the cheapest of all, if nothing changed since the last time it was called,
      * or the most expensive of all, if everything changed.
      */
-    public computeRegions(): TCircleRegions {
+    public computeRegions(): ArcPolygon[] {
         if (!this._staleRegions) {
             return this._regions;
         }
