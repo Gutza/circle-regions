@@ -113,7 +113,7 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
         // with five control points instead of four -- that's correct, because
         // we need both endpoints' control points associated to this circle to
         // participate in approximating it.
-        const vertexCount = singleCircle ? 5 : (1 + Math.floor(4 * arc.fractionalLength));
+        const vertexCount = singleCircle ? 5 : (2 + Math.floor(4 * arc.fractionalLength));
         const segmentCount = vertexCount - 1;
 
         const angularStep = (arc.endAngle - arc.startAngle) / segmentCount;
