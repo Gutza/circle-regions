@@ -1,6 +1,6 @@
 {
   "name": "circle-regions",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "Circle Intersection Regions",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
