@@ -44,7 +44,7 @@ export class TanGroupCollection {
 
     public removeEmptyGroups = (): boolean => {
        const prevCount = this.tangencyGroups.length;
-       this.tangencyGroups = this.tangencyGroups.filter(tanGroup => tanGroup.elements.size === 0);
+       this.tangencyGroups = this.tangencyGroups.filter(tanGroup => tanGroup.elements.size > 0);
        return prevCount !== this.tangencyGroups.length;
     }
 }
