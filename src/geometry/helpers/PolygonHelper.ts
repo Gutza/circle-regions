@@ -1,5 +1,6 @@
 import { IPoint } from "../../Types";
 import { ArcPolygon } from "../ArcPolygon";
+import { makeSafeRenderingArc } from "./helperHelpers";
 
 const DEFAULT_RESOLUTION = 0.1;
 
@@ -38,7 +39,8 @@ function arcsToVertices (arcPolygon: ArcPolygon, resolution: number): IPoint[] {
     const vertices: IPoint[] = new Array(vertexCount);
 
     let vertexIndex = 0;
-    arcPolygon.arcs.forEach(arc => {
+    arcPolygon.arcs.forEach(unsafeArc => {
+        const arc = makeSafeRenderingArc(unsafeArc);
         const { startAngle, endAngle, totalLength } = arc;
         const { x: centerX, y: centerY } = arc.circle.center;
         const radius = arc.circle.radius;

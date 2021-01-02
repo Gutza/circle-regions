@@ -1,10 +1,11 @@
 import { Circle } from "./geometry/Circle";
-import { EDrawableEventType, ERegionDebugMode, TCircleRegions } from "./Types";
+import { EDrawableEventType, ERegionDebugMode } from "./Types";
 import GraphNode from "./topology/GraphNode";
 import { RegionEngineBL } from "./RegionEngineBL";
 import { DebugEngine } from "./DebugEngine";
 import { RegionError } from "./geometry/utils/RegionError";
 import { Point } from "./geometry/Point";
+import { ArcPolygon } from "./geometry/ArcPolygon";
 
 /**
  * The main engine for computing regions resulted from intersecting circles.
@@ -26,11 +27,10 @@ export class RegionEngine extends RegionEngineBL {
         this._nodes = [];
         this._edges = new Map();
         
-        this._circles.forEach(circle => this.emit(EDrawableEventType.delete, circle));
-        this._circles = [];
-        
         this._regions.forEach(region => this.emit(EDrawableEventType.delete, region));
         this._regions = [];
+        this._circles = [];
+
         this._staleRegions = false;
     }
 
@@ -66,8 +66,8 @@ export class RegionEngine extends RegionEngineBL {
             throw new Error(`Duplicate circle: new instance C(${circle.center.x}, ${circle.center.y})R${circle.radius}`);
         }
 
-        circle.isStale = true;
-        circle.onGeometryChange = () => this.onCircleChange(circle);
+        circle.setStale();
+        circle.onGeometryChange = () => this.onCircleChange();
         this._circles.push(circle);
     }
 
@@ -98,7 +98,7 @@ export class RegionEngine extends RegionEngineBL {
      * This method is the cheapest of all, if nothing changed since the last time it was called,
      * or the most expensive of all, if everything changed.
      */
-    public computeRegions(): TCircleRegions {
+    public computeRegions(): ArcPolygon[] {
         if (!this._staleRegions) {
             return this._regions;
         }

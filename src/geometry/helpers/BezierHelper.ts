@@ -1,5 +1,6 @@
 import { IPoint } from "../../Types";
 import { ArcPolygon } from "../ArcPolygon";
+import { makeSafeRenderingArc } from "./helperHelpers";
 
 /**
  * The main convenience Bezier function -- it rolls together all necessary logic and callbacks
@@ -73,6 +74,7 @@ interface IInternalVertexDTO {
  * in this context, it always holds circle arcs.
  */
 interface IArcDTO {
+    singleCircle: boolean,
     vertices: IInternalVertexDTO[],
 }
 
@@ -91,10 +93,13 @@ const K4 = 4 * (Math.SQRT2 - 1) * (4 / 3);
  */
 function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
     const arcMetas: IArcDTO[] = [];
+
+    const singleCircle = arcPolygon.arcs.length == 1;
     for (let arcIndex = 0; arcIndex < arcPolygon.arcs.length; arcIndex++) {
-        const arc = arcPolygon.arcs[arcIndex];
+        const arc = makeSafeRenderingArc(arcPolygon.arcs[arcIndex]);
         const arcMeta: IArcDTO = {
             vertices: [],
+            singleCircle: singleCircle,
         };
         arcMetas.push(arcMeta);
 
@@ -102,17 +107,22 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
         const xc = arc.circle.center.x;
         const yc = arc.circle.center.y;
 
-        // Two endpoints, plus one extra vertex for every 120 degrees.
-        // That's at most 2 + 2 = 4 vertices, since all arcs are less than 360 degrees.
-        // As such, each individual Bezier curve approximates an arc segment less than 90 degrees.
-        const vertexCount = 2 + Math.floor(3 * arc.fractionalLength);
-        const segmentCount = vertexCount - 1;
+        // For arcPolygons which represent single circles, we always want
+        // four segments.
+        // For all other arcPolygons, we want at least one segment, plus an
+        // additional one for every full 90°. Yes, that does mean that for
+        // circles with a single tangency point, which by definition are not
+        // single circles, we'll end up with five control points -- that's
+        // correct, because we need both endpoints' control points associated
+        // to this circle to participate in approximating it.
+        const segmentCount = singleCircle ? 4 : (1 + Math.floor(4 * arc.fractionalLength));
+
         const angularStep = (arc.endAngle - arc.startAngle) / segmentCount;
         const cpAmplitude = radius * K4 * arc.fractionalLength / segmentCount;
         const trigSign = arc.isClockwise ? -1 : 1;
 
         // Also compute the control points for the final vertex
-        for (let vIndex = 0; vIndex < vertexCount; vIndex++) {
+        for (let vIndex = 0; vIndex < segmentCount + 1; vIndex++) {
             const vertexAngle = arc.startAngle + angularStep * vIndex;
             const sinAng = Math.sin(vertexAngle);
             const cosAng = Math.cos(vertexAngle);
@@ -133,13 +143,13 @@ function arcsToVertices(arcPolygon: ArcPolygon): IArcDTO[] {
  * Bezier anchor entities used by your rendering engine of choice.
  * Take a look at @see bezierPolygonArc() to see how this is supposed to be integrated
  * into your code.
- * @param vertices An array of conventional arcs, as produced by @see arcsToVertices()
+ * @param arcs An array of conventional arcs, as produced by @see arcsToVertices()
  * @param anchorCallback A callback mapping conventional vertex pairs unto concrete Bezier anchor entities.
  */
-function verticesToAnchors<TAnchor>(vertices: IArcDTO[], anchorCallback: (vertex: IBezierVertex) => TAnchor): TAnchor[] {
+function verticesToAnchors<TAnchor>(arcs: IArcDTO[], anchorCallback: (vertex: IBezierVertex) => TAnchor): TAnchor[] {
     const anchors: TAnchor[] = [];
-    for (let arcIndex = 0; arcIndex < vertices.length; arcIndex++) {
-        const arcMeta = vertices[arcIndex];
+    for (let arcIndex = 0; arcIndex < arcs.length; arcIndex++) {
+        const arcMeta = arcs[arcIndex];
 
         // The last vertex is never drawn, since it would overlap the first vertex on the next arc.
         // Instead, collect the left CP from the last vertex on the previous arc when drawing
@@ -152,13 +162,13 @@ function verticesToAnchors<TAnchor>(vertices: IArcDTO[], anchorCallback: (vertex
                 continue;
             }
 
-            let prevMeta: IArcDTO;
-            if (arcIndex === 0) {
-                prevMeta = vertices[vertices.length - 1];
+            let prevArcMeta: IArcDTO;
+            if (arcIndex !== 0) {
+                prevArcMeta = arcs[arcIndex - 1];
             } else {
-                prevMeta = vertices[arcIndex - 1];
+                prevArcMeta = arcs[arcs.length - 1];
             }
-            anchors.push(concreteAnchor(currV, prevMeta.vertices[prevMeta.vertices.length - 1], anchorCallback));
+            anchors.push(concreteAnchor(currV, prevArcMeta.vertices[prevArcMeta.vertices.length - 1], anchorCallback));
         }
     }
 

@@ -1,10 +1,13 @@
-import { EGeometryEventType, IBoundingBox, IDrawable, IRegion } from "../Types";
+import { EGeometryEventType, ERegionType, IBoundingBox, IDrawable, IPoint, IRegion } from "../Types";
 import CircleVertex from "./CircleVertex";
 import GraphNode from "../topology/GraphNode";
 import { round } from "./utils/numbers";
 import { Point } from "./Point";
 import { PureGeometry } from "./PureGeometry";
 import { TWO_PI } from "./utils/angles";
+import { xor } from "./utils/xor";
+import { ArcPolygon } from "./ArcPolygon";
+import { CircleArc } from "./CircleArc";
 
 /**
  * The main circle class. You can instantiate new circles either by calling
@@ -16,17 +19,18 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     private static internalCounter: number = 0;
     protected _vertices: CircleVertex[] = [];
     private _sortedVertices: boolean = true;
-    private _roundedBbox?: IBoundingBox;
-    private _roundedRadius?: number;
 
-    // TODO: Sort out isDisplayed and isOuterContour
     /**
-     * Boolean indicating whether this circle should ever be displayed as such (or whether it's split into arcs which make up region boundaries).
+     * This circle is completely empty: none if its points are shared with
+     * any other circle on the inside.
      */
-    public isDisplayed = false;
+    public isEmpty = false;
 
-    // TODO: Outer contour if the circle is alone, but never if it has parents
-    public isOuterContour: boolean = false;
+    /**
+     * This circle is completely exposed to the universe: none of its points
+     * are shared with any other circle on the outside.
+     */
+    public isExposed: boolean = false;
 
     public id: any;
     private _internalId: number;
@@ -55,11 +59,6 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
      * Internal cache for the circle's area.
      */
     private _area?: number;
-
-    /**
-     * Internal cache for the circle's perimeter.
-     */
-    private _perimeter?: number;
 
     private _bbox?: IBoundingBox;
 
@@ -96,7 +95,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
      */
     public setStale = () => {
         this.isStale = true;
-        this.isOuterContour = false;
+        this.isExposed = false;
     }
 
     public onCenterMove = () => {
@@ -105,6 +104,11 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this.emit(EGeometryEventType.move);
     }
 
+    /**
+     * Adds a new vertex to this circle. If genuinely new, this will also
+     * cause vertices to be re-sorted, and the circle to be maked as stale.
+     * @param vertex The vertex to add.
+     */
     public addVertex(vertex: CircleVertex) {
         if (this._vertices.includes(vertex) || this._vertices.some(v => v.node === vertex.node)) {
             return;
@@ -115,6 +119,12 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this.setStale();
     }
 
+    /**
+     * Removes an existing vertex from this circle. If present, this will also
+     * cause the circle to be marked as stale, but the vertices won't be re-sorted
+     * (removing elements doesn't alter sorting).
+     * @param node The vertex to remove.
+     */
     public removeVertexByNode(node: GraphNode) {
         if (!this._vertices.some(v => v.node === node)) {
             return;
@@ -122,7 +132,6 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
         this._vertices = this._vertices.filter(v => v.node !== node);
         this.setStale();
-        // they are still sorted
     }
 
     public getVertexByNode(node: GraphNode): CircleVertex | undefined {
@@ -130,7 +139,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     }
 
     /**
-     * Retrieve this circle's vertices (i.e. intersection points with other circles)
+     * Retrieve this circle's vertices (i.e. intersection points with other circles).
      */
     public get vertices(): CircleVertex[] {
         if (this._sortedVertices) {
@@ -150,7 +159,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     }
 
     /**
-     * This circle's radius.
+     * Retrieve this circle's radius.
      */
     get radius(): number {
         return this._radius;
@@ -168,12 +177,13 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     }
 
     /**
-     * Change this circle's radius.
+     * Resize this circle.
      */
     set radius(radius: number) {
         this._area = undefined;
         this._radius = radius;
         this._roundedRadius = undefined;
+        this._perimeter = undefined;
         this._resetCommonGeometryCaches();
         this.emit(EGeometryEventType.resize);
     }
@@ -181,8 +191,11 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     private _resetCommonGeometryCaches = () => {
         this._bbox = undefined;
         this._roundedBbox = undefined;
+        this._zeroPoint = undefined;
+        this._innerRegion = undefined;
+        this._outerContour = undefined;
         this._vertices = [];
-        this.isStale = true;
+        this.setStale();
     }
 
     /**
@@ -213,6 +226,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         };
     }
 
+    private _roundedBbox?: IBoundingBox;
     public get roundedBoundingBox(): IBoundingBox {
         if (this._roundedBbox !== undefined) {
             return this._roundedBbox;
@@ -265,10 +279,9 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         );
     }
 
-    // TODO: This is not particularly conductive to lazy evaluation, could it be done more efficiently for most cases?
     public boundingBoxOverlap = (that: Circle): boolean => (
-        Math.sign(this.boundingBox.minPoint.x - that.boundingBox.maxPoint.x) != Math.sign(this.boundingBox.maxPoint.x - that.boundingBox.minPoint.x) &&
-        Math.sign(this.boundingBox.minPoint.y - that.boundingBox.maxPoint.y) != Math.sign(this.boundingBox.maxPoint.y - that.boundingBox.minPoint.y)
+        xor(this.boundingBox.minPoint.x < that.boundingBox.maxPoint.x, this.boundingBox.maxPoint.x < that.boundingBox.minPoint.x) &&
+        xor(this.boundingBox.minPoint.y < that.boundingBox.maxPoint.y, this.boundingBox.maxPoint.y < that.boundingBox.minPoint.y)
     );
 
     public equals = (that: Circle): boolean => (
@@ -277,6 +290,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this.roundedRadius == that.roundedRadius
     );
 
+    private _roundedRadius?: number;
     public get roundedRadius(): number {
         if (this._roundedRadius !== undefined) {
             return this._roundedRadius;
@@ -289,6 +303,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         return this._internalId;
     }
 
+    private _perimeter?: number;
     public get perimeter(): number {
         if (this._perimeter !== undefined) {
             return this._perimeter;
@@ -296,5 +311,44 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
 
         this._perimeter = TWO_PI * this.radius;
         return this._perimeter;
+    }
+
+    private _zeroPoint?: IPoint;
+    public get zeroPoint(): IPoint {
+        if (this._zeroPoint !== undefined) {
+            return this._zeroPoint;
+        }
+        return this._zeroPoint = {
+            x: this.boundingBox.maxPoint.x,
+            y: this.center.y,
+        };
+    }
+
+    private _getContour = (isClockwise: boolean): CircleArc => (
+        new CircleArc(this, 0, 0, this.zeroPoint, this.zeroPoint, isClockwise)
+    );
+
+    private _innerRegion?: ArcPolygon;
+    public get innerRegion(): ArcPolygon {
+        if (this._innerRegion !== undefined) {
+            return this._innerRegion;
+        }
+
+        return this._innerRegion = new ArcPolygon(
+            [this._getContour(false)],
+            ERegionType.region
+        );
+    }
+
+    private _outerContour?: ArcPolygon;
+    public get outerContour(): ArcPolygon {
+        if (this._outerContour !== undefined) {
+            return this._outerContour;
+        }
+
+        return this._outerContour = new ArcPolygon(
+            [this._getContour(true)],
+            ERegionType.outerContour
+        );
     }
 }

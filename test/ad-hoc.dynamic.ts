@@ -15,7 +15,7 @@ const adHocData = [
             [[0,0,1,0],[1,0,1,1]],
             [[0,0,1,0],[1,0,3,1]]
         ],
-    },
+    }
 ]
 
 function buildCircle(circleMeta: number[]): Circle {

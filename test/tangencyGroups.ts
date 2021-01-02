@@ -3,7 +3,7 @@ import { Circle } from '../src/geometry/Circle';
 import { Point } from '../src/geometry/Point';
 import { RegionEngine } from '../src/RegionEngine';
 import GraphNode from '../src/topology/GraphNode';
-import { ETangencyParity } from '../src/Types';
+import { ERegionType, ETangencyParity } from '../src/Types';
 
 {
     // For starters, make sure this doesn't throw
@@ -14,6 +14,17 @@ import { ETangencyParity } from '../src/Types';
     engine.addCircle(new Circle(new Point(+0, 0), 3));
     engine.computeRegions();
 }
+
+describe("Simple tangency", () => {
+    const engine = new RegionEngine();
+    engine.add(245,164,50);
+    engine.add(305,244,50);
+    it("Simple tangency should work properly", done => {
+        const regions = engine.computeRegions();
+        assert.equal(regions.filter(r => r.regionType == ERegionType.outerContour).length, 1);
+        done();
+    });
+});
 
 const engine = new RegionEngine();
 engine.addCircle(new Circle(new Point(-1, 0), 1, "leftSmall"));

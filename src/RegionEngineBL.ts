@@ -9,7 +9,6 @@ import GraphEdge from "./topology/GraphEdge";
 import GraphNode from "./topology/GraphNode";
 
 import {
-    TCircleRegions,
     IGraphCycle,
     TIntersectionType,
     ETraversalDirection,
@@ -28,7 +27,7 @@ export class RegionEngineBL {
     protected _nodes: GraphNode[] = [];
     protected _edges: Map<string, GraphEdge> = new Map();
     protected _circles: Circle[] = [];
-    protected _regions: TCircleRegions = [];
+    protected _regions: ArcPolygon[] = [];
 
     /**
      * True if the regions need to be recomputed, false if they're still current.
@@ -63,39 +62,31 @@ export class RegionEngineBL {
         this._staleRegions = false;
 
         // TODO: This is just sanity check; it can be removed when the code is mature enough.
-        if (this._regions.some(regionElement => regionElement instanceof Circle && regionElement.isOuterContour)) {
+        if (this._regions.some(r => r.regionType == ERegionType.outerContour)) {
             return;
         }
 
-        const arcPolygons = this._regions.filter(regionElement => regionElement instanceof ArcPolygon);
-        if (arcPolygons.length > 0 && !arcPolygons.some(ap => (ap as ArcPolygon).regionType === ERegionType.outerContour)) {
-            throw new Error("This region set has no outer contours!");
-        }
+        throw new Error("This region set has no outer contours!");
     }
 
-    protected onCircleChange = (circle: Circle) => {
+    protected onCircleChange = () => {
         this._staleRegions = true;
-        this.emit(EDrawableEventType.redraw, circle);
     }
 
-    protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): GraphNode => {
-        circle1.isStale = true;
-        circle2.isStale = true;
+    protected addNode = (circle1: Circle, circle2: Circle, intersectionPoint: Point, intersectionType: TIntersectionType): void => {
+        circle1.setStale();
+        circle2.setStale();
 
-        let sameCoordinates = this._nodes.find(n =>
-            n.coordinates.roundedPoint.x === intersectionPoint.roundedPoint.x &&
-            n.coordinates.roundedPoint.y === intersectionPoint.roundedPoint.y
-        );
+        let sameCoordinates = this._nodes.find(n => n.coordinates.equals(intersectionPoint));
 
         if (sameCoordinates !== undefined) {
             sameCoordinates.addCirclePair(circle1, circle2, intersectionType);
-            return sameCoordinates;
+            return;
         }
         
         const newNode = new GraphNode(intersectionPoint);
         newNode.addCirclePair(circle1, circle2, intersectionType);
         this._nodes.push(newNode);
-        return newNode;
     }
 
     protected extractGraphCycle(startEdge: GraphEdge, direction: ETraversalDirection): IGraphCycle | null {
@@ -154,10 +145,6 @@ export class RegionEngineBL {
     
     protected removeStaleRegions = (staleCircles: Circle[]): void => {
         this._regions = this._regions.filter(region => {
-            if (region instanceof Circle) {
-                return true;
-            }
-
             if (region.arcs.every(arc => !staleCircles.includes(arc.circle))) {
                 return true;
             }
@@ -351,38 +338,19 @@ export class RegionEngineBL {
 
     // (5/5)
     protected refreshRegions = (cycles: IGraphCycle[]): void => {
-        const deleteIndices: number[] = [];
-        
-        // Deleting regions because they used to be stand-alone circles and now are
-        // not anymore stand-alone is statistically rare; we don't want to re-initialize
-        // the regions array unconditionally every time.
-        this._regions.forEach((region, index) => {
-            if (region instanceof ArcPolygon || region.vertices.length === 0) {
-                return;
-            }
-            deleteIndices.push(index);
-        });
-        if (deleteIndices.length > 0) {
-            this._regions = this._regions.filter((region, index) => {
-                if (!deleteIndices.includes(index)) {
-                    return true;
-                }
-                this.emit(EDrawableEventType.delete, region);
-                return false;
-            });
-        }
-
         this._circles.forEach(circle => {
-            circle.isDisplayed = circle.vertices.length === 0;
-            if (circle.isOuterContour) {
-                this._regions.push(circle);
-                return;
+            if (circle.vertices.length === 0) {
+                circle.isExposed = true;
+                circle.isEmpty = true;
             }
-            if (circle.vertices.length !== 0 || this._regions.includes(circle)) {
-                return;
+            if (circle.isEmpty && !this._regions.includes(circle.innerRegion)) {
+                this._regions.push(circle.innerRegion);
+                this.emit(EDrawableEventType.add, circle.innerRegion);
             }
-            this._regions.push(circle);
-            this.emit(EDrawableEventType.add, circle);
+            if (circle.isExposed && !this._regions.includes(circle.outerContour)) {
+                this._regions.push(circle.outerContour);
+                this.emit(EDrawableEventType.add, circle.outerContour);
+            }
         });
 
         cycles.forEach(cycle => {
@@ -476,7 +444,8 @@ export class RegionEngineBL {
             throw new Error("Attempting to intersect a circle with an identical one! (different instance, same coordinates)");
         }
     
-        // Math.sqrt(a**2 + b**2) is more precise than Math.hypot(a, b)
+        // Math.sqrt(a**2 + b**2) is slightly safer than Math.hypot(a, b); try running the mocha tests with this instead:
+        // const centerDist = Math.hypot(circle1.center.x - circle2.center.x, circle1.center.y - circle2.center.y);
         const centerDist = Math.sqrt((circle1.center.x - circle2.center.x) ** 2 + (circle1.center.y - circle2.center.y) ** 2);
         const roundedCenterDist = round(centerDist);
         if (roundedCenterDist > round(circle1.radius + circle2.radius)) {

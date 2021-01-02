@@ -56,7 +56,6 @@ export class Point extends PureGeometry implements IPoint {
 
     /**
      * Retrieve a point with rounded coordinates.
-     * 
      */
     public get roundedPoint(): Point {
         if (this._roundedPoint !== undefined) {
@@ -65,7 +64,21 @@ export class Point extends PureGeometry implements IPoint {
         return this._roundedPoint = Point.computeRoundedPoint(this);
     }
 
+    /**
+     * Computes the rounded coordinates of a point.
+     * @param point The original point.
+     */
     public static computeRoundedPoint = (point: IPoint): Point => {
         return new Point(round(point.x), round(point.y));
     }
+
+    /**
+     * Checks if this point's rounded version has the same
+     * coordinates as another point's rounded coordinates.
+     * @param that The point to compare this to.
+     */
+    public equals = (that: Point): boolean => (
+        this.roundedPoint.x == that.roundedPoint.x &&
+        this.roundedPoint.y == that.roundedPoint.y
+    )
 }

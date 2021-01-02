@@ -55,13 +55,10 @@ export interface FOnGeometryEvent {
 export enum EDrawableEventType {
     delete = "delete",
     add = "add",
-    redraw = "redraw",
 }
 
-export type TDrawableGeometry = Circle | ArcPolygon;
-
 export interface FOnDrawableEvent {
-    (eventType: EDrawableEventType, entity: TDrawableGeometry): void;
+    (eventType: EDrawableEventType, arcPolygon: ArcPolygon): void;
 }
 
 export enum ETangencyType {
@@ -130,8 +127,6 @@ interface IOrientedEdge {
 export interface IGraphCycle {
     oEdges: IOrientedEdge[];
 }
-
-export type TCircleRegions = (ArcPolygon | Circle)[];
 
 export interface INextTangentEdge {
     edge: GraphEdge;

@@ -19,6 +19,7 @@ export default class GraphNode {
     public addCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType) {
         if (!this.touched) {
             // TODO: Shouldn't we also reset the tangency collection at this point?
+            // TODO: Also, is this safe? We essentially remove edges, but only from nodes!
             this._edges = new Map();
             this.touched = true;
         }
@@ -460,8 +461,12 @@ export default class GraphNode {
             throw new Error("Multiple vertex circle with a single edge");
         }
 
-        if (isTangencyContour && currentDirection === ETraversalDirection.backward) {
-            currentEdge.circle.isOuterContour = true;
+        if (isTangencyContour) {
+            if (currentDirection === ETraversalDirection.forward) {
+                currentEdge.circle.isEmpty = true;
+            } else {
+                currentEdge.circle.isExposed = true;
+            }
         }
     }
 
