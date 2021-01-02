@@ -72,7 +72,7 @@ export class RegionEngineBL {
                 }
                 continue;
             }
-            
+
             if (regionElement.regionType == ERegionType.outerContour) {
                 return;
             }
@@ -381,7 +381,7 @@ export class RegionEngineBL {
         }
 
         this._circles.forEach(circle => {
-            circle.isDisplayed = circle.vertices.length === 0;
+            circle.isRegion = circle.vertices.length === 0;
             if (circle.isOuterContour) {
                 this._regions.push(circle);
                 return;

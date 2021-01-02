@@ -20,13 +20,18 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     private _roundedBbox?: IBoundingBox;
     private _roundedRadius?: number;
 
-    // TODO: Sort out isDisplayed and isOuterContour
     /**
-     * Boolean indicating whether this circle should ever be displayed as such (or whether it's split into arcs which make up region boundaries).
+     * This is a stand-alone circle, and it should be rendered as two
+     * distinct regions: a complete inner contour, and a complete outer contour.
      */
-    public isDisplayed = false;
+    public isRegion = false;
 
-    // TODO: Outer contour if the circle is alone, but never if it has parents
+    /**
+     * This circle is the outer contour of a region set which contains
+     * other regions inside (i.e. this is the largest inner tangent circle
+     * in an otherwise stand-alone configuration). As such, it should only
+     * be rendered as an outer contour.
+     */
     public isOuterContour: boolean = false;
 
     public id: any;
