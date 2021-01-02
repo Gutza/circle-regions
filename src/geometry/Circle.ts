@@ -21,18 +21,16 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     private _sortedVertices: boolean = true;
 
     /**
-     * This is a stand-alone circle, and it should be rendered as two
-     * distinct regions: a complete inner contour, and a complete outer contour.
+     * This circle is completely empty: none if its points are shared with
+     * any other circle on the inside.
      */
-    public isRegion = false;
+    public isEmpty = false;
 
     /**
-     * This circle is the outer contour of a region set which contains
-     * other regions inside (i.e. this is the largest inner tangent circle
-     * in an otherwise stand-alone configuration). As such, it should only
-     * be rendered as an outer contour.
+     * This circle is completely exposed to the universe: none of its points
+     * are shared with any other circle on the outside.
      */
-    public isOuterContour: boolean = false;
+    public isExposed: boolean = false;
 
     public id: any;
     private _internalId: number;
@@ -97,7 +95,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
      */
     public setStale = () => {
         this.isStale = true;
-        this.isOuterContour = false;
+        this.isExposed = false;
     }
 
     public onCenterMove = () => {
@@ -194,7 +192,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         this._bbox = undefined;
         this._roundedBbox = undefined;
         this._zeroPoint = undefined;
-        this._innerContour = undefined;
+        this._innerRegion = undefined;
         this._outerContour = undefined;
         this._vertices = [];
         this.setStale();
@@ -330,13 +328,13 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
         new CircleArc(this, 0, 0, this.zeroPoint, this.zeroPoint, isClockwise)
     );
 
-    private _innerContour?: ArcPolygon;
-    public get innerContour(): ArcPolygon {
-        if (this._innerContour !== undefined) {
-            return this._innerContour;
+    private _innerRegion?: ArcPolygon;
+    public get innerRegion(): ArcPolygon {
+        if (this._innerRegion !== undefined) {
+            return this._innerRegion;
         }
 
-        return this._innerContour = new ArcPolygon(
+        return this._innerRegion = new ArcPolygon(
             [this._getContour(false)],
             ERegionType.region
         );

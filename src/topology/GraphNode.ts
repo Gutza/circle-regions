@@ -461,8 +461,13 @@ export default class GraphNode {
             throw new Error("Multiple vertex circle with a single edge");
         }
 
-        if (isTangencyContour && currentDirection === ETraversalDirection.backward) {
-            currentEdge.circle.isOuterContour = true;
+        if (isTangencyContour) {
+            const thisCircle = currentEdge.circle;
+            if (currentDirection === ETraversalDirection.backward) {
+                thisCircle.isExposed = true;
+            } else {
+                thisCircle.isExposed = true;
+            }
         }
     }
 

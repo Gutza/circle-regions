@@ -339,12 +339,14 @@ export class RegionEngineBL {
     // (5/5)
     protected refreshRegions = (cycles: IGraphCycle[]): void => {
         this._circles.forEach(circle => {
-            const isRegion = circle.vertices.length === 0;
-            if (isRegion && !this._regions.includes(circle.innerContour)) {
-                this._regions.push(circle.innerContour);
-                this.emit(EDrawableEventType.add, circle.innerContour);
+            if (circle.vertices.length === 0) {
+                circle.isExposed = circle.isEmpty = true;
             }
-            if ((isRegion || circle.isOuterContour) && !this._regions.includes(circle.outerContour)) {
+            if (circle.isEmpty && !this._regions.includes(circle.innerRegion)) {
+                this._regions.push(circle.innerRegion);
+                this.emit(EDrawableEventType.add, circle.innerRegion);
+            }
+            if (circle.isExposed && !this._regions.includes(circle.outerContour)) {
                 this._regions.push(circle.outerContour);
                 this.emit(EDrawableEventType.add, circle.outerContour);
             }
