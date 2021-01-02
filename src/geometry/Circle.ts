@@ -173,6 +173,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     set radius(radius: number) {
         this._area = undefined;
         this._radius = radius;
+        this._roundedRadius = undefined;
         this._resetCommonGeometryCaches();
         this.emit(EGeometryEventType.resize);
     }

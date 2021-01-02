@@ -1,4 +1,4 @@
-import { Circle, Point, RegionEngine } from "../src";
+import { RegionEngine } from "../src";
 import assert from 'assert';
 
 const adHocData = [
