@@ -1,33 +1,50 @@
 import assert from 'assert';
-
-import { Circle } from '../src/geometry/Circle';
-import { Point } from '../src/geometry/Point';
-import { RegionEngine } from '../src/RegionEngine';
-import { ERegionType } from '../src/Types';
+import { Circle, ERegionType, Point, RegionEngine } from '../src';
 
 describe("Removing circles", () => {
-    it("Recomputing regions after removing a circle should work", () => {
-        const engine = new RegionEngine();
-        engine.addCircle(new Circle(new Point(-1, +0), 2, "left"));
-        engine.addCircle(new Circle(new Point(+1, +0), 2, "right"));
-
+    const engine = new RegionEngine();
+    const cLeft = engine.add(-1, +0, 2, "left");
+    const cRight = engine.add(+1, +0, 2, "right");
+    it("Recomputing regions after removing a circle should work", done => {
         assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
-        assert.strictEqual(4, engine.computeRegions().length, "There should be 4 regions in total");
-        assert.strictEqual(1, engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, "There should be a single outer contour");
-
-        let midCircle = engine.add(0, 0, 1, "middle");
-
+        assert.strictEqual(engine.computeRegions().length, 4, "There should be 4 regions in total");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, 1, "There should be a single outer contour//1");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.region).length, 3, "There should be exactly three regular regions");
+        done();
+    });
+    it("Recomputing regions after moving a circle should work", done => {
+        cRight.center.x += 100;
+        assert.strictEqual(engine.isStale, true, "Regions should be stale after moving circles");
+        assert.strictEqual(engine.computeRegions().length, 4, "There should be 4 regions in total");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, 2, "There should two single outer contours");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.region).length, 2, "There should be two regular regions");
+        done();
+    });
+    it("Recomputing regions after moving a circle back into place should work", done => {
+        cRight.center.x -= 100;
+        assert.strictEqual(engine.isStale, true, "Regions should be stale after moving circles back again");
+        assert.strictEqual(engine.computeRegions().length, 4, "There should be 4 regions in total after restoring the original positions");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, 1, "There should be a single outer contour//2");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.region).length, 3, "There should be exactly three regular regions");
+        done();
+    });
+    let midCircle: Circle;
+    it("Recomputing regions after adding a new circle should work", done => {
+        midCircle = engine.add(0, 0, 1, "middle");
         assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
         assert.strictEqual(6, engine.computeRegions().length, "There should be 6 regions in total");
         assert.strictEqual(1, engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, "There should be a single outer contour");
-
+        done();
+    });
+    it("Recomputing regions after removing the circle should work", done => {
         engine.removeCircle(midCircle);
-        
         assert.strictEqual(engine.isStale, true, "Regions should be stale after removing circles");
         assert.strictEqual(4, engine.computeRegions().length, "There should be 4 regions in total");
         assert.strictEqual(1, engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+        done();
     });
 });
+
 
 describe("Four overlapping axis-centered circles", () => {
     const engine = new RegionEngine();

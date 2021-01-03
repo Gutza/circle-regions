@@ -96,6 +96,7 @@ export class Circle extends PureGeometry implements IRegion, IDrawable {
     public setStale = () => {
         this.isStale = true;
         this.isExposed = false;
+        this.isEmpty = false;
     }
 
     public onCenterMove = () => {
