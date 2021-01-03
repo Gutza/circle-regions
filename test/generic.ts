@@ -1,18 +1,18 @@
 import assert from 'assert';
 import { Circle, ERegionType, Point, RegionEngine } from '../src';
 
-describe("Removing circles", () => {
+describe("Adding, moving, and removing circles", () => {
     const engine = new RegionEngine();
     const cLeft = engine.add(-1, +0, 2, "left");
     const cRight = engine.add(+1, +0, 2, "right");
-    it("Recomputing regions after removing a circle should work", done => {
+    it("Computing regions with two intersecting circles", done => {
         assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
         assert.strictEqual(engine.computeRegions().length, 4, "There should be 4 regions in total");
         assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, 1, "There should be a single outer contour//1");
         assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.region).length, 3, "There should be exactly three regular regions");
         done();
     });
-    it("Recomputing regions after moving a circle should work", done => {
+    it("Recomputing regions after moving one of the circles so they don't intersect", done => {
         cRight.center.x += 100;
         assert.strictEqual(engine.isStale, true, "Regions should be stale after moving circles");
         assert.strictEqual(engine.computeRegions().length, 4, "There should be 4 regions in total");
@@ -20,7 +20,7 @@ describe("Removing circles", () => {
         assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.region).length, 2, "There should be two regular regions");
         done();
     });
-    it("Recomputing regions after moving a circle back into place should work", done => {
+    it("Recomputing regions after moving the circle back to intersect the other one", done => {
         cRight.center.x -= 100;
         assert.strictEqual(engine.isStale, true, "Regions should be stale after moving circles back again");
         assert.strictEqual(engine.computeRegions().length, 4, "There should be 4 regions in total after restoring the original positions");
@@ -29,18 +29,19 @@ describe("Removing circles", () => {
         done();
     });
     let midCircle: Circle;
-    it("Recomputing regions after adding a new circle should work", done => {
+    it("Recomputing regions after adding a third intersecting circle", done => {
         midCircle = engine.add(0, 0, 1, "middle");
         assert.strictEqual(engine.isStale, true, "Regions should be stale after adding circles");
         assert.strictEqual(6, engine.computeRegions().length, "There should be 6 regions in total");
         assert.strictEqual(1, engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, "There should be a single outer contour");
         done();
     });
-    it("Recomputing regions after removing the circle should work", done => {
+    it("Recomputing regions after removing the third circle", done => {
         engine.removeCircle(midCircle);
-        assert.strictEqual(engine.isStale, true, "Regions should be stale after removing circles");
-        assert.strictEqual(4, engine.computeRegions().length, "There should be 4 regions in total");
-        assert.strictEqual(1, engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, "There should be a single outer contour");
+        assert.strictEqual(engine.isStale, true, "Regions should be stale after removing the third circle");
+        assert.strictEqual(engine.computeRegions().length, 4, "There should be 4 regions in total after removing the third circle");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.outerContour).length, 1, "There should be a single outer contour//2");
+        assert.strictEqual(engine.computeRegions().filter(region => region.regionType === ERegionType.region).length, 3, "There should be exactly three regular regions");
         done();
     });
 });
