@@ -55,7 +55,7 @@ The library can be used both in NodeJS, and as a stand-alone, browser library â€
 Install it with
 
 ```shell
-npm i circle-regions@1.0.0-alpha.3
+npm i circle-regions@1.0.0-alpha.5
 ```
 
 Change the version number, if you have to (I might forget to upade the documentation on every release). Then use it:
@@ -147,13 +147,10 @@ export const run = () => {
     const tRegions = new Two.Group();
     tRegions.id = "regions";
 
-    const tCircles = new Two.Group();
-    tCircles.id = "circles";
-
     const tInnerContours = new Two.Group();
     tInnerContours.id = "inner-contours";
 
-    tCircleGeometry.add(tOuterContours, tInnerContours, tRegions, tCircles);
+    tCircleGeometry.add(tOuterContours, tInnerContours, tRegions);
 
     const demoRegionEngine = new CircleRegions.RegionEngine();
     type OriginalPosition = {
@@ -184,8 +181,7 @@ export const run = () => {
             return;
         }
         const circRad = 50;
-        const rCircle = new CircleRegions.Circle(new CircleRegions.Point(ev.x, ev.y), circRad);
-        demoRegionEngine.addCircle(rCircle);
+        const rCircle = demoRegionEngine.add(ev.x, ev.y, circRad);
 
         if (demoRegionEngine.isStale) {
             demoRegionEngine.computeRegions();
@@ -211,80 +207,61 @@ export const run = () => {
         }
     });
 
-    const handleRedraw = (entity : CircleRegions.Circle | CircleRegions.ArcPolygon) => {
-        if (entity instanceof CircleRegions.Circle) {
-            const child = entity.shape as Two.Circle;
-            tCircles.remove(child);
-
-            if (!entity.isDisplayed) {
-                return;
-            }
-            const tShape = new Two.Circle(entity.center.x, entity.center.y, entity.radius);
-            tShape.linewidth = 6;
-            entity.shape = tShape;
-            tCircles.add(tShape);
-            two.update();
-        }
-    }
-
-    const handleDelete = (entity: CircleRegions.Circle | CircleRegions.ArcPolygon) => {
-        const path = entity.shape as Two.Path;
-        if (entity instanceof CircleRegions.Circle) {
-            tCircles.remove(path);
-            return;
-        }
-
-        if (entity.regionType === CircleRegions.ERegionType.region) {
-            tRegions.remove(path);
-        } else {
-            if (entity.regionType === CircleRegions.ERegionType.innerContour) {
-                tInnerContours.remove(path);
-            } else {
-                tOuterContours.remove(path);
-            }
-        }
-    }
-
-    const handleAdd = (entity: CircleRegions.Circle | CircleRegions.ArcPolygon) => {
-        if (entity instanceof CircleRegions.Circle) {
-            const tShape = new Two.Circle(entity.center.x, entity.center.y, entity.radius);
-            entity.shape = tShape;
-            tShape.linewidth = 6;
-            tCircles.add(tShape);
-        } else {
-            const tPolygonArc = createPolygonArc(entity);
-            const tGroup = new Two.Group();
-            tGroup.add(tPolygonArc);
-            entity.shape = tGroup;
-
-            if (entity.regionType !== CircleRegions.ERegionType.region) {
-                tPolygonArc.linewidth = 6;
-                if (entity.regionType === CircleRegions.ERegionType.outerContour) {
-                    tPolygonArc.fill = "none";
-                    tOuterContours.add(tGroup);
-                } else {
-                    tPolygonArc.fill = "#f00";
-                    tInnerContours.add(tGroup);
-                }
-            } else {
-                tPolygonArc.fill = randomColor();
-                tRegions.add(tGroup);
-            }
+    const handleDelete = (arcPolygon: CircleRegions.ArcPolygon) => {
+        const twoPath = arcPolygon.shape as Two.Path;
+        switch(arcPolygon.regionType) {
+            case CircleRegions.ERegionType.region:
+                tRegions.remove(twoPath);
+                break;
+            case CircleRegions.ERegionType.innerContour:
+                tInnerContours.remove(twoPath);
+                break;
+            case CircleRegions.ERegionType.outerContour:
+                tOuterContours.remove(twoPath);
+                break;
+            default:
+                throw new Error(`Unexpected region type: ${arcPolygon.regionType}`);
         }
 
         two.update();
     }
 
-    demoRegionEngine.onRegionChange = (evtype, entity) => {
-        switch(evtype) {
-            case CircleRegions.EDrawableEventType.redraw:
-                handleRedraw(entity);
+    const handleAdd = (arcPolygon: CircleRegions.ArcPolygon) => {
+        const tPolygonArc = createPolygonArc(arcPolygon);
+        const tGroup = new Two.Group();
+        tGroup.add(tPolygonArc);
+        arcPolygon.shape = tGroup;
+
+        switch(arcPolygon.regionType) {
+            case CircleRegions.ERegionType.region:
+                tPolygonArc.linewidth = 1;
+                tPolygonArc.fill = randomColor();
+                tRegions.add(tGroup);
                 break;
+            case CircleRegions.ERegionType.innerContour:
+                tPolygonArc.linewidth = 6;
+                tPolygonArc.fill = "#f00";
+                tInnerContours.add(tGroup);
+                break;
+            case CircleRegions.ERegionType.outerContour:
+                tPolygonArc.linewidth = 6;
+                tPolygonArc.fill = "none";
+                tOuterContours.add(tGroup);
+                break;
+            default:
+                throw new Error(`Unexpected region type: ${arcPolygon.regionType}`);
+        }
+
+        two.update();
+    }
+
+    demoRegionEngine.onRegionChange = (evtype, arcPolygon) => {
+        switch(evtype) {
             case CircleRegions.EDrawableEventType.delete:
-                handleDelete(entity);
+                handleDelete(arcPolygon);
                 break;
             case CircleRegions.EDrawableEventType.add:
-                handleAdd(entity);
+                handleAdd(arcPolygon);
                 break;
             default:
                 throw new Error(`Unknown event type: ${evtype}`);
