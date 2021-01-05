@@ -26,7 +26,7 @@ export default class GraphNode {
 
         const tanGroup1 = this._tangencyCollection.getGroupByCircle(circle1);
         const tanGroup2 = this._tangencyCollection.getGroupByCircle(circle2);
-        
+
         if (tanGroup1 === undefined && tanGroup2 === undefined) {
             return this._addNewCirclePair(circle1, circle2, intersectionType);
         }
@@ -132,7 +132,7 @@ export default class GraphNode {
             this._tangencyCollection.addSimpleGroup(circle2);
             return;
         }
-        
+
         let
             parity1: ETangencyParity,
             parity2: ETangencyParity;
@@ -150,7 +150,7 @@ export default class GraphNode {
         const tanGroup = new TangencyGroup();
         tanGroup.addElement(circle1, parity1);
         tanGroup.addElement(circle2, parity2);
-        this._tangencyCollection.tangencyGroups.push(tanGroup);        
+        this._tangencyCollection.tangencyGroups.push(tanGroup);
     }
 
     public addEdge = (edge: GraphEdge): void => {
@@ -173,7 +173,7 @@ export default class GraphNode {
                 this._edges.delete(edgeId);
             }
         });
-        
+
         // Next, remove the empty tangency groups
         return this._tangencyCollection.removeEmptyGroups();
     }
@@ -200,9 +200,9 @@ export default class GraphNode {
             node: tanEdge.edge.node2,
             direction: ETraversalDirection.forward,
         } : {
-            node: tanEdge.edge.node1,
-            direction: ETraversalDirection.backward,
-        };
+                node: tanEdge.edge.node1,
+                direction: ETraversalDirection.backward,
+            };
     }
 
     private _getNextTangentEdge = (currentEdge: GraphEdge, currentDirection: ETraversalDirection, edgeTanGroup: TangencyGroup, edgeTanElem: TangencyElement): INextTangentEdge | undefined => {
@@ -220,7 +220,7 @@ export default class GraphNode {
             }
             unsortedSameSideNeighbors.push(tanElem);
         });
-        
+
         if (unsortedSameSideNeighbors.length > 0) {
             const sameSideNeighbors = unsortedSameSideNeighbors.sort((a, b) => b.circle.radius - a.circle.radius);
             let winningTangencyElement: TangencyElement | undefined = undefined;
@@ -234,7 +234,7 @@ export default class GraphNode {
             }
 
             if (winningTangencyElement !== undefined) {
-                // Found a same side neighbor with a larger circle! Now let's find the edge.
+                // Found a neighbor on the same side with a larger circle! Now let's find the edge.
                 const winningEdges: GraphEdge[] = [];
                 this._edges.forEach(edge => {
                     if (edge.circle === winningTangencyElement?.circle && this === getSameEdgeEnd(edge)) {
@@ -346,7 +346,7 @@ export default class GraphNode {
                     if (perpendicularAngle > minPerpendicularAngle) {
                         return;
                     }
-    
+
                     minPerpendicularAngle = perpendicularAngle;
                     nextEdge = {
                         edge: tgEdge,
@@ -391,7 +391,7 @@ export default class GraphNode {
                 }
 
                 minPerpendicularAngle = perpendicularAngle;
-                nextEdge = { 
+                nextEdge = {
                     edge: candidateEdge,
                     sameSide: true,
                 };
@@ -403,10 +403,10 @@ export default class GraphNode {
 
             candidates = [];
             if (smallestYinCircles.length > 0) {
-                candidates.push(smallestYinCircles[smallestYinCircles.length-1]);
+                candidates.push(smallestYinCircles[smallestYinCircles.length - 1]);
             }
             if (smallestYangCircles.length > 0) {
-                candidates.push(smallestYangCircles[smallestYangCircles.length-1]);
+                candidates.push(smallestYangCircles[smallestYangCircles.length - 1]);
             }
 
             this._edges.forEach(candidateEdge => {
@@ -419,7 +419,7 @@ export default class GraphNode {
                 }
 
                 minPerpendicularAngle = perpendicularAngle;
-                nextEdge = { 
+                nextEdge = {
                     edge: candidateEdge,
                     sameSide: true,
                 };
@@ -461,12 +461,14 @@ export default class GraphNode {
             throw new Error("Multiple vertex circle with a single edge");
         }
 
-        if (isTangencyContour) {
-            if (currentDirection === ETraversalDirection.forward) {
-                currentEdge.circle.isEmpty = true;
-            } else {
-                currentEdge.circle.isExposed = true;
-            }
+        if (!isTangencyContour) {
+            return;
+        }
+
+        if (currentDirection === ETraversalDirection.forward) {
+            currentEdge.circle.isEmpty = true;
+        } else {
+            currentEdge.circle.isExposed = true;
         }
     }
 

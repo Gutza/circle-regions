@@ -31,7 +31,7 @@ export class RegionEngineBL {
      */
     protected _staleRegions: boolean = false;
     protected _debugMode: ERegionDebugMode;
-    protected _lastCircles: {x: number, y: number, r: number, iId: number}[] = [];
+    protected _lastCircles: { x: number, y: number, r: number, iId: number }[] = [];
 
     public onRegionChange: FOnDrawableEvent | undefined;
     protected _deletedCircles: Circle[] = [];
@@ -43,7 +43,7 @@ export class RegionEngineBL {
     protected recomputeRegions = () => {
         //  (1/5)
         this.removeStaleNodesVertices();
-        
+
         // (2/5)
         this.computeIntersections();
 
@@ -80,7 +80,7 @@ export class RegionEngineBL {
             sameCoordinates.addCirclePair(circle1, circle2, intersectionType);
             return;
         }
-        
+
         const newNode = new GraphNode(intersectionPoint);
         newNode.addCirclePair(circle1, circle2, intersectionType);
         this._nodes.push(newNode);
@@ -103,12 +103,12 @@ export class RegionEngineBL {
             });
             if (currentEdgeDirection === ETraversalDirection.forward) {
                 if (currentEdge.InnerCycle) {
-                    throw new Error("Inner cycle already set for "+currentEdge.id+"!");
+                    throw new Error(`Inner cycle already set for edge ${currentEdge.id}!`);
                 }
                 currentEdge.InnerCycle = cycle;
             } else {
                 if (currentEdge.OuterCycle) {
-                    throw new Error("Outer cycle already set for "+currentEdge.id+"!");
+                    throw new Error(`Outer cycle already set for edge ${currentEdge.id}!`);
                 }
                 currentEdge.OuterCycle = cycle;
             }
@@ -139,7 +139,7 @@ export class RegionEngineBL {
             }
         }
     }
-    
+
     protected removeStaleRegions = (staleCircles: Circle[]): void => {
         this._regions = this._regions.filter(region => {
             if (region.arcs.every(arc => !staleCircles.includes(arc.circle))) {
@@ -192,7 +192,7 @@ export class RegionEngineBL {
             }
         });
         this._nodes = remainingNodes;
-        
+
         // Remove nodes which only contain one circle
         remainingNodes = [];
         this._nodes.forEach(node => {
@@ -227,27 +227,34 @@ export class RegionEngineBL {
     /**
      * (2/5)
      * This sets parents and children among circles, and creates nodes by
-     * intersecting stale circles with all other circles. When an intersection
-     * is found between a stale circle and a fresh circle, the fresh circle
-     * gets contaminated -- its vertices need re-sorting, its edges deleted and re-created,
-     * and all adjacent regions need to be revisited. Therefore it's marked as stale in addNode().
+     * intersecting stale circles with all other circles. When a tangency
+     * or intersection is found between a stale circle and a fresh circle,
+     * the fresh circle gets contaminated, and marked as stale -- its vertices
+     * need re-sorting, its edges deleted and re-created, and all adjacent
+     * regions need to be revisited. Therefore the "fresh" circle is marked
+     * as stale in @see Circle.addNode() which in turn is called by
+     * @see RegionEngineBL.intersectCircles() whenever a tangency or
+     * intersection point is found.
      * 
-     * As such, stale child/parent, vertex and node cleanup must be performed before computing the
-     * intersections, while edge and region cleanup must be done after computing them.
+     * As such, stale child/parent, vertex and node cleanup must be performed
+     * before computing the intersections, while edge and region cleanup must
+     * be done after computing them.
      * 
      * This means the set of stale circles could increase during this step, so:
-     * (1) The notion of a circle being stale means different things before and after this step;
-     * (2) The list of stale circles must be recomputed after this operation (do not cache it across this step).
+     * (1) The notion of a circle being stale means different things before
+     * and after this step;
+     * (2) The list of stale circles must be recomputed after this operation
+     * (do not cache it across this step).
      */
     protected computeIntersections = () => {
-        for (let i = 0; i < this._circles.length-1; i++) {
+        for (let i = 0; i < this._circles.length - 1; i++) {
             const c1 = this._circles[i];
-            for (let j = i+1; j < this._circles.length; j++) {
+            for (let j = i + 1; j < this._circles.length; j++) {
                 const c2 = this._circles[j];
                 if (!c1.isStale && !c2.isStale) {
                     continue;
                 }
-                
+
                 this.intersectCircles(c1, c2);
             }
         }
@@ -258,7 +265,7 @@ export class RegionEngineBL {
         const staleCircles = this._circles.filter(circle => circle.isStale);
 
         this.removeStaleRegions(staleCircles);
-        
+
         const staleEdges: GraphEdge[] = [];
         this._edges.forEach((edge, id) => {
             if (!staleCircles.includes(edge.circle)) {
@@ -300,8 +307,14 @@ export class RegionEngineBL {
                     continue;
                 }
 
-                const newEdge = new GraphEdge(staleCircle, staleCircle.vertices[i], staleCircle.vertices[i+1] ? staleCircle.vertices[i+1] : staleCircle.vertices[0], newEdgeId);
+                const newEdge = new GraphEdge(
+                    staleCircle,
+                    staleCircle.vertices[i],
+                    staleCircle.vertices[i + 1] ? staleCircle.vertices[i + 1] : staleCircle.vertices[0],
+                    newEdgeId
+                );
                 this._edges.set(newEdge.id, newEdge);
+
                 newEdge.node1.addEdge(newEdge);
                 if (newEdge.node1 !== newEdge.node2) {
                     newEdge.node2.addEdge(newEdge);
@@ -425,7 +438,7 @@ export class RegionEngineBL {
     }
 
     private midAngle = (startAngle: number, endAngle: number): number => {
-        return (startAngle + endAngle)/2 - (startAngle < endAngle ? Math.PI : 0);
+        return (startAngle + endAngle) / 2 - (startAngle < endAngle ? Math.PI : 0);
     }
 
     protected intersectCircles = (circle1: Circle, circle2: Circle): void => {
@@ -436,11 +449,11 @@ export class RegionEngineBL {
         if (circle1 === circle2) {
             throw new Error("Attempting to intersect a circle with itself! (same instance)");
         }
-    
+
         if (circle1.equals(circle2)) {
             throw new Error("Attempting to intersect a circle with an identical one! (different instance, same coordinates)");
         }
-    
+
         // Math.sqrt(a**2 + b**2) is slightly safer than Math.hypot(a, b); try running the mocha tests with this instead:
         // const centerDist = Math.hypot(circle1.center.x - circle2.center.x, circle1.center.y - circle2.center.y);
         const centerDist = Math.sqrt((circle1.center.x - circle2.center.x) ** 2 + (circle1.center.y - circle2.center.y) ** 2);
@@ -448,38 +461,38 @@ export class RegionEngineBL {
         if (roundedCenterDist > round(circle1.radius + circle2.radius)) {
             return;
         }
-    
+
         if (circle1.roundedRadius > round(centerDist + circle2.radius)) {
             circle1.children.push(circle2);
             circle2.parents.push(circle1);
             return;
         }
-    
+
         if (circle2.roundedRadius > round(centerDist + circle1.radius)) {
             circle2.children.push(circle1);
             circle1.parents.push(circle2);
             return;
         }
-    
-        const a = (circle1.radius**2 - circle2.radius**2 + centerDist**2) / (2 * centerDist);
-        const h = Math.sqrt(circle1.radius**2 - a**2);
+
+        const a = (circle1.radius ** 2 - circle2.radius ** 2 + centerDist ** 2) / (2 * centerDist);
+        const h = Math.sqrt(circle1.radius ** 2 - a ** 2);
         const x = circle1.center.x + a * (circle2.center.x - circle1.center.x) / centerDist;
         const y = circle1.center.y + a * (circle2.center.y - circle1.center.y) / centerDist;
-    
+
         if (round(circle1.radius + circle2.radius) == roundedCenterDist) {
             this.addNode(circle1, circle2, new Point(x, y), ETangencyType.outerTangent);
             return;
         }
-    
+
         if (round(Math.abs(circle1.radius - circle2.radius)) == roundedCenterDist) {
             this.addNode(circle1, circle2, new Point(x, y), ETangencyType.innerTangent);
             return;
         }
-    
+
         const hDistRatio = h / centerDist;
         const rx = -(circle2.center.y - circle1.center.y) * hDistRatio;
         const ry = -(circle2.center.x - circle1.center.x) * hDistRatio;
-    
+
         this.addNode(circle1, circle2, new Point(x + rx, y - ry), EIntersectionType.lens);
         this.addNode(circle1, circle2, new Point(x - rx, y + ry), EIntersectionType.lens);
     }

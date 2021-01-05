@@ -58,15 +58,15 @@ Install it with
 npm i circle-regions@1.0.0-alpha.6
 ```
 
-Change the version number, if you have to (I might forget to upade the documentation on every release). Then use it:
+Change the version number, if you have to (I might forget to update the documentation on every release). Then use it:
 
 ```javascript
 "use strict";
 const CircleRegions = require('circle-regions');
 const engine = new CircleRegions.RegionEngine();
-var c1 = engine.add(0, 5, 5);
-var c2 = engine.add(0, -4, 4);
-var c3 = engine.add(3, 0, 3);
+const c1 = engine.add(0, 5, 5);
+const c2 = engine.add(0, -4, 4);
+const c3 = engine.add(3, 0, 3);
 console.log(engine.computeRegions());
 ```
 
