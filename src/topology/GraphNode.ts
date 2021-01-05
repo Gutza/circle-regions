@@ -16,7 +16,7 @@ export default class GraphNode {
         this._coordinates = coordinates;
     }
 
-    public addCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType) {
+    public addCirclePair = (circle1: Circle, circle2: Circle, intersectionType: TIntersectionType): void => {
         if (!this.touched) {
             // TODO: Shouldn't we also reset the tangency collection at this point?
             // TODO: Also, is this safe? We essentially remove edges, but only from nodes!
@@ -28,7 +28,20 @@ export default class GraphNode {
         const tanGroup2 = this._tangencyCollection.getGroupByCircle(circle2);
 
         if (tanGroup1 === undefined && tanGroup2 === undefined) {
-            return this._addNewCirclePair(circle1, circle2, intersectionType);
+            if (intersectionType === EIntersectionType.lens) {
+                this._tangencyCollection.addSimpleGroup(circle1);
+                this._tangencyCollection.addSimpleGroup(circle2);
+                return;
+            }
+    
+            const tanGroup = new TangencyGroup();
+            tanGroup.addElement(circle1, ETangencyParity.yin);
+            tanGroup.addElement(
+                circle2,
+                intersectionType === ETangencyType.innerTangent ? ETangencyParity.yin : ETangencyParity.yang
+            );
+            this._tangencyCollection.addGroup(tanGroup);
+            return;
         }
 
         // From now on, at least one tangency group is already defined.
@@ -40,7 +53,6 @@ export default class GraphNode {
             if (tanGroup2 === undefined) {
                 this._tangencyCollection.addSimpleGroup(circle2);
             }
-            // If both are defined, just do nothing -- both are already defined.
             return;
         }
 
@@ -125,34 +137,6 @@ export default class GraphNode {
         existingGroup.addElement(newCircle, GraphNode._otherParity(tgElem.parity, tangencyType));
     }
 
-    private _addNewCirclePair(circle1: Circle, circle2: Circle, intersectionType: TIntersectionType): void {
-        // Easy case: just create new tangency group(s)
-        if (intersectionType === EIntersectionType.lens) {
-            this._tangencyCollection.addSimpleGroup(circle1);
-            this._tangencyCollection.addSimpleGroup(circle2);
-            return;
-        }
-
-        let
-            parity1: ETangencyParity,
-            parity2: ETangencyParity;
-
-        if (intersectionType === ETangencyType.innerTangent) {
-            parity1 = ETangencyParity.yin;
-            parity2 = ETangencyParity.yin;
-        } else if (intersectionType === ETangencyType.outerTangent) {
-            parity1 = ETangencyParity.yin;
-            parity2 = ETangencyParity.yang;
-        } else {
-            throw new Error("Unknown intersection type: " + intersectionType);
-        }
-
-        const tanGroup = new TangencyGroup();
-        tanGroup.addElement(circle1, parity1);
-        tanGroup.addElement(circle2, parity2);
-        this._tangencyCollection.tangencyGroups.push(tanGroup);
-    }
-
     public addEdge = (edge: GraphEdge): void => {
         this._edges.set(edge.id, edge);
     }
@@ -165,7 +149,7 @@ export default class GraphNode {
         return this._coordinates;
     }
 
-    public removeCircles(circles: Circle[]): boolean {
+    public removeCircles(circles: Circle[]): void {
         // First, remove the elements which contain the given circles from all tangency groups
         circles.forEach(circle => this._tangencyCollection.removeCircle(circle));
         this._edges.forEach((edge, edgeId) => {
@@ -175,7 +159,7 @@ export default class GraphNode {
         });
 
         // Next, remove the empty tangency groups
-        return this._tangencyCollection.removeEmptyGroups();
+        this._tangencyCollection.removeEmptyGroups();
     }
 
     public isValid(): boolean {
